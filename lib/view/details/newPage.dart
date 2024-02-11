@@ -480,9 +480,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     children: [
                       hasFrame == null
                           ? Container(
-                              // width: 70,
+                            /*   // width: 70,
                               // child: Image.network(
-                              //   hasFrame,
+                              //   hasFrame, */
                               // )
                               )
                           : Container(
