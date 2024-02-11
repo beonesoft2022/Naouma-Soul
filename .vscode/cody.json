@@ -1,0 +1,11 @@
+{
+  "commands": {
+    "co": {
+      "prompt": "comment the selected code",
+      "context": {
+        "codebase": true,
+        "selection": true
+      }
+    }
+  }
+}

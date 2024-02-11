@@ -58,7 +58,6 @@ class _GiftScreenState extends State<GiftScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 

@@ -144,44 +144,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
   var expmodel;
   DocumentSnapshot snapshot; //Define snapshot
   HedraTrace hedra = HedraTrace(StackTrace.current);
-  void _addMicsToFirebase(String roomId) async {
-    // Factory method to create mic models
-    UserMicModel createMicModel(
-        {int micNumber, bool isLocked = false, bool micStatus = false}) {
-      return UserMicModel(
-          id: null,
-          userId: null,
-          // etc
-          micNumber: micNumber,
-          isLocked: isLocked,
-          micStatus: micStatus);
-    }
-
-    final mics = <UserMicModel>[];
-
-    // Generate mic models in a loop
-    for (int i = 0; i < 10; i++) {
-      mics.add(createMicModel(micNumber: i));
-    }
-
-    try {
-      // Write all models in a batch
-      final batch = FirebaseFirestore.instance.batch();
-      CollectionReference _collectionRef = FirebaseFirestore.instance
-          .collection('roomUsers')
-          .doc(roomId)
-          .collection(roomId);
-
-      mics.forEach((mic) {
-        batch.set(_collectionRef.doc(mic.micNumber.toString()), mic.toJson());
-      });
-
-      await batch.commit();
-    } catch (e) {
-      // Handle any errors
-      print('Error occurred while adding mics to Firebase: $e');
-    }
-  }
 
   @override
   void initState() {
@@ -594,22 +556,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                       _updateMicsToFirebase(index, micModel);
                     },
-                    leaveMicFunction: () {
-                       // Leave mic
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = true;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
+                    leaveMicFunction: () {},
                     lockMicFunction: () {
                       // lock mic
                       micModel.id = null;
@@ -1047,106 +994,106 @@ class _DetailsScreenState extends State<DetailsScreen> {
   ////	Create roomUsers Collection in firestore with roomID Doc
   ////	Create second Collection inside roomID Doc and insert the 10 mics inside it
   //// By Hedra Adel
-  // void _addMicsToFirebase(String roomID) async {
-  //   List<UserMicModel> _micsList = [];
+  void _addMicsToFirebase(String roomID) async {
+    List<UserMicModel> _micsList = [];
 
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 0,
-  //       micStatus: false,
-  //       isLocked: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 1,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 2,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 3,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 4,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 5,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 6,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 7,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 8,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 9,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   CollectionReference _collectionRef = FirebaseFirestore.instance
-  //       .collection('roomUsers')
-  //       .doc(roomID)
-  //       .collection(roomID);
-  //   await _collectionRef
-  //       .doc(_micsList[0].micNumber.toString())
-  //       .set(_micsList[0].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[1].micNumber.toString())
-  //       .set(_micsList[1].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[2].micNumber.toString())
-  //       .set(_micsList[2].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[3].micNumber.toString())
-  //       .set(_micsList[3].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[4].micNumber.toString())
-  //       .set(_micsList[4].toJson());
-  //   _micsList.forEach((element) async {
-  //     await _collectionRef
-  //         .doc("${_micsList.indexOf(element)}")
-  //         .set(element.toJson());
-  //   });
-  //   print(
-  //       'RoomUsers() Collection has been Created with 10 mics --- Hedra adel ---');
-  // }
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 0,
+        micStatus: false,
+        isLocked: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 1,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 2,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 3,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 4,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 5,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 6,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 7,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 8,
+        isLocked: false,
+        micStatus: false));
+    _micsList.add(UserMicModel(
+        id: null,
+        userId: null,
+        userName: null,
+        micNumber: 9,
+        isLocked: false,
+        micStatus: false));
+    CollectionReference _collectionRef = FirebaseFirestore.instance
+        .collection('roomUsers')
+        .doc(roomID)
+        .collection(roomID);
+    await _collectionRef
+        .doc(_micsList[0].micNumber.toString())
+        .set(_micsList[0].toJson());
+    await _collectionRef
+        .doc(_micsList[1].micNumber.toString())
+        .set(_micsList[1].toJson());
+    await _collectionRef
+        .doc(_micsList[2].micNumber.toString())
+        .set(_micsList[2].toJson());
+    await _collectionRef
+        .doc(_micsList[3].micNumber.toString())
+        .set(_micsList[3].toJson());
+    await _collectionRef
+        .doc(_micsList[4].micNumber.toString())
+        .set(_micsList[4].toJson());
+    _micsList.forEach((element) async {
+      await _collectionRef
+          .doc("${_micsList.indexOf(element)}")
+          .set(element.toJson());
+    });
+    print(
+        'RoomUsers() Collection has been Created with 10 mics --- Hedra adel ---');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1318,8 +1265,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           child: Column(
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Container(
@@ -1361,8 +1307,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                               widget.roomName,
                                                           roomID: widget.roomId
                                                               .toString(),
-                                                          currentlevel: model
-                                                              .data
+                                                          currentlevel: model.data
                                                               .userCurrentLevel),
                                                     );
                                                   });
@@ -1379,8 +1324,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 Text(
                                                   widget.roomName,
                                                   maxLines: 1,
-                                                  style: theme
-                                                      .textTheme.bodyText1
+                                                  style: theme.textTheme.bodyText1
                                                       .copyWith(
                                                           color: Colors.white,
                                                           fontSize: 17),
@@ -1388,8 +1332,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 Text(
                                                   "ID :${widget.roomId}",
                                                   maxLines: 1,
-                                                  style: theme
-                                                      .textTheme.bodyText2
+                                                  style: theme.textTheme.bodyText2
                                                       .copyWith(
                                                           color: Colors.white,
                                                           fontSize: 15),
@@ -1462,8 +1405,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       Text(
                                                         "الموضوعات",
                                                         style: TextStyle(
-                                                            color:
-                                                                Colors.white),
+                                                            color: Colors.white),
                                                       )
                                                     ],
                                                   )),
@@ -1496,8 +1438,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       Text(
                                                         "قفل",
                                                         style: TextStyle(
-                                                            color:
-                                                                Colors.white),
+                                                            color: Colors.white),
                                                       )
                                                     ],
                                                   )),
@@ -1514,8 +1455,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       Text(
                                                         "مشاركة",
                                                         style: TextStyle(
-                                                            color:
-                                                                Colors.white),
+                                                            color: Colors.white),
                                                       )
                                                     ],
                                                   )),
@@ -1525,9 +1465,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           child: Icon(Icons.close,
                                               color: Colors.white),
                                           onTap: () {
-                                            HomeCubit.get(context)
-                                                .logoutUserRoom(
-                                                    id: widget.roomId);
+                                            HomeCubit.get(context).logoutUserRoom(
+                                                id: widget.roomId);
                                             _closeRoom();
                                           })
                                     ],
@@ -1554,8 +1493,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         child: Container(
                                           child: Row(
                                             children: [
-                                              Icon(
-                                                  Icons.monetization_on_rounded,
+                                              Icon(Icons.monetization_on_rounded,
                                                   color: Colors.orange),
                                               SizedBox(
                                                 width: 6.0,
@@ -1564,8 +1502,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 child: Text(
                                                   widget.roomDesc,
                                                   maxLines: 1,
-                                                  style: theme
-                                                      .textTheme.bodyText1
+                                                  style: theme.textTheme.bodyText1
                                                       .copyWith(
                                                           color: Colors.white,
                                                           fontSize: 17),
@@ -1621,41 +1558,43 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                             DefaultTabController(
                                                           length: 2,
                                                           child: Scaffold(
-                                                            appBar:
-                                                                PreferredSize(
-                                                                    preferredSize:
-                                                                        Size.fromHeight(
-                                                                            30.0),
-                                                                    child:
-                                                                        AppBar(
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white,
-                                                                      bottom:
-                                                                          TabBar(
-                                                                        indicator:
-                                                                            BoxDecoration(
-                                                                          color:
-                                                                              KstorebuttonColor,
-                                                                          borderRadius:
-                                                                              BorderRadius.all(
-                                                                            Radius.circular(5),
-                                                                          ),
-                                                                        ),
-                                                                        tabs: [
-                                                                          Text(
-                                                                            "اخر 24 ساعة",
-                                                                            style:
-                                                                                TextStyle(color: Colors.grey),
-                                                                          ),
-                                                                          Text(
-                                                                            "اخر 7 أيام",
-                                                                            style:
-                                                                                TextStyle(color: Colors.grey),
-                                                                          ),
-                                                                        ],
+                                                            appBar: PreferredSize(
+                                                                preferredSize: Size
+                                                                    .fromHeight(
+                                                                        30.0),
+                                                                child: AppBar(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  bottom: TabBar(
+                                                                    indicator:
+                                                                        BoxDecoration(
+                                                                      color:
+                                                                          KstorebuttonColor,
+                                                                      borderRadius:
+                                                                          BorderRadius
+                                                                              .all(
+                                                                        Radius
+                                                                            .circular(
+                                                                                5),
                                                                       ),
-                                                                    )),
+                                                                    ),
+                                                                    tabs: [
+                                                                      Text(
+                                                                        "اخر 24 ساعة",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.grey),
+                                                                      ),
+                                                                      Text(
+                                                                        "اخر 7 أيام",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.grey),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                )),
                                                             body: TabBarView(
                                                               children: [
                                                                 GiftScreen(),
@@ -1665,8 +1604,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                           .center,
                                                                   children: [
                                                                     SizedBox(
-                                                                      height:
-                                                                          80,
+                                                                      height: 80,
                                                                     ),
                                                                     Padding(
                                                                       padding:
@@ -1682,8 +1620,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                               .hourglass_empty_rounded,
                                                                           size:
                                                                               80,
-                                                                          color:
-                                                                              Colors.grey,
+                                                                          color: Colors
+                                                                              .grey,
                                                                         ),
                                                                       ),
                                                                     ),
@@ -1691,8 +1629,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                       padding:
                                                                           const EdgeInsets.all(
                                                                               8.0),
-                                                                      child:
-                                                                          Text(
+                                                                      child: Text(
                                                                         "لم يرسل أحد الهدايا في ال 24 ساعة الماضية",
                                                                         style: TextStyle(
                                                                             color:
@@ -1700,8 +1637,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                       ),
                                                                     ),
                                                                     SizedBox(
-                                                                      height:
-                                                                          240,
+                                                                      height: 240,
                                                                     ),
                                                                     Row(
                                                                       children: [
@@ -1747,8 +1683,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                           .center,
                                                                   children: [
                                                                     SizedBox(
-                                                                      height:
-                                                                          80,
+                                                                      height: 80,
                                                                     ),
                                                                     Padding(
                                                                       padding:
@@ -1764,8 +1699,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                               .hourglass_empty_rounded,
                                                                           size:
                                                                               80,
-                                                                          color:
-                                                                              Colors.grey,
+                                                                          color: Colors
+                                                                              .grey,
                                                                         ),
                                                                       ),
                                                                     ),
@@ -1773,8 +1708,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                       padding:
                                                                           const EdgeInsets.all(
                                                                               8.0),
-                                                                      child:
-                                                                          Text(
+                                                                      child: Text(
                                                                         "لم يرسل أحد الهدايا في السبعة أيام الماضية",
                                                                         style: TextStyle(
                                                                             color:
@@ -1782,8 +1716,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                       ),
                                                                     ),
                                                                     SizedBox(
-                                                                      height:
-                                                                          240,
+                                                                      height: 240,
                                                                     ),
                                                                     Row(
                                                                       children: [
@@ -1857,13 +1790,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                           (BuildContext context,
                                                               int index) {
                                                         var roomUserModel =
-                                                            HomeCubit.get(
-                                                                    context)
+                                                            HomeCubit.get(context)
                                                                 .roomUserModel;
                                                         if (roomUserModel !=
                                                                 null &&
-                                                            roomUserModel
-                                                                    .data !=
+                                                            roomUserModel.data !=
                                                                 null) {
                                                           return builditem(
                                                               roomUserModel
@@ -1901,8 +1832,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         style: theme
                                                             .textTheme.bodyText1
                                                             .copyWith(
-                                                                color: Colors
-                                                                    .white,
+                                                                color:
+                                                                    Colors.white,
                                                                 fontSize: 18),
                                                       )
                                                     : Text(
@@ -1910,8 +1841,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         style: theme
                                                             .textTheme.bodyText1
                                                             .copyWith(
-                                                                color: Colors
-                                                                    .white,
+                                                                color:
+                                                                    Colors.white,
                                                                 fontSize: 18),
                                                       ),
                                                 Icon(Icons.person_outline,

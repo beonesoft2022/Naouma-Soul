@@ -1,0 +1,451 @@
+
+
+
+///////// //////// //////// //////// //////// //////// //////// ////////
+///
+///DetailsScreen_Init
+///Part Name: Let's call this "DetailsScreen_Init" since it focuses on the screen's initialization.
+/* 
+Import Breakdown
+
+dart: Core Dart libraries for basic programming elements.
+flutter: Widgets, UI building blocks, and tools specific to Flutter apps. These likely form the foundation of this screen.
+firebase: Libraries to interact with Firestore (database) and potentially other Firebase services (messaging, analytics).
+agora_rtc_engine: Handles real-time audio & video features. This suggests the room has voice call features!
+project/various: These files seem custom to your project. They likely have helper functions, data models, and constants your app uses.
+uuid: For generating unique identifiers (possibly for messages or images).
+image_picker: To retrieve images from the user's camera or gallery.
+State and Data (The DetailsScreen Class)
+
+Properties: It has properties storing details passed from the previous screen (room name, IDs, etc.), along with its ClientRole (role). This role dictates permissions within the voice chat context.
+Statefulness: It's a StatefulWidget. This means it maintains state that can change during the user's interaction. Some values here may update (member count, user's mic on/off, etc.). */
+///
+///////////////// //////// //////// //////// //////// //////// ////////
+import 'dart:async';
+import 'dart:io';
+import 'dart:ui';
+import 'package:project/utils/HedraTrace.dart';
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:conditional_builder/conditional_builder.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:hexcolor/hexcolor.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'package:nb_utils/nb_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:project/audiocall.dart';
+import 'package:project/common_functions.dart';
+import 'package:project/endpoint.dart';
+import 'package:project/models/IsFollow_model.dart';
+import 'package:project/models/firebase_room_model.dart';
+import 'package:project/models/get_user_exp_model.dart';
+import 'package:project/models/notification_model.dart';
+import 'package:project/models/roomUser.dart';
+import 'package:project/models/room_index.dart';
+import 'package:project/models/room_user_model.dart';
+import 'package:project/models/send_gift_model.dart';
+import 'package:project/models/user_mic_model.dart';
+import 'package:project/oneTo_one_screen.dart';
+import 'package:project/utils/constants.dart';
+import 'package:project/utils/images.dart';
+import 'package:project/utils/preferences_services.dart';
+import 'package:project/view/details/components/roomImageTap.dart';
+import 'package:project/view/details/users_Inroom.dart';
+import 'package:project/view/home/homeCubit.dart';
+import 'package:project/view/home/home_tab_pages/myroom/room_setting.dart';
+import 'package:project/view/home/states.dart';
+import 'package:agora_rtm/agora_rtm.dart';
+import 'package:uuid/uuid.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import '../../gift_screen.dart';
+import '../../models/firebaseModel.dart';
+import '../../models/mics_model.dart';
+import '../../shop_background_gift.dart';
+import '../../utils/size_config.dart';
+import 'components/mic_click_dialog.dart';
+
+class DetailsScreen extends StatefulWidget {
+  //// Data Has Been Send From my_rooms_view.dart
+  //// By Hedra Adel
+
+  final String username;
+  final String userID;
+  final String roomId;
+  final String roomImage;
+  var e = StateError("This is a state error.");
+
+  final String roomName;
+  final String roomDesc;
+  final String roomOwnerId;
+  final String passwordRoom;
+  final String apiroomID;
+  final ClientRole role;
+
+  DetailsScreen(
+      {Key key,
+      this.username,
+      this.userID,
+      this.role,
+      this.roomId,
+      this.roomName,
+      this.roomDesc,
+      this.roomOwnerId,
+      this.apiroomID,
+      this.passwordRoom,
+      this.roomImage})
+      : super(key: key);
+  int _remoteUid;
+
+  // RtcEngine _engine;
+  @override
+  _DetailsScreenState createState() => _DetailsScreenState();
+}
+
+class _DetailsScreenState extends State<DetailsScreen> {
+  //// Model have : userid,spacialid,Relation with Level , isfriend,relation with Package , typeuser(Don’t know),
+  //// isPurchaseid(Don’t know),frame,frameurl,avatar,avatarurl
+  //// By Hedra Adel
+
+  InRoomUserModelModel inRoomUserModelModel;
+  RtcEngine _engine;
+  static final _users = <int>[];
+
+  bool _isSpeaking = false;
+
+  // AgoraRtmClient _client;
+  // AgoraRtmChannel _channel;
+  // AgoraRtmChannel _subchannel;
+  bool get isSpeaking => _isSpeaking;
+
+  String myChannel = '';
+  bool _isChannelCreated = true;
+  final _channelFieldController = TextEditingController();
+  TextEditingController _messageController = TextEditingController();
+  final ScrollController listScrollController = ScrollController();
+  List<QueryDocumentSnapshot> listMessage = new List.from([]);
+  List<QueryDocumentSnapshot> roomUsersList = new List.from([]);
+  final Map<String, List<String>> _seniorMember = {};
+  final Map<String, int> _channelList = {};
+  List<UserMicModel> _micUsersList = [];
+  final _infoStrings = <String>[];
+  String groupChatId = "";
+  String roomID = "";
+  int _roomUsersCount = 0;
+  bool _isLoadingMics = true;
+  bool _isLogin = false;
+  bool _isInChannel = false;
+  String isHaveFrame = '1';
+  bool mute = true;
+  int micnum;
+  int micIndex = 3;
+  bool onmic = false;
+  int check;
+  int message;
+  String background;
+  RoomModel roomModel;
+  String totalnum;
+  int limit = 20;
+  final _firestoreInstance = FirebaseFirestore.instance;
+
+  bool _isRoomOnFirebase = false;
+  var expmodel;
+  DocumentSnapshot snapshot; //Define snapshot
+  HedraTrace hedra = HedraTrace(StackTrace.current);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+
+    //// Get the Muted users in the Users in room From firestore
+    getmuted();
+
+    //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
+    GetRoomsCollection();
+
+    ////
+    readLocal();
+
+    //// Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable
+    initialize();
+
+    // _addMicsToFirebase();
+
+    print("initState has been completed and the  " +
+        "roomId: $roomID" +
+        "--- Hedra Adel ---");
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    // _users.clear();
+    // destroy sdk
+
+    // _engine.leaveChannel();
+    print("The Room has Been Closed" + "--- Hedra Adel ---");
+    // _engine.destroy();
+    super.dispose();
+  }
+
+  Future<void> initialize() async {
+    //// Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable
+    //// By Hedra Adel
+    try {
+      await checkRoomFoundOrNot();
+    } catch (e) {
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      print(" - Error - There is Error in ${hedra.fileName} -- " +
+          "In Line : ${hedra.lineNumber} -- " +
+          "The caller function : ${hedra.callerFunctionName} -- " +
+          "The Details is : :::: " +
+          e.toString() +
+          " :::: " +
+          "-- Hedra Adel - Error -");
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+
+    // initialize agora
+    // await _initAgoraRtcEngine();
+    // _addAgoraEventHandlers();
+    // await _engine.joinChannel(
+    //     "00645f4567598af4f32afca701cccd0cf2dIADRIb4LxYD/WX4B1uQnZIJqrURDf6xrB/V2mFU7a+SDTwnn9jMAAAAAEAD+bihbcUpCYQEAAQCfyEJh",
+    //     // "naoumaRoom",
+    //     "${widget.roomName}",
+    //     null,
+    //     0);
+  }
+
+  File imageFile;
+
+  //// Chose Image
+  Future<File> pickImage(ImageSource source) async {
+    var image = await ImagePicker().pickImage(source: source);
+    if (image != null) {
+      imageFile = File(image.path);
+      uploadImage();
+      imagename = imageFile.path.split("/").last;
+      print(imageFile.path);
+      return imageFile;
+    }
+  }
+
+  //// Pick Image with Camera
+  Future<File> imagePicker(BuildContext context, ThemeData themeData) {
+    showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: CupertinoActionSheet(
+              title: Text(
+                'التقاط الصورة عبر',
+                // style: themeData.textTheme.subtitle,
+              ),
+              cancelButton: CupertinoButton(
+                child: Text("اغلاق",
+                    style: themeData.textTheme.bodyText1.copyWith(
+                      color: kPrimaryColor,
+                    )),
+                onPressed: () => Navigator.pop(context),
+              ),
+              actions: <Widget>[
+                CupertinoButton(
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          CupertinoIcons.photo_camera_solid,
+                          color: themeData.primaryColor,
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text(
+                          "الكاميرا",
+                          //  style: themeData.textTheme.body1,
+                        ),
+                      ],
+                    ),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      File imageFile = await pickImage(ImageSource.camera);
+                      return imageFile;
+                    }),
+                CupertinoButton(
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.insert_photo,
+                          color: themeData.primaryColor,
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text(
+                          "الاستوديو",
+                          // style: themeData.textTheme.body1,
+                        ),
+                      ],
+                    ),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      File imageFile = await pickImage(ImageSource.gallery);
+                      return imageFile;
+                    }),
+              ],
+            ),
+          );
+        });
+  }
+
+  //// Upload Image to firestore into chats collection inside chatroom collection
+  Future uploadImage() async {
+    String fileName = Uuid().v1();
+    int status = 1;
+
+    await _firestoreInstance
+        .collection('chatroom')
+        .doc(widget.roomId)
+        .collection('chats')
+        .doc(fileName)
+        .set({
+      "sendby": specialId,
+      "message": "",
+      "type": "img",
+      "time": FieldValue.serverTimestamp(),
+    });
+
+    var ref =
+        FirebaseStorage.instance.ref().child('images').child("$fileName.jpg");
+
+    //// Delete the image if Error has been catched
+    var uploadTask = await ref.putFile(imageFile).catchError((error) async {
+      await _firestoreInstance
+          .collection('chatroom')
+          .doc(widget.roomId)
+          .collection('chats')
+          .doc(fileName)
+          .delete();
+
+      status = 0;
+    });
+
+    if (status == 1) {
+      String imageUrl = await uploadTask.ref.getDownloadURL();
+
+      await _firestoreInstance
+          .collection('chatroom')
+          .doc(widget.roomId)
+          .collection('chats')
+          .doc(fileName)
+          .update({"message": imageUrl});
+      onSendMessage(imageUrl, 1, 1);
+      print(imageUrl);
+    }
+  }
+
+  //// Send New massage (content) from the user To the room chat , select the massage Type if text or image, etc ..
+  //// By Hedra Adel
+  void onSendMessage(
+    String content,
+    int type,
+    int currentlevel,
+  ) {
+    // type: 0 = text, 1 = image, 2 = sticker
+    if (content.trim() != '') {
+      _messageController.clear();
+
+      var documentReference = FirebaseFirestore.instance
+          .collection('messages')
+          .doc(widget.roomId)
+          .collection(widget.roomId)
+          .doc(DateTime.now().millisecondsSinceEpoch.toString());
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(
+          documentReference,
+          {
+            'username': username,
+            'idFrom': specialId,
+            'idTo': widget.roomId,
+            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+            'content': content,
+            'type': type,
+            'userLevel': currentlevel,
+            'ApiUserID': apiid,
+            'userType': userstateInroom,
+            'specialId': specialId,
+            'packageName': nameOFPackage,
+            'packageColor': packageColor,
+            'packageBadge': packagebadge,
+            'hasSpecialID': hasSpecialID
+          },
+        );
+      });
+      listScrollController.animateTo(0.0,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      print("The Message has Been Sent" + "--- Hedra Adel ---");
+    } else {
+      CommonFunctions.showToast('Nothing to send', Colors.red);
+      print("The Message hasn't Been Sent" + "--- Hedra Adel ---");
+    }
+  }
+
+  //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
+  //// By Hedra Adel
+  readLocal() async {
+    try {
+      if (apiid.hashCode <= widget.roomId.hashCode) {
+        setState(() {
+          groupChatId = '${widget.roomId}';
+          roomID = widget.roomId;
+        });
+      } else {
+        setState(() {
+          groupChatId = '${widget.roomId}';
+          roomID = widget.roomId;
+        });
+      }
+    } catch (e) {
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      print(" - Error - There is Error in ${hedra.fileName} -- " +
+          "In Line : ${hedra.lineNumber} -- " +
+          "The caller function : ${hedra.callerFunctionName} -- " +
+          "The Details is : :::: " +
+          e.toString() +
+          " :::: " +
+          "-- Hedra Adel - Error -");
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+  }
+
+  //// Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable and create room doc if it not exists
+  //// By Hedra Adel
+  checkRoomFoundOrNot() async {
+    DocumentSnapshot ds =
+        await _firestoreInstance.collection("roomUsers").doc(roomID).get();
+    this.setState(() {
+      _isRoomOnFirebase = ds.exists;
+      print("checkRoomFoundOrNot Has been Completed and " +
+          "_isRoomOnFirebase is : $_isRoomOnFirebase" +
+          "--- Hedra Adel ---");
+    });
+    // if room not exist add it to firebase
+    _isRoomOnFirebase ? null : _addMicsToFirebase(roomID);
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+  }
