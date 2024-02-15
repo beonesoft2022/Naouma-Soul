@@ -18,7 +18,7 @@ import 'package:project/shop_background_gift.dart';
 import 'package:project/shop_intres_screen.dart';
 import 'package:project/shop_lock_room.dart';
 import 'package:project/utils/constants.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 import 'package:project/view/home/home_screen.dart';
 import 'package:project/view/profile/profile_screen.dart';
 

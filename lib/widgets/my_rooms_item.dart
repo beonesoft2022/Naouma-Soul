@@ -1,17 +1,35 @@
+/// Brief documentation for MyRoomsItem widget.
+///
+/// This widget displays information and navigation for a room item in a list.
+/// It shows the room name, description, tags, and user count.
+/// Tapping on it navigates to the room details screen.
+
 /*
- * Copyright (c) 2023. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
+The MyRoomsItem widget is a StatelessWidget that displays information and navigation for a room item in a list. It shows the room name, description, tags, and user count. Tapping on it navigates to the room details screen.
+The widget takes the following parameters:
+
+roomId: The ID of the room.
+roomOwnerId: The ID of the room owner.
+roomName: The name of the room.
+roomDesc: The description of the room.
+
+The widget first creates a Directionality widget to set the text direction to RTL (right-to-left). This is because the app is being localized for Arabic, which is a right-to-left language.
+Next, the widget creates a GestureDetector widget to handle taps on the room item. When the user taps on the room item, the widget calls the Get.to() function to navigate to the DetailsScreen. The DetailsScreen is a StatefulWidget that displays the details of the room.
+The widget then creates a Container widget to hold the room item's content. The Container widget has a BoxDecoration widget to set the room item's border, color, and shadow. The Container widget also has a Row widget to hold the room item's image, name, and description.
+The Row widget has two children: an Image widget and a Column widget. The Image widget displays the room item's image. The Column widget holds the room item's name and description.
+The Column widget has three children: a Row widget, a Text widget, and a Row widget. The Row widget displays the room item's tags. The Text widget displays the room item's description. The Row widget displays the room item's user count.
+Finally, the widget returns the Container widget.
+
+*/
+
+
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project/utils/constants.dart';
 import 'package:project/utils/images.dart';
 import 'package:project/view/details/details_screen.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 
 class MyRoomsItem extends StatelessWidget {
   const MyRoomsItem(

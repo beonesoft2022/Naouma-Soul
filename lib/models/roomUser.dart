@@ -8,12 +8,15 @@
 
 class InRoomUserModelModel {
   List<InRoomUserModelModelData> data;
-  int message;
+  String message;
   int status;
 
   InRoomUserModelModel({this.data, this.message, this.status});
 
   InRoomUserModelModel.fromJson(Map<String, dynamic> json) {
+    assert(json['message'] is String);
+    assert(json['status'] is int);
+
     if (json['data'] != null) {
       data = <InRoomUserModelModelData>[];
       json['data'].forEach((v) {

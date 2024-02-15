@@ -14,6 +14,20 @@ class UserFollowingRoomModel {
   UserFollowingRoomModel({this.data, this.message, this.status});
 
   UserFollowingRoomModel.fromJson(Map<String, dynamic> json) {
+    // Check type of message
+    assert(json['message'] is int);
+
+// Check type of status
+    assert(json['status'] is int);
+
+// Handle invalid type
+    if (json['message'] is! int) {
+      throw FormatException('Message field must be an integer');
+    }
+
+    if (json['status'] is! int) {
+      throw FormatException('Status field must be an integer');
+    }
     if (json['data'] != null) {
       data = <UserFollowingRoomModelData>[];
       json['data'].forEach((v) {

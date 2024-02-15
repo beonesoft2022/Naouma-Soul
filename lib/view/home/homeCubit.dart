@@ -594,11 +594,10 @@ class HomeCubit extends Cubit<HomeStates> {
         .then((value) {
       if (value != null && value.data != null) {
         roomUserModel = InRoomUserModelModel.fromJson(value.data);
-
-        print("getroomuser() Has been Complete and data is " +
-            value.data +
-            "--- Hedra Adel ---");
-
+        print(
+            "roomUserModel.data.length" + roomUserModel.data.length.toString());
+        print("ProDay For getroomuser() Has been Complete and data is " +
+            value.data);
         if (roomUserModel.data != null) {
           for (int i = 0; i < roomUserModel.data.length; i++) {
             if (apiid == roomUserModel.data[i].userId.toString()) {
@@ -634,7 +633,7 @@ class HomeCubit extends Cubit<HomeStates> {
         emit(InroomErrorState());
       }
     }).catchError((error) {
-      print(error.toString());
+      print("there is errorrrrrrrrrr here + " + error.toString());
       emit(InroomErrorState());
     });
   }
@@ -758,7 +757,7 @@ class HomeCubit extends Cubit<HomeStates> {
       print(value.data);
 
       print("--------------------");
-      print("followingroom  ok");
+      print("followingroom  data is " + value.data + "--- Hedra Adel ---");
       print("--------------------");
 
       emit(FollowingSuccessStates());
@@ -775,7 +774,7 @@ class HomeCubit extends Cubit<HomeStates> {
     DioHelper.getdata(url: 'get-room-followers/$id', token: token)
         .then((value) {
       userFollowingRoomModel = UserFollowingRoomModel.fromJson(value.data);
-      print("usersfollowingroom() Has been Complete and data is " +
+      print("ProDay For usersfollowingroom() Has been Complete and data is " +
           value.data +
           "--- Hedra Adel ---");
 
@@ -905,10 +904,10 @@ class HomeCubit extends Cubit<HomeStates> {
 
     DioHelper.getdata(url: showfriend, token: token).then((value) {
       showFriendsModel = ShowFriendsModel.fromJson(value.data);
-      print(value.data);
+      print("the data of showfriends " + value.data);
 
       print("--------------------");
-      print("showfriends 919  ok");
+      print("showfriends 919191  ok");
       print("--------------------");
 
       emit(ShowFriendSuccessStates());
@@ -1011,7 +1010,7 @@ class HomeCubit extends Cubit<HomeStates> {
     DioHelper.getdata(url: 'getExpLevel/$id', token: token).then((value) {
       getUserExpModel = GetUserExpModel.fromJson(value.data);
 
-      print(value.data);
+      print("ProDay For getUserExpModel IS" + value.data);
 
       emit(GetExpSuccessStates(getUserExpModel));
     }).catchError((error) {

@@ -8,7 +8,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:project/common_functions.dart';
 import 'package:project/utils/constants.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 import 'package:project/view/home/homeCubit.dart';
 import 'package:project/view/home/home_tab_pages/myroom/blackList.dart';
 import 'package:project/view/home/home_tab_pages/myroom/usersFollowRoom.dart';

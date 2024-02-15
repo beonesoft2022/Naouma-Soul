@@ -22,7 +22,7 @@ import 'package:project/models/follow_room_model.dart';
 import 'package:project/utils/constants.dart';
 import 'package:project/utils/preferences_services.dart';
 import 'package:project/view/details/details_screen.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 import 'package:project/view/home/homeCubit.dart';
 import 'package:project/view/home/states.dart';
 import 'package:project/widgets/my_rooms_item.dart';
@@ -32,7 +32,18 @@ class MyRoomsView extends StatelessWidget {
   RtcChannel _channel;
   RtcEngine _engine;
   ClientRole role = ClientRole.Broadcaster;
-
+/*
+The @override keyword indicates that the build method is overriding a method in a superclass.
+The build method is the main method in the widget class. It is responsible for building the widget's UI.
+The BlocProvider widget is used to provide a Bloc to the widget tree. A Bloc is a state management tool that helps to keep track of the state of a UI.
+The create method in the BlocProvider widget is called when the widget is created. It returns a new instance of the HomeCubit class. The HomeCubit class is a Bloc that manages the state of the home screen.
+The followingroom method in the HomeCubit class is called when the widget is created. It fetches the list of rooms that the user is following from the database.
+The listener property in the BlocConsumer widget is called whenever the state of the HomeCubit class changes.
+The builder property in the BlocConsumer widget is called when the state of the HomeCubit class changes. It returns a widget that displays the list of rooms that the user is following.
+The ConditionalBuilder widget is used to conditionally render a widget. In this case, the widget is rendered if the followModel property in the HomeCubit class is not null.
+The buildroomItem method is called for each item in the list of rooms. It returns a MyRoomsItem widget that displays information about the room.
+The fallback property in the ConditionalBuilder widget is called if the followModel property in the HomeCubit class is null. It returns a widget that displays a message indicating that the user is not following any rooms.
+*/
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -71,41 +82,12 @@ class MyRoomsView extends StatelessWidget {
                           ),
                         )),
                   ),
-              // child: FutureBuilder(
-              //   future: HomeCubit.get(context).getCategory(),
-              //   builder: (BuildContext context, AsyncSnapshot snapshot) {
-              //     if (HomeCubit.get(context).categoriesModel.data == null) {
-              //       return CircularProgressIndicator();
-              //     } else {
-              //       return ListView.builder(
-              //           itemBuilder: (context, index) => buildCatItem(
-              //               HomeCubit.get(context).categoriesModel.data[index]),
-              //           itemCount:
-              //               HomeCubit.get(context).categoriesModel.data.length);
-              //     }
-              //   },
-              // ),
             );
-            // ConditionalBuilder(
-            //   condition: HomeCubit.get(context).getWalletModel != null,
-            //   builder: (context) =>
-            //       mybackgroundItem(HomeCubit.get(context).getWalletModel.data),
-            //   fallback: (context) => Container(
-            //     color: Colors.white,
-            //     child: Center(
-            //       child: CircularProgressIndicator(),
-            //     ),
-            //   ),
-            // );
-
-            // return ListView.separated(
-            //     itemBuilder: (context, index) => buildCatItem(
-            //         HomeCubit.get(context).categoriesModel.data[index]),
-            //     separatorBuilder: (context, index) => Divider(),
-            //     itemCount: HomeCubit.get(context).categoriesModel.data.length);
           }),
     );
   }
+
+
 
   buildroomItem(FollowModelData model) =>
       Column(

@@ -19,7 +19,7 @@ import 'package:project/utils/constants.dart';
 import 'package:project/utils/images.dart';
 import 'package:project/utils/preferences_services.dart';
 import 'package:project/view/details/details_screen.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 import 'package:project/view/home/homeCubit.dart';
 import 'package:project/view/home/states.dart';
 import 'package:project/view/login/logincubit.dart';
@@ -35,7 +35,6 @@ class MyRoomTab extends StatefulWidget {
 
 class _MyRoomTabState extends State<MyRoomTab> {
   final _firestoreInstance = FirebaseFirestore.instance;
-
   bool _haveARoom = false;
   bool _loadingRoom = true;
   List<RoomDataModel> _myRooms = [];
@@ -45,6 +44,153 @@ class _MyRoomTabState extends State<MyRoomTab> {
     // TODO: implement initState
     //getmyroom();
     super.initState();
+  }
+
+  Widget _createRoomSlide(var theme) {
+    return SingleChildScrollView(
+      child: GestureDetector(
+        onTap: () {
+          print("create room clicked");
+          Get.to(CreateRoomScreen());
+        },
+        child: Container(
+          width: 300,
+          margin:
+              const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 52),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: kPrimaryColor,
+                child: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                radius: 30,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "إنشاء غرفة",
+                      style: theme.textTheme.bodyText1.copyWith(fontSize: 16.0),
+                      textAlign: TextAlign.start,
+                    ),
+                    Text(
+                      "ابدأ رحلتك فى نعومة !",
+                      style: theme.textTheme.bodyText2.copyWith(fontSize: 15.0),
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.flag,
+                color: Colors.orange,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // void getMyRoom() async {
+  //   QuerySnapshot querySnapshot = await _firestoreInstance
+  //       .collection('rooms')
+  //       .where("roomOwnerId", isEqualTo: PreferencesServices.getString(ID_KEY))
+  //       .get();
+  //   print(querySnapshot.docs.length);
+  //   if (querySnapshot.docs.length > 0) {
+  //     print("_haveARoom: $_haveARoom");
+  //     print("in it...");
+  //     // querySnapshot.docs.forEach((document) {
+  //     //     print(document.data);
+  //     //     // Map<String, dynamic> json = document.data(); //casts, but if you put breaklines through this its that _InternalLinkedHashMap<dynamic, dynamic> type
+  //     //     RoomDataModel myRoomDataModel = new RoomDataModel.fromJson(document.data());
+  //     //     _myRooms.add(myRoomDataModel);
+  //     //   });
+
+  //     setState(() {
+  //       roomId = querySnapshot.docs[0].id;
+  //       roomName = querySnapshot.docs[0]['roomName'];
+  //       roomDesc = querySnapshot.docs[0]['roomDesc'];
+  //       _haveARoom = true;
+  //       _loadingRoom = false;
+  //     });
+  //   } else {
+  //     setState(() {
+  //       _haveARoom = false;
+  //       _loadingRoom = false;
+  //     });
+  //     print("_haveARoom: $_haveARoom");
+  //   }
+  // }
+
+  Widget _myRoom(GetMyRoomModelData model) {
+    return GestureDetector(
+      onTap: () {
+        print("roomDetails");
+        Get.to(DetailsScreen(
+          roomId: model.id.toString(),
+          roomName: model.roomName,
+          roomDesc: model.roomDesc,
+          roomOwnerId: PreferencesServices.getString(ID_KEY),
+        ));
+      },
+      child: SingleChildScrollView(
+        child: Container(
+          width: 300,
+          margin:
+              const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 52),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: kPrimaryColor,
+                child: Image.asset(kDefaultProfileImage),
+                radius: 35,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      model.roomName,
+                      style: TextStyle(color: Colors.black, fontSize: 16.0),
+                      textAlign: TextAlign.start,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      model.roomDesc,
+                      style: TextStyle(color: Colors.black, fontSize: 15.0),
+                      textAlign: TextAlign.start,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -362,152 +508,5 @@ class _MyRoomTabState extends State<MyRoomTab> {
         },
       );
     });
-  }
-
-  Widget _createRoomSlide(var theme) {
-    return SingleChildScrollView(
-      child: GestureDetector(
-        onTap: () {
-          print("create room clicked");
-          Get.to(CreateRoomScreen());
-        },
-        child: Container(
-          width: 300,
-          margin:
-              const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 52),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: kPrimaryColor,
-                child: Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                radius: 30,
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "إنشاء غرفة",
-                      style: theme.textTheme.bodyText1.copyWith(fontSize: 16.0),
-                      textAlign: TextAlign.start,
-                    ),
-                    Text(
-                      "ابدأ رحلتك فى نعومة !",
-                      style: theme.textTheme.bodyText2.copyWith(fontSize: 15.0),
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.flag,
-                color: Colors.orange,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // void getMyRoom() async {
-  //   QuerySnapshot querySnapshot = await _firestoreInstance
-  //       .collection('rooms')
-  //       .where("roomOwnerId", isEqualTo: PreferencesServices.getString(ID_KEY))
-  //       .get();
-  //   print(querySnapshot.docs.length);
-  //   if (querySnapshot.docs.length > 0) {
-  //     print("_haveARoom: $_haveARoom");
-  //     print("in it...");
-  //     // querySnapshot.docs.forEach((document) {
-  //     //     print(document.data);
-  //     //     // Map<String, dynamic> json = document.data(); //casts, but if you put breaklines through this its that _InternalLinkedHashMap<dynamic, dynamic> type
-  //     //     RoomDataModel myRoomDataModel = new RoomDataModel.fromJson(document.data());
-  //     //     _myRooms.add(myRoomDataModel);
-  //     //   });
-
-  //     setState(() {
-  //       roomId = querySnapshot.docs[0].id;
-  //       roomName = querySnapshot.docs[0]['roomName'];
-  //       roomDesc = querySnapshot.docs[0]['roomDesc'];
-  //       _haveARoom = true;
-  //       _loadingRoom = false;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       _haveARoom = false;
-  //       _loadingRoom = false;
-  //     });
-  //     print("_haveARoom: $_haveARoom");
-  //   }
-  // }
-
-  Widget _myRoom(GetMyRoomModelData model) {
-    return GestureDetector(
-      onTap: () {
-        print("roomDetails");
-        Get.to(DetailsScreen(
-          roomId: model.id.toString(),
-          roomName: model.roomName,
-          roomDesc: model.roomDesc,
-          roomOwnerId: PreferencesServices.getString(ID_KEY),
-        ));
-      },
-      child: SingleChildScrollView(
-        child: Container(
-          width: 300,
-          margin:
-              const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 52),
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: kPrimaryColor,
-                child: Image.asset(kDefaultProfileImage),
-                radius: 35,
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      model.roomName,
-                      style: TextStyle(color: Colors.black, fontSize: 16.0),
-                      textAlign: TextAlign.start,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      model.roomDesc,
-                      style: TextStyle(color: Colors.black, fontSize: 15.0),
-                      textAlign: TextAlign.start,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

@@ -1242,7 +1242,7 @@
 // //     //   querySnap.documents.forEach((document) {
 // //     //     print(document.data);
 // //     //
-// //     //     Map<String, dynamic> json = document.data; //casts, but if you put breaklines through this its that _InternalLinkedHashMap<dynamic, dynamic> type
+// //     //     Map<String, dynamic> json = document.data; //casts, but if you put breaklines through this its that z_InternalLinkedHashMap<dynamic, dynamic> type
 // //     //     Album album = new Album.fromJson(json['favorite_albums'][0]); //Throws the type exception
 // //     //   });
 // //     // })

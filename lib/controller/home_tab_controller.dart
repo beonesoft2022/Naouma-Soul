@@ -20,14 +20,14 @@ class HomeTabController extends GetxController {
   // to check selected app bar item
   int _appBarCurrentItem = 0;
 
-  int get appBarCurrentItem => _appBarCurrentItem;
-
   // Widget _currentScreen = HomeTab();
   final List<Widget> _homeTabChildren = [
     HomeTabAll(),
     MyRoomTab(),
     DiscoveryTab(),
   ];
+
+  int get appBarCurrentItem => _appBarCurrentItem;
 
   List<Widget> get homeTabChildren => _homeTabChildren;
 

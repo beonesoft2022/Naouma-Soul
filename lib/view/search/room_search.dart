@@ -9,7 +9,7 @@ import 'package:project/models/search_model.dart';
 import 'package:project/models/userSearch_model.dart';
 import 'package:project/utils/constants.dart';
 import 'package:project/view/details/details_screen.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 import 'package:project/view/search/cubit.dart';
 import 'package:project/view/search/states.dart';
 

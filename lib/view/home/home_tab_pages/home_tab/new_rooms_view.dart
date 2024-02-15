@@ -10,7 +10,7 @@ import 'package:project/common_functions.dart';
 import 'package:project/models/room_data_model.dart';
 import 'package:project/models/room_index.dart';
 import 'package:project/utils/constants.dart';
-import 'package:project/view/details/newPage.dart';
+import 'package:project/view/details/roomDetailsScreen.dart';
 
 import '../../homeCubit.dart';
 import '../../states.dart';
