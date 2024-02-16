@@ -71,7 +71,7 @@ class ShopCubit extends Cubit<ShopIntresStates> {
 
     DioHelper.getdata(url: frame, token: token).then((value) {
       framesModel = FramesModel.fromJson(value.data);
-      print(value.data);
+      print("getFramesData" + value.data);
       emit(FrameSuccessStates());
     }).catchError((error) {
       print(error.toString());
@@ -126,16 +126,30 @@ class ShopCubit extends Cubit<ShopIntresStates> {
 
   ShopPurchaseModel shopPurchaseModel;
 
+  // void shopPurchase({@required id}) {
+  //   emit(ShopPurchaseLoadingStates());
+  //   DioHelper.postdata(url: 'buy-new-product/$id', token: token).then((value) {
+  //     shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
+  //     print("id value of shopPurchaseModel is   " + value.data);
+  //     emit(ShopPurchaseSuccessStates());
+  //   }).catchError((error) {
+  //     print(error.toString());
+  //     emit(ShopPurchaseErrorStates(error.message)); // Pass the message property of the DioError object
+  //   });
+  // }
+
   void shopPurchase({@required id}) {
     emit(ShopPurchaseLoadingStates());
-    // print(giftID);
-    DioHelper.getdata(url: 'shop-purchase/$id', token: token).then((value) {
+    DioHelper.postdata(
+        url: 'buy-new-product/$id',
+        token: token,
+        data: {'id': id}).then((value) {
+      print("id value of shopPurchaseModel is   " + value.data);
       shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
-      print(value.data);
+
       emit(ShopPurchaseSuccessStates());
     }).catchError((error) {
-      print(error.toString());
-      emit(ShopPurchaseErrorStates(error));
+      emit(ShopPurchaseErrorStates(error.toString()));
     });
   }
 

@@ -929,6 +929,7 @@
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_storage_web-3.3.5/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_bloc-8.1.1/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_page_indicator-0.0.3/lib" />
+      <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-2.0.7/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_secure_storage-4.2.1/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_swiper-1.1.6/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_switch-0.3.2/lib" />
@@ -961,7 +962,10 @@
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_platform_interface-2.0.4/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.1.2/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler-10.0.0/lib" />
+      <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler_android-10.0.0/lib" />
+      <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler_apple-9.0.4/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler_platform_interface-3.7.0/lib" />
+      <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/permission_handler_windows-0.1.0/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/petitparser-5.0.0/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/platform-3.1.0/lib" />
       <root url="file://$PROJECT_DIR$/../../f30/flutter/.pub-cache/hosted/pub.dartlang.org/plugin_platform_interface-2.1.2/lib" />

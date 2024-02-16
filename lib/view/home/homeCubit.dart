@@ -587,18 +587,20 @@ class HomeCubit extends Cubit<HomeStates> {
 
   List<InRoomUserModelModel> userList = [];
 
-  void getroomuser({@required id}) {
+  void getroomuser({@required String id}) {
+    // Ensure 'id' is a String or the correct type
     emit(InroomLoadingStates());
 
-    DioHelper.getdata(url: 'get-room-followers/$id', token: token)
+    DioHelper.getdata(url: 'onlineusersinroom/$id/', token: token)
         .then((value) {
       if (value != null && value.data != null) {
         roomUserModel = InRoomUserModelModel.fromJson(value.data);
         print(
             "roomUserModel.data.length" + roomUserModel.data.length.toString());
         print("ProDay For getroomuser() Has been Complete and data is " +
-            value.data);
-        if (roomUserModel.data != null) {
+            value.data
+                .toString()); // Ensure 'value.data' can be converted to a String
+        if (roomUserModel.data != null && roomUserModel.data.isNotEmpty) {
           for (int i = 0; i < roomUserModel.data.length; i++) {
             if (apiid == roomUserModel.data[i].userId.toString()) {
               print("roomUserModel api id is " +
@@ -606,15 +608,16 @@ class HomeCubit extends Cubit<HomeStates> {
                   "--- Hedra Adel ---");
               userstateInroom = roomUserModel.data[i].typeUser;
               specialId = roomUserModel.data[i].spacialId;
-              nameOFPackage = roomUserModel.data[i].package.first.name;
-              packageColor = roomUserModel.data[i].package.first.color;
-              packagebadge = roomUserModel.data[i].package.first.url;
-
-              if (roomUserModel.data[i].isPurchaseId == true) {
-                hasSpecialID = true;
-              } else {
-                hasSpecialID = false;
+              // Check if package list is not empty before accessing it
+              if (roomUserModel.data[i].package != null &&
+                  roomUserModel.data[i].package.isNotEmpty) {
+                nameOFPackage = roomUserModel.data[i].package[0].name;
+                packageColor = roomUserModel.data[i].package[0].color;
+                packagebadge = roomUserModel.data[i].package[0].url;
               }
+
+              hasSpecialID = roomUserModel.data[i].isPurchaseId ??
+                  false; // Use '??' to provide a default value
             }
           }
 

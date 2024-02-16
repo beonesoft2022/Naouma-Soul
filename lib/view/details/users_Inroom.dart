@@ -180,7 +180,9 @@ Widget builditem(InRoomUserModelModelData model, String text, String roomID,
             ),
             Spacer(),
             Text(
-              model.level != null ? "LV ${model.level.userCurrentLevel}" : "LV",
+              model.level != null
+                  ? "LV ${model.level[0].userCurrentLevel}"
+                  : "LV",
               style:
                   TextStyle(color: kPrimaryColor, fontWeight: FontWeight.bold),
             ),
@@ -206,7 +208,7 @@ Widget builditem(InRoomUserModelModelData model, String text, String roomID,
                           color: Colors.transparent.withOpacity(0.0),
                         ),
                         Container(
-                          height: 300,
+                          height: 240,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(
@@ -215,641 +217,651 @@ Widget builditem(InRoomUserModelModelData model, String text, String roomID,
                           ),
                           // color: Colors.amber,
 
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 20, top: 12),
-                                    child: Container(
-                                      height: 22,
-                                      width: 25,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.orange,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "@",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
+                          child: Expanded(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 20, top: 12),
+                                      child: Container(
+                                        height: 22,
+                                        width: 25,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.orange,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            "@",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 20, top: 12),
-                                    child: Container(
-                                      height: 22,
-                                      width: 25,
-                                      child: Icon(
-                                        Icons.report_problem_outlined,
-                                        color: Colors.grey.shade400,
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 20, top: 12),
+                                      child: Container(
+                                        height: 22,
+                                        width: 25,
+                                        child: Icon(
+                                          Icons.report_problem_outlined,
+                                          color: Colors.grey.shade400,
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                  // IconButton(
-                                  //   onPressed: () {},
-                                  //   icon: Icon(Icons.report_gmailerrorred),
-                                  // ),
+                                    )
+                                    // IconButton(
+                                    //   onPressed: () {},
+                                    //   icon: Icon(Icons.report_gmailerrorred),
+                                    // ),
 
-                                  // Spacer(),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Text(model.name.toString()),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Text(text),
-                                  if (model.typeUser == 'user')
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: kPrimaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-                                            border: Border.all(
-                                              width: 1,
-                                              color: kPrimaryColor,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            'عضو',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ))),
-                                    ),
-                                  if (model.typeUser == 'supervisor')
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: kPrimaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-                                            border: Border.all(
-                                              width: 1,
-                                              color: kPrimaryColor,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            'مشرف',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ))),
-                                    ),
-                                  if (model.typeUser == 'owner')
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: kPrimaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-                                            border: Border.all(
-                                              width: 1,
-                                              color: kPrimaryColor,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            'مالك',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ))),
-                                    ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    'ID:${model.spacialId}',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    "LV ${model.level.userCurrentLevel.toString()}",
-                                    style: TextStyle(
-                                        color: kPrimaryColor,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    width: 30,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 18,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Colors.amber,
-                                        )),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.person,
-                                        color: Colors.amber,
-                                        size: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Container(
-                                    height: 18,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Colors.amber,
-                                        )),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.markunread_mailbox,
-                                        color: Colors.amber,
-                                        size: 10,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Container(
-                                    height: 18,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Colors.amber,
-                                        )),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.home,
-                                        color: Colors.amber,
-                                        size: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Spacer(),
-                              Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Row(
+                                    // Spacer(),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Text(model.name.toString()),
+                                Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    if (model.isFriend == true)
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {
-                                              Get.to(Onechat(
-                                                user: model,
-                                                fromRoomUser: true,
-                                                //  createUserModel: model,
-                                                //  userModel: model,
-                                              ));
-
-                                              // print(HomeCubit.get(context)
-                                              //     .addfriendsModel
-                                              //     .message);
-                                            },
-                                            color: Colors.yellow,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.message_rounded,
-                                              size: 14,
+                                    // Text(text),
+                                    if (model.typeUser == 'user')
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              color: kPrimaryColor,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(10),
+                                                bottomRight:
+                                                    Radius.circular(10),
+                                                bottomLeft: Radius.circular(10),
+                                                topLeft: Radius.circular(10),
+                                              ),
+                                              border: Border.all(
+                                                width: 1,
+                                                color: kPrimaryColor,
+                                                style: BorderStyle.solid,
+                                              ),
+                                              // shape: BoxShape.circle,
                                             ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            "الرسائل",
-                                            style:
-                                                TextStyle(color: Colors.grey),
-                                          )
-                                        ],
+                                            child: Center(
+                                                child: Text(
+                                              'عضو',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12),
+                                            ))),
                                       ),
-                                    if (model.isFriend == false)
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {
-                                              HomeCubit.get(context).addfriend(
-                                                id: model.userId,
-                                              );
-
-                                              // print(HomeCubit.get(context)
-                                              //     .addfriendsModel
-                                              //     .message);
-                                            },
-                                            color: Colors.yellow,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.person_add,
-                                              size: 14,
+                                    if (model.typeUser == 'supervisor')
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              color: kPrimaryColor,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(10),
+                                                bottomRight:
+                                                    Radius.circular(10),
+                                                bottomLeft: Radius.circular(10),
+                                                topLeft: Radius.circular(10),
+                                              ),
+                                              border: Border.all(
+                                                width: 1,
+                                                color: kPrimaryColor,
+                                                style: BorderStyle.solid,
+                                              ),
+                                              // shape: BoxShape.circle,
                                             ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            'إضافه صديق',
-                                            style:
-                                                TextStyle(color: Colors.grey),
-                                          )
-                                        ],
+                                            child: Center(
+                                                child: Text(
+                                              'مشرف',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12),
+                                            ))),
                                       ),
-                                    Column(
-                                      children: [
-                                        MaterialButton(
-                                          onPressed: () {},
-                                          color: kPrimaryLightColor,
-                                          textColor: Colors.white,
-                                          child: Icon(
-                                            Icons.mic_external_off_rounded,
-                                            size: 14,
-                                          ),
-                                          padding: EdgeInsets.all(16),
-                                          shape: CircleBorder(),
-                                        ),
-                                        Text(
-                                          'كتم الصوت',
-                                          style: TextStyle(color: Colors.grey),
-                                        )
-                                      ],
+                                    if (model.typeUser == 'owner')
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              color: kPrimaryColor,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(10),
+                                                bottomRight:
+                                                    Radius.circular(10),
+                                                bottomLeft: Radius.circular(10),
+                                                topLeft: Radius.circular(10),
+                                              ),
+                                              border: Border.all(
+                                                width: 1,
+                                                color: kPrimaryColor,
+                                                style: BorderStyle.solid,
+                                              ),
+                                              // shape: BoxShape.circle,
+                                            ),
+                                            child: Center(
+                                                child: Text(
+                                              'مالك',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12),
+                                            ))),
+                                      ),
+                                    SizedBox(
+                                      width: 10,
                                     ),
-                                    Column(
-                                      children: [
-                                        MaterialButton(
-                                          onPressed: () {
-                                            //     Get.to(StackDemo());
-                                          },
-                                          color: Colors.pink,
-                                          textColor: Colors.white,
-                                          child: Icon(
-                                            Icons.star,
-                                            size: 14,
-                                          ),
-                                          padding: EdgeInsets.all(16),
-                                          shape: CircleBorder(),
-                                        ),
-                                        Text(
-                                          'البطاقات السحرية',
-                                          style: TextStyle(color: Colors.grey),
-                                        )
-                                      ],
+                                    Text(
+                                      'ID:${model.spacialId}',
+                                      style: TextStyle(color: Colors.grey),
                                     ),
-                                    Column(
-                                      children: [
-                                        MaterialButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-
-                                            showModalBottomSheet(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return GiftScreen(
-                                                    roomID: roomID,
-                                                    userID:
-                                                        model.userId.toString(),
-                                                    check: true,
-                                                    username: model.name,
-                                                    // userID: model.userId
-                                                    // .toString(),
-                                                  );
-                                                });
-                                          },
-                                          color: Colors.blueAccent,
-                                          textColor: Colors.white,
-                                          child: Icon(
-                                            Icons.card_giftcard,
-                                            size: 14,
-                                          ),
-                                          padding: EdgeInsets.all(16),
-                                          shape: CircleBorder(),
-                                        ),
-                                        Text(
-                                          'إرسال هديه',
-                                          style: TextStyle(color: Colors.grey),
-                                        )
-                                      ],
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      "LV ${model.level[0].userCurrentLevel.toString()}",
+                                      style: TextStyle(
+                                          color: kPrimaryColor,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(
+                                      width: 30,
                                     ),
                                   ],
                                 ),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                        height: 45,
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                                width: 1.0,
-                                                color: Colors.grey.shade300),
-                                            bottom: BorderSide(
-                                                width: 1.0,
-                                                color:
-                                                    Colors.lightBlue.shade900),
-                                          ),
-                                          color: Colors.white,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 18,
+                                      width: 20,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.red,
+                                          border: Border.all(
+                                            width: 2,
+                                            color: Colors.amber,
+                                          )),
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.person,
+                                          color: Colors.amber,
+                                          size: 12,
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Container(
+                                      height: 18,
+                                      width: 20,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.red,
+                                          border: Border.all(
+                                            width: 2,
+                                            color: Colors.amber,
+                                          )),
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.markunread_mailbox,
+                                          color: Colors.amber,
+                                          size: 10,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Container(
+                                      height: 18,
+                                      width: 20,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.red,
+                                          border: Border.all(
+                                            width: 2,
+                                            color: Colors.amber,
+                                          )),
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.home,
+                                          color: Colors.amber,
+                                          size: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Spacer(),
+                                Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (model.isFriend == true)
+                                        Column(
                                           children: [
-                                            IconButton(
-                                                onPressed: () {
-                                                  showDialog<String>(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        Directionality(
-                                                      textDirection:
-                                                          TextDirection.rtl,
-                                                      child: AlertDialog(
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            15))),
-                                                        title: Center(
-                                                          child: const Text(
-                                                              'هل تريد حظر العضو'),
-                                                        ),
-                                                        // content: const Text('AlertDialog description'),
-                                                        actions: <Widget>[
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  HomeCubit.get(
-                                                                          context)
-                                                                      .addBlockList(
-                                                                          id: model
-                                                                              .userId);
-                                                                  Navigator.pop(
-                                                                      context,
-                                                                      'yes');
+                                            MaterialButton(
+                                              onPressed: () {
+                                                Get.to(Onechat(
+                                                  user: model,
+                                                  fromRoomUser: true,
+                                                  //  createUserModel: model,
+                                                  //  userModel: model,
+                                                ));
 
-                                                                  CommonFunctions
-                                                                      .showToast(
-                                                                          'تم حظر العضو',
-                                                                          Colors
-                                                                              .green);
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'نعم'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () =>
+                                                // print(HomeCubit.get(context)
+                                                //     .addfriendsModel
+                                                //     .message);
+                                              },
+                                              color: Colors.yellow,
+                                              textColor: Colors.white,
+                                              child: Icon(
+                                                Icons.message_rounded,
+                                                size: 14,
+                                              ),
+                                              padding: EdgeInsets.all(16),
+                                              shape: CircleBorder(),
+                                            ),
+                                            Text(
+                                              "الرسائل",
+                                              style:
+                                                  TextStyle(color: Colors.grey),
+                                            )
+                                          ],
+                                        ),
+                                      if (model.isFriend == false)
+                                        Column(
+                                          children: [
+                                            MaterialButton(
+                                              onPressed: () {
+                                                HomeCubit.get(context)
+                                                    .addfriend(
+                                                  id: model.userId,
+                                                );
+
+                                                // print(HomeCubit.get(context)
+                                                //     .addfriendsModel
+                                                //     .message);
+                                              },
+                                              color: Colors.yellow,
+                                              textColor: Colors.white,
+                                              child: Icon(
+                                                Icons.person_add,
+                                                size: 14,
+                                              ),
+                                              padding: EdgeInsets.all(16),
+                                              shape: CircleBorder(),
+                                            ),
+                                            Text(
+                                              'إضافه صديق',
+                                              style:
+                                                  TextStyle(color: Colors.grey),
+                                            )
+                                          ],
+                                        ),
+                                      Column(
+                                        children: [
+                                          MaterialButton(
+                                            onPressed: () {},
+                                            color: kPrimaryLightColor,
+                                            textColor: Colors.white,
+                                            child: Icon(
+                                              Icons.mic_external_off_rounded,
+                                              size: 14,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          Text(
+                                            'كتم الصوت',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          MaterialButton(
+                                            onPressed: () {
+                                              //     Get.to(StackDemo());
+                                            },
+                                            color: Colors.pink,
+                                            textColor: Colors.white,
+                                            child: Icon(
+                                              Icons.star,
+                                              size: 14,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          Text(
+                                            'البطاقات السحرية',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          MaterialButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+
+                                              showModalBottomSheet(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return GiftScreen(
+                                                      roomID: roomID,
+                                                      userID: model.userId
+                                                          .toString(),
+                                                      check: true,
+                                                      username: model.name,
+                                                      // userID: model.userId
+                                                      // .toString(),
+                                                    );
+                                                  });
+                                            },
+                                            color: Colors.blueAccent,
+                                            textColor: Colors.white,
+                                            child: Icon(
+                                              Icons.card_giftcard,
+                                              size: 14,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          Text(
+                                            'إرسال هديه',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              top: BorderSide(
+                                                  width: 1.0,
+                                                  color: Colors.grey.shade300),
+                                              bottom: BorderSide(
+                                                  width: 1.0,
+                                                  color: Colors
+                                                      .lightBlue.shade900),
+                                            ),
+                                            color: Colors.white,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              IconButton(
+                                                  onPressed: () {
+                                                    showDialog<String>(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          Directionality(
+                                                        textDirection:
+                                                            TextDirection.rtl,
+                                                        child: AlertDialog(
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          15))),
+                                                          title: Center(
+                                                            child: const Text(
+                                                                'هل تريد حظر العضو'),
+                                                          ),
+                                                          // content: const Text('AlertDialog description'),
+                                                          actions: <Widget>[
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceAround,
+                                                              children: [
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    HomeCubit.get(
+                                                                            context)
+                                                                        .addBlockList(
+                                                                            id: model.userId);
                                                                     Navigator.pop(
                                                                         context,
-                                                                        'no'),
-                                                                child:
-                                                                    const Text(
-                                                                        'لا'),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                  // print(model.userId);
-                                                },
-                                                icon: Icon(
-                                                  Icons.logout,
-                                                  color: Colors.grey.shade400,
-                                                  size: 25,
-                                                )),
-                                            VerticalDivider(),
-                                            IconButton(
-                                                onPressed: () {
-                                                  showDialog<String>(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        Directionality(
-                                                      textDirection:
-                                                          TextDirection.rtl,
-                                                      child: AlertDialog(
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            15))),
-                                                        title: Center(
-                                                          child: const Text(
-                                                              'هل تريد اصمات العضو'),
+                                                                        'yes');
+
+                                                                    CommonFunctions.showToast(
+                                                                        'تم حظر العضو',
+                                                                        Colors
+                                                                            .green);
+                                                                  },
+                                                                  child:
+                                                                      const Text(
+                                                                          'نعم'),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'no'),
+                                                                  child:
+                                                                      const Text(
+                                                                          'لا'),
+                                                                ),
+                                                              ],
+                                                            )
+                                                          ],
                                                         ),
-                                                        // content: const Text('AlertDialog description'),
-                                                        actions: <Widget>[
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  ismuted =
-                                                                      false;
-                                                                  _updateuserDataFirebase(
-                                                                      roomID,
-                                                                      model
-                                                                          .name,
-                                                                      model
-                                                                          .spacialId);
-
-                                                                  _updateMutedFirebase(
-                                                                    roomID,
-                                                                  );
-
-                                                                  Navigator.pop(
-                                                                      context,
-                                                                      'yes');
-
-                                                                  // CommonFunctions
-                                                                  //     .showToast(
-                                                                  //         'تم اصمات العضو',
-                                                                  //         Colors
-                                                                  //             .green);
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'نعم'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        context,
-                                                                        'no'),
-                                                                child:
-                                                                    const Text(
-                                                                        'لا'),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        ],
                                                       ),
-                                                    ),
-                                                  );
-
-                                                  // FirebaseFirestore.instance
-                                                  //     .collection('users')
-                                                  //     .doc(model.spacialId)
-                                                  //     .add(
-                                                  //       model.toMap(),
-                                                  //     );
-                                                },
-                                                icon: Icon(
-                                                  Icons.block_rounded,
-                                                  color: Colors.grey.shade400,
-                                                  size: 25,
-                                                )),
-                                            VerticalDivider(),
-                                            IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
-                                                  Icons.mic,
-                                                  color: Colors.grey.shade400,
-                                                  size: 25,
-                                                )),
-                                            VerticalDivider(),
-                                            Theme(
-                                                data:
-                                                    Theme.of(context).copyWith(
-                                                  dividerTheme:
-                                                      DividerThemeData(
-                                                    color: Colors.white,
-                                                  ),
-                                                  cardColor: Colors.black
-                                                      .withOpacity(0.7),
-                                                ),
-                                                child: PopupMenuButton<int>(
+                                                    );
+                                                    // print(model.userId);
+                                                  },
                                                   icon: Icon(
-                                                    Icons.person,
-                                                    color: Colors.green,
+                                                    Icons.logout,
+                                                    color: Colors.grey.shade400,
                                                     size: 25,
+                                                  )),
+                                              VerticalDivider(),
+                                              IconButton(
+                                                  onPressed: () {
+                                                    showDialog<String>(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          Directionality(
+                                                        textDirection:
+                                                            TextDirection.rtl,
+                                                        child: AlertDialog(
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          15))),
+                                                          title: Center(
+                                                            child: const Text(
+                                                                'هل تريد اصمات العضو'),
+                                                          ),
+                                                          // content: const Text('AlertDialog description'),
+                                                          actions: <Widget>[
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceAround,
+                                                              children: [
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    ismuted =
+                                                                        false;
+                                                                    _updateuserDataFirebase(
+                                                                        roomID,
+                                                                        model
+                                                                            .name,
+                                                                        model
+                                                                            .spacialId);
+
+                                                                    _updateMutedFirebase(
+                                                                      roomID,
+                                                                    );
+
+                                                                    Navigator.pop(
+                                                                        context,
+                                                                        'yes');
+
+                                                                    // CommonFunctions
+                                                                    //     .showToast(
+                                                                    //         'تم اصمات العضو',
+                                                                    //         Colors
+                                                                    //             .green);
+                                                                  },
+                                                                  child:
+                                                                      const Text(
+                                                                          'نعم'),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'no'),
+                                                                  child:
+                                                                      const Text(
+                                                                          'لا'),
+                                                                ),
+                                                              ],
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+
+                                                    // FirebaseFirestore.instance
+                                                    //     .collection('users')
+                                                    //     .doc(model.spacialId)
+                                                    //     .add(
+                                                    //       model.toMap(),
+                                                    //     );
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.block_rounded,
+                                                    color: Colors.grey.shade400,
+                                                    size: 25,
+                                                  )),
+                                              VerticalDivider(),
+                                              IconButton(
+                                                  onPressed: () {},
+                                                  icon: Icon(
+                                                    Icons.mic,
+                                                    color: Colors.grey.shade400,
+                                                    size: 25,
+                                                  )),
+                                              VerticalDivider(),
+                                              Theme(
+                                                  data: Theme.of(context)
+                                                      .copyWith(
+                                                    dividerTheme:
+                                                        DividerThemeData(
+                                                      color: Colors.white,
+                                                    ),
+                                                    cardColor: Colors.black
+                                                        .withOpacity(0.7),
                                                   ),
-                                                  onSelected: (item) =>
-                                                      onSelected(context, item,
-                                                          model.userId, roomID),
-                                                  itemBuilder: (context) => [
-                                                    PopupMenuItem<int>(
-                                                        value: 0,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Center(
-                                                              child: Text(
-                                                                "تعين مشرف",
+                                                  child: PopupMenuButton<int>(
+                                                    icon: Icon(
+                                                      Icons.person,
+                                                      color: Colors.green,
+                                                      size: 25,
+                                                    ),
+                                                    onSelected: (item) =>
+                                                        onSelected(
+                                                            context,
+                                                            item,
+                                                            model.userId,
+                                                            roomID),
+                                                    itemBuilder: (context) => [
+                                                      PopupMenuItem<int>(
+                                                          value: 0,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Center(
+                                                                child: Text(
+                                                                  "تعين مشرف",
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          )),
+                                                      PopupMenuDivider(),
+                                                      PopupMenuItem<int>(
+                                                          value: 1,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Center(
+                                                                child: Text(
+                                                                    "تعين عضو",
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white)),
+                                                              )
+                                                            ],
+                                                          )),
+                                                      PopupMenuDivider(),
+                                                      PopupMenuItem<int>(
+                                                          value: 2,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Text(
+                                                                "ازالة العضو",
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .white),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        )),
-                                                    PopupMenuDivider(),
-                                                    PopupMenuItem<int>(
-                                                        value: 1,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Center(
-                                                              child: Text(
-                                                                  "تعين عضو",
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .white)),
-                                                            )
-                                                          ],
-                                                        )),
-                                                    PopupMenuDivider(),
-                                                    PopupMenuItem<int>(
-                                                        value: 2,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text(
-                                                              "ازالة العضو",
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white),
-                                                            )
-                                                          ],
-                                                        )),
-                                                  ],
-                                                )),
-                                          ],
-                                        )),
-                                  )
-                                ],
-                              ),
-                            ],
+                                                              )
+                                                            ],
+                                                          )),
+                                                    ],
+                                                  )),
+                                            ],
+                                          )),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

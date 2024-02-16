@@ -88,7 +88,7 @@ class _framesScreenState extends State<framesScreen> {
                               TextButton(
                                 onPressed: () {
                                   // ShopCubit.get(context)
-                                  //     .shopPurchase(id: model.id);
+                                  //     .shopPurchase(id: model1.id);
                                   // ShopCubit.get(context).getWalletAmount();
                                   Get.to(WalletScreen());
                                 },
@@ -232,6 +232,10 @@ class _framesScreenState extends State<framesScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('١٥يوما/' + model.name),
+                            //make new linfor the price
+                            SizedBox(
+                              width: 5,
+                            ),
                             Text(
                               model.price.toString(),
                               style: TextStyle(color: KstorebuttonColor),
@@ -291,9 +295,8 @@ class _framesScreenState extends State<framesScreen> {
                                                 .getWalletAmount();
                                             Navigator.pop(context, 'yes');
 
-                                            // CommonFunctions.showToast(
-                                            //     'تم شراء بطاقة سحرية',
-                                            //     Colors.green);
+                                            CommonFunctions.showToast(
+                                                'تم', Colors.green);
 
                                             hasFrame =
                                                 model.url + model.giftLink;
@@ -331,7 +334,8 @@ class _framesScreenState extends State<framesScreen> {
                   builder: (BuildContext context) {
                     return Theme(
                       data: ThemeData(
-                          dialogBackgroundColor: Colors.grey.withOpacity(0.0)),
+                          dialogBackgroundColor:
+                              Colors.greenAccent.withOpacity(0.0)),
                       child: AlertDialog(
                         content: SingleChildScrollView(
                             child: Image.network(

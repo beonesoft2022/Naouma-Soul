@@ -72,17 +72,18 @@ class DetailsScreen extends StatefulWidget {
   final String apiroomID;
   final ClientRole role;
 
-  DetailsScreen({Key key,
-    this.username,
-    this.userID,
-    this.role,
-    this.roomId,
-    this.roomName,
-    this.roomDesc,
-    this.roomOwnerId,
-    this.apiroomID,
-    this.passwordRoom,
-    this.roomImage})
+  DetailsScreen(
+      {Key key,
+      this.username,
+      this.userID,
+      this.role,
+      this.roomId,
+      this.roomName,
+      this.roomDesc,
+      this.roomOwnerId,
+      this.apiroomID,
+      this.passwordRoom,
+      this.roomImage})
       : super(key: key);
   int _remoteUid;
 
@@ -268,9 +269,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     if (image != null) {
       imageFile = File(image.path);
       uploadImage();
-      imagename = imageFile.path
-          .split("/")
-          .last;
+      imagename = imageFile.path.split("/").last;
       print(imageFile.path);
       return imageFile;
     }
@@ -362,7 +361,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     });
 
     var ref =
-    FirebaseStorage.instance.ref().child('images').child("$fileName.jpg");
+        FirebaseStorage.instance.ref().child('images').child("$fileName.jpg");
 
     //// Delete the image if Error has been catched
     var uploadTask = await ref.putFile(imageFile).catchError((error) async {
@@ -392,9 +391,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   //// Send New massage (content) from the user To the room chat , select the massage Type if text or image, etc ..
   //// By Hedra Adel
-  void onSendMessage(String content,
-      int type,
-      int currentlevel,) {
+  void onSendMessage(
+    String content,
+    int type,
+    int currentlevel,
+  ) {
     // type: 0 = text, 1 = image, 2 = sticker
     if (content.trim() != '') {
       _messageController.clear();
@@ -403,10 +404,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           .collection('messages')
           .doc(widget.roomId)
           .collection(widget.roomId)
-          .doc(DateTime
-          .now()
-          .millisecondsSinceEpoch
-          .toString());
+          .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
       FirebaseFirestore.instance.runTransaction((transaction) async {
         transaction.set(
@@ -415,10 +413,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             'username': username,
             'idFrom': specialId,
             'idTo': widget.roomId,
-            'timestamp': DateTime
-                .now()
-                .millisecondsSinceEpoch
-                .toString(),
+            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
             'content': content,
             'type': type,
             'userLevel': currentlevel,
@@ -476,7 +471,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   checkRoomFoundOrNot() async {
     try {
       DocumentSnapshot ds =
-      await _firestoreInstance.collection("roomUsers").doc(roomID).get();
+          await _firestoreInstance.collection("roomUsers").doc(roomID).get();
       this.setState(() {
         _isRoomOnFirebase = ds.exists;
         print("checkRoomFoundOrNot Has been Completed and " +
@@ -513,56 +508,56 @@ class _DetailsScreenState extends State<DetailsScreen> {
           children: [
             micModel.micStatus == true
                 ? Stack(
-              children: [
-                hasFrame == null
-                    ? Container(
-                  /*   // width: 70,
+                    children: [
+                      hasFrame == null
+                          ? Container(
+                              /*   // width: 70,
                               // child: Image.network(
                               //   hasFrame, */
-                  // )
-                )
-                    : Container(
-                    width: 70,
-                    child: Image.network(
-                      hasFrame,
-                    )), // Back image
-                Padding(
-                  padding: const EdgeInsets.all(9.0),
-                  child: Container(
-                    width: 50,
-                    child: Image.asset(
-                      "assets/images/Profile Image.png",
-                      // fit: BoxFit.cover,
+                              // )
+                              )
+                          : Container(
+                              width: 70,
+                              child: Image.network(
+                                hasFrame,
+                              )), // Back image
+                      Padding(
+                        padding: const EdgeInsets.all(9.0),
+                        child: Container(
+                          width: 50,
+                          child: Image.asset(
+                            "assets/images/Profile Image.png",
+                            // fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                : Container(
+                    padding: const EdgeInsets.all(6.0),
+                    decoration: BoxDecoration(
+                        color: Colors.grey,
+                        shape: BoxShape.circle,
+                        border: Border.all(width: 2, color: kPrimaryColor)),
+                    child: Icon(
+                      micModel.isLocked != null
+                          ? micModel.isLocked
+                              ? Icons.lock
+                              : Icons.mic
+                          : Icons.mic,
+                      color: Colors.white,
+                      size: 32,
                     ),
                   ),
-                )
-              ],
-            )
-                : Container(
-              padding: const EdgeInsets.all(6.0),
-              decoration: BoxDecoration(
-                  color: Colors.grey,
-                  shape: BoxShape.circle,
-                  border: Border.all(width: 2, color: kPrimaryColor)),
-              child: Icon(
-                micModel.isLocked != null
-                    ? micModel.isLocked
-                    ? Icons.lock
-                    : Icons.mic
-                    : Icons.mic,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
             2.height,
             Text(
               micModel.isLocked != null && micModel.isLocked
                   ? "مقفل"
                   : micModel.micStatus
-                  ? micModel.userName.length > 7
-                  ? ".${micModel.userName}"
-                  : micModel.userName
-                  : "${index + 1}",
+                      ? micModel.userName.length > 7
+                          ? ".${micModel.userName}"
+                          : micModel.userName
+                      : "${index + 1}",
               overflow: TextOverflow.ellipsis,
               style: secondaryTextStyle(size: 12, color: black),
             ),
@@ -580,8 +575,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
           // Check if user already holds mic before
           var existingItem = _micUsersList.firstWhere(
-                  (itemToCheck) =>
-              itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+              (itemToCheck) =>
+                  itemToCheck.userId == PreferencesServices.getString(ID_KEY),
               orElse: () => null);
 
           // user already holds mic before
@@ -822,8 +817,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
           // Iam not room owner and mic is locked
           print("Iam not room owner and mic is taken by me...");
           var existingItem = _micUsersList.firstWhere(
-                  (itemToCheck) =>
-              itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+              (itemToCheck) =>
+                  itemToCheck.userId == PreferencesServices.getString(ID_KEY),
               orElse: () => null);
           if (existingItem != null) {
             // user already holds mic before
@@ -989,8 +984,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
           print("_micUsersList: ${_micUsersList.length}");
           //find existing item per link criteria
           var existingItem = _micUsersList.firstWhere(
-                  (itemToCheck) =>
-              itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+              (itemToCheck) =>
+                  itemToCheck.userId == PreferencesServices.getString(ID_KEY),
               orElse: () => null);
           if (existingItem != null) {
             // user already holds mic before
@@ -1255,14 +1250,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final theme = Theme.of(context);
-      final size = MediaQuery
-          .of(context)
-          .size;
+      final size = MediaQuery.of(context).size;
       TextEditingController _controller = TextEditingController();
 
       return BlocProvider(
-        create: (context) =>
-        HomeCubit()
+        create: (context) => HomeCubit()
           ..getnotification(id: widget.roomId, password: widget.passwordRoom)
           ..getroomuser(id: widget.roomId)
           ..getuserExp(id: apiid)
@@ -1272,19 +1264,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
             CommonFunctions.showToast('تم تعين كلمة مرور للغرفة', Colors.green);
           }
           if (state is InroomSuccessStates) {
-            var model = HomeCubit
-                .get(context)
-                .roomUserModel
-                .message;
+            var model = HomeCubit.get(context).roomUserModel.message;
           }
 
           if (state is NotificationSuccessStates) {
-            var model = HomeCubit
-                .get(context)
-                .notificationModel;
-            var model1 = HomeCubit
-                .get(context)
-                .roomUserModel;
+            var model = HomeCubit.get(context).notificationModel;
+            var model1 = HomeCubit.get(context).roomUserModel;
             message = model1.message;
             check = model.data.user.follow;
             background = model.data.user.background;
@@ -1326,9 +1311,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           }
 
           if (state is SendGiftSuccessStates) {
-            var model = HomeCubit
-                .get(context)
-                .notificationModel;
+            var model = HomeCubit.get(context).notificationModel;
 
             FirebaseMessaging.onMessage.listen((event) {
               print(
@@ -1363,49 +1346,27 @@ class _DetailsScreenState extends State<DetailsScreen> {
           }
 
           if (state is FollowSuccessStates) {
-            if (HomeCubit
-                .get(context)
-                .isFollowModel
-                .success == true) {
+            if (HomeCubit.get(context).isFollowModel.success == true) {
               CommonFunctions.showToast('تم الانضام للغرفة', Colors.green);
             }
           }
         }, builder: (context, state) {
           return ConditionalBuilder(
-            condition: HomeCubit
-                .get(context)
-                .roomUserModel != null &&
-                HomeCubit
-                    .get(context)
-                    .getUserExpModel != null,
+            condition: HomeCubit.get(context).roomUserModel != null &&
+                HomeCubit.get(context).getUserExpModel != null,
             builder: (context) {
               try {
                 // Call getdata function with necessary parameters
                 print("Error occurred in builder:" +
-                    HomeCubit
-                        .get(context)
-                        .roomUserModel
-                        .message
-                        .toString());
+                    HomeCubit.get(context).roomUserModel.message.toString());
                 print("Error occurred in builder:" +
-                    HomeCubit
-                        .get(context)
-                        .roomUserModel
-                        .toString());
+                    HomeCubit.get(context).roomUserModel.toString());
 
                 return getdata(
                     constraints,
-                    HomeCubit
-                        .get(context)
-                        .getUserExpModel,
-                    HomeCubit
-                        .get(context)
-                        .roomUserModel
-                        .message
-                        .toString(),
-                    HomeCubit
-                        .get(context)
-                        .roomUserModel,
+                    HomeCubit.get(context).getUserExpModel,
+                    HomeCubit.get(context).roomUserModel.message.toString(),
+                    HomeCubit.get(context).roomUserModel,
                     _controller);
               } catch (e) {
                 // If any error occurs during the execution of the code, it is caught here
@@ -1436,30 +1397,27 @@ class _DetailsScreenState extends State<DetailsScreen> {
     });
   }
 
-  Widget getdata(BoxConstraints constraints,
-      GetUserExpModel model,
-      String model1,
-      InRoomUserModelModel model2,
-      TextEditingController _controller,) {
+  Widget getdata(
+    BoxConstraints constraints,
+    GetUserExpModel model,
+    String model1,
+    InRoomUserModelModel model2,
+    TextEditingController _controller,
+  ) {
     print(
         'getdata function is called'); // This will print when the function is called
 
     print('Constraints: $constraints'); // This will print the constraints value
     print(
-        'GetUserExpModel: ${model
-            .toJson()}'); // This will print the GetUserExpModel data
+        'GetUserExpModel: ${model.toJson()}'); // This will print the GetUserExpModel data
     print('Model1: $model1'); // This will print the model1 value
     print(
-        'InRoomUserModelModel: ${model2
-            .toJson()}'); // This will print the InRoomUserModelModel data
+        'InRoomUserModelModel: ${model2.toJson()}'); // This will print the InRoomUserModelModel data
     print(
-        'Controller: ${_controller
-            .text}'); // This will print the text inside the controller
+        'Controller: ${_controller.text}'); // This will print the text inside the controller
 
     return LayoutBuilder(builder: (context, constraints) {
-      final size = MediaQuery
-          .of(context)
-          .size;
+      final size = MediaQuery.of(context).size;
       final theme = Theme.of(context);
 
       return Directionality(
@@ -1474,20 +1432,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     children: [
                       background != null
                           ? Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: NetworkImage(background),
-                              fit: BoxFit.cover),
-                        ),
-                      )
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: NetworkImage(background),
+                                    fit: BoxFit.cover),
+                              ),
+                            )
                           : Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: NetworkImage(
-                                  'https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80'),
-                              fit: BoxFit.cover),
-                        ),
-                      ),
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: NetworkImage(
+                                        'https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80'),
+                                    fit: BoxFit.cover),
+                              ),
+                            ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             vertical: 40.0, horizontal: 8.0),
@@ -1496,7 +1454,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             children: [
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Container(
@@ -1530,12 +1488,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       color: Colors.transparent,
                                                       child: RoomImageTap(
                                                           roomDesc:
-                                                          widget.roomDesc,
+                                                              widget.roomDesc,
                                                           totalNum: totalnum,
                                                           roomimage:
-                                                          widget.roomImage,
+                                                              widget.roomImage,
                                                           roomname:
-                                                          widget.roomName,
+                                                              widget.roomName,
                                                           roomID: widget.roomId
                                                               .toString(),
                                                           currentlevel: model
@@ -1551,7 +1509,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   widget.roomName,
@@ -1559,8 +1517,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                   style: theme
                                                       .textTheme.bodyText1
                                                       .copyWith(
-                                                      color: Colors.white,
-                                                      fontSize: 17),
+                                                          color: Colors.white,
+                                                          fontSize: 17),
                                                 ),
                                                 Text(
                                                   "ID :${widget.roomId}",
@@ -1568,36 +1526,36 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                   style: theme
                                                       .textTheme.bodyText2
                                                       .copyWith(
-                                                      color: Colors.white,
-                                                      fontSize: 15),
+                                                          color: Colors.white,
+                                                          fontSize: 15),
                                                 ),
                                               ],
                                             ),
                                           ),
                                           check == 0
-                                          // model.data.user.follow == 0
-                                          // model.data.user.follow == 0
+                                              // model.data.user.follow == 0
+                                              // model.data.user.follow == 0
                                               ? IconButton(
-                                            onPressed: () {
-                                              HomeCubit.get(context)
-                                                  .followroom(id: roomID);
-                                              setState(() {
-                                                check = 1;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              Icons.favorite_border,
-                                              color: Colors.white,
-                                            ),
-                                          )
+                                                  onPressed: () {
+                                                    HomeCubit.get(context)
+                                                        .followroom(id: roomID);
+                                                    setState(() {
+                                                      check = 1;
+                                                    });
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.favorite_border,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
                                               : IconButton(
-                                              onPressed: () {
-                                                HomeCubit.get(context)
-                                                    .followroom(id: roomID);
-                                                // check = true;
-                                              },
-                                              icon: Icon(Icons.favorite,
-                                                  color: Colors.blue))
+                                                  onPressed: () {
+                                                    HomeCubit.get(context)
+                                                        .followroom(id: roomID);
+                                                    // check = true;
+                                                  },
+                                                  icon: Icon(Icons.favorite,
+                                                      color: Colors.blue))
                                         ],
                                       ),
                                     ),
@@ -1617,18 +1575,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               color: Colors.white,
                                             ),
                                             cardColor:
-                                            Colors.black.withOpacity(0.7),
+                                                Colors.black.withOpacity(0.7),
                                           ),
                                           child: PopupMenuButton<int>(
                                             icon: Icon(
                                               Icons.more_vert,
                                               color: Colors.white,
                                             ),
-                                            onSelected: (item) =>
-                                                onSelected(
-                                                    context, item, _controller),
-                                            itemBuilder: (context) =>
-                                            [
+                                            onSelected: (item) => onSelected(
+                                                context, item, _controller),
+                                            itemBuilder: (context) => [
                                               PopupMenuItem<int>(
                                                   value: 0,
                                                   child: Row(
@@ -1642,7 +1598,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         "الموضوعات",
                                                         style: TextStyle(
                                                             color:
-                                                            Colors.white),
+                                                                Colors.white),
                                                       )
                                                     ],
                                                   )),
@@ -1659,7 +1615,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       Text("تطوير",
                                                           style: TextStyle(
                                                               color:
-                                                              Colors.white))
+                                                                  Colors.white))
                                                     ],
                                                   )),
                                               PopupMenuDivider(),
@@ -1676,7 +1632,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         "قفل",
                                                         style: TextStyle(
                                                             color:
-                                                            Colors.white),
+                                                                Colors.white),
                                                       )
                                                     ],
                                                   )),
@@ -1694,7 +1650,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         "مشاركة",
                                                         style: TextStyle(
                                                             color:
-                                                            Colors.white),
+                                                                Colors.white),
                                                       )
                                                     ],
                                                   )),
@@ -1707,7 +1663,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           onTap: () {
                                             HomeCubit.get(context)
                                                 .logoutUserRoom(
-                                                id: widget.roomId);
+                                                    id: widget.roomId);
                                             _closeRoom();
                                           })
                                     ],
@@ -1718,7 +1674,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               Container(
                                 child: Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Container(
                                       width: 150,
@@ -1747,8 +1703,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                   style: theme
                                                       .textTheme.bodyText1
                                                       .copyWith(
-                                                      color: Colors.white,
-                                                      fontSize: 17),
+                                                          color: Colors.white,
+                                                          fontSize: 17),
                                                 ),
                                               ),
                                               Icon(
@@ -1764,30 +1720,29 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               isScrollControlled: true,
                                               builder: (builder) {
                                                 return Container(
-                                                  height: MediaQuery
-                                                      .of(context)
-                                                      .size
-                                                      .height *
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
                                                       0.80,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
                                                     borderRadius:
-                                                    BorderRadius.only(
+                                                        BorderRadius.only(
                                                       topLeft:
-                                                      Radius.circular(30.0),
+                                                          Radius.circular(30.0),
                                                       topRight:
-                                                      Radius.circular(30.0),
+                                                          Radius.circular(30.0),
                                                     ),
                                                   ),
                                                   child: Column(
                                                     mainAxisAlignment:
-                                                    MainAxisAlignment.start,
+                                                        MainAxisAlignment.start,
                                                     children: [
                                                       Container(
                                                         child: Padding(
                                                           padding:
-                                                          const EdgeInsets
-                                                              .all(14.0),
+                                                              const EdgeInsets
+                                                                  .all(14.0),
                                                           child: Text(
                                                             "قائمة الكرماء",
                                                             style: TextStyle(
@@ -1799,143 +1754,117 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         width: double.infinity,
                                                         height: 568,
                                                         child:
-                                                        DefaultTabController(
+                                                            DefaultTabController(
                                                           length: 2,
                                                           child: Scaffold(
                                                             appBar:
-                                                            PreferredSize(
-                                                                preferredSize:
-                                                                Size.fromHeight(
-                                                                    30.0),
-                                                                child:
-                                                                AppBar(
-                                                                  backgroundColor:
-                                                                  Colors
-                                                                      .white,
-                                                                  bottom:
-                                                                  TabBar(
-                                                                    indicator:
-                                                                    BoxDecoration(
-                                                                      color:
-                                                                      KstorebuttonColor,
-                                                                      borderRadius:
-                                                                      BorderRadius
-                                                                          .all(
-                                                                        Radius
-                                                                            .circular(
-                                                                            5),
+                                                                PreferredSize(
+                                                                    preferredSize:
+                                                                        Size.fromHeight(
+                                                                            30.0),
+                                                                    child:
+                                                                        AppBar(
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .white,
+                                                                      bottom:
+                                                                          TabBar(
+                                                                        indicator:
+                                                                            BoxDecoration(
+                                                                          color:
+                                                                              KstorebuttonColor,
+                                                                          borderRadius:
+                                                                              BorderRadius.all(
+                                                                            Radius.circular(5),
+                                                                          ),
+                                                                        ),
+                                                                        tabs: [
+                                                                          Text(
+                                                                            "اخر 24 ساعة",
+                                                                            style:
+                                                                                TextStyle(color: Colors.grey),
+                                                                          ),
+                                                                          Text(
+                                                                            "اخر 7 أيام",
+                                                                            style:
+                                                                                TextStyle(color: Colors.grey),
+                                                                          ),
+                                                                        ],
                                                                       ),
-                                                                    ),
-                                                                    tabs: [
-                                                                      Text(
-                                                                        "اخر 24 ساعة",
-                                                                        style:
-                                                                        TextStyle(
-                                                                            color: Colors
-                                                                                .grey),
-                                                                      ),
-                                                                      Text(
-                                                                        "اخر 7 أيام",
-                                                                        style:
-                                                                        TextStyle(
-                                                                            color: Colors
-                                                                                .grey),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                )),
+                                                                    )),
                                                             body: TabBarView(
                                                               children: [
                                                                 GiftScreen(),
                                                                 Column(
                                                                   mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
+                                                                      MainAxisAlignment
+                                                                          .center,
                                                                   children: [
                                                                     SizedBox(
                                                                       height:
-                                                                      80,
+                                                                          80,
                                                                     ),
                                                                     Padding(
                                                                       padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          8.0),
+                                                                          const EdgeInsets.all(
+                                                                              8.0),
                                                                       child:
-                                                                      Container(
+                                                                          Container(
                                                                         color: Colors
                                                                             .white,
                                                                         child:
-                                                                        Icon(
+                                                                            Icon(
                                                                           Icons
                                                                               .hourglass_empty_rounded,
                                                                           size:
-                                                                          80,
+                                                                              80,
                                                                           color:
-                                                                          Colors
-                                                                              .grey,
+                                                                              Colors.grey,
                                                                         ),
                                                                       ),
                                                                     ),
                                                                     Padding(
                                                                       padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          8.0),
+                                                                          const EdgeInsets.all(
+                                                                              8.0),
                                                                       child:
-                                                                      Text(
+                                                                          Text(
                                                                         "لم يرسل أحد الهدايا في ال 24 ساعة الماضية",
                                                                         style: TextStyle(
                                                                             color:
-                                                                            Colors
-                                                                                .grey),
+                                                                                Colors.grey),
                                                                       ),
                                                                     ),
                                                                     SizedBox(
                                                                       height:
-                                                                      240,
+                                                                          240,
                                                                     ),
                                                                     Row(
                                                                       children: [
                                                                         Expanded(
                                                                           child: Container(
                                                                               height: 80,
-                                                                              decoration: BoxDecoration(
-                                                                                  border: Border
-                                                                                      .all(
-                                                                                      color: Colors
-                                                                                          .grey)),
+                                                                              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                                                                               child: Row(
                                                                                 children: [
                                                                                   CircleAvatar(
                                                                                     radius: 30.0,
-                                                                                    backgroundImage: NetworkImage(
-                                                                                        "https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
-                                                                                    backgroundColor: Colors
-                                                                                        .transparent,
+                                                                                    backgroundImage: NetworkImage("https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
+                                                                                    backgroundColor: Colors.transparent,
                                                                                   ),
                                                                                   Padding(
-                                                                                    padding: const EdgeInsets
-                                                                                        .all(
-                                                                                        8.0),
+                                                                                    padding: const EdgeInsets.all(8.0),
                                                                                     child: Column(
-                                                                                      mainAxisAlignment: MainAxisAlignment
-                                                                                          .center,
+                                                                                      mainAxisAlignment: MainAxisAlignment.center,
                                                                                       children: [
-                                                                                        Text(
-                                                                                            "username"),
+                                                                                        Text("username"),
                                                                                         Row(
                                                                                           children: [
-                                                                                            Icon(
-                                                                                                Icons
-                                                                                                    .monetization_on_rounded,
-                                                                                                color: Colors
-                                                                                                    .orange),
+                                                                                            Icon(Icons.monetization_on_rounded, color: Colors.orange),
                                                                                             SizedBox(
                                                                                               width: 10,
                                                                                             ),
-                                                                                            Text(
-                                                                                                "0"),
+                                                                                            Text("0"),
                                                                                           ],
                                                                                         )
                                                                                       ],
@@ -1950,93 +1879,74 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                 ),
                                                                 Column(
                                                                   mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
+                                                                      MainAxisAlignment
+                                                                          .center,
                                                                   children: [
                                                                     SizedBox(
                                                                       height:
-                                                                      80,
+                                                                          80,
                                                                     ),
                                                                     Padding(
                                                                       padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          8.0),
+                                                                          const EdgeInsets.all(
+                                                                              8.0),
                                                                       child:
-                                                                      Container(
+                                                                          Container(
                                                                         color: Colors
                                                                             .white,
                                                                         child:
-                                                                        Icon(
+                                                                            Icon(
                                                                           Icons
                                                                               .hourglass_empty_rounded,
                                                                           size:
-                                                                          80,
+                                                                              80,
                                                                           color:
-                                                                          Colors
-                                                                              .grey,
+                                                                              Colors.grey,
                                                                         ),
                                                                       ),
                                                                     ),
                                                                     Padding(
                                                                       padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          8.0),
+                                                                          const EdgeInsets.all(
+                                                                              8.0),
                                                                       child:
-                                                                      Text(
+                                                                          Text(
                                                                         "لم يرسل أحد الهدايا في السبعة أيام الماضية",
                                                                         style: TextStyle(
                                                                             color:
-                                                                            Colors
-                                                                                .grey),
+                                                                                Colors.grey),
                                                                       ),
                                                                     ),
                                                                     SizedBox(
                                                                       height:
-                                                                      240,
+                                                                          240,
                                                                     ),
                                                                     Row(
                                                                       children: [
                                                                         Expanded(
                                                                           child: Container(
                                                                               height: 80,
-                                                                              decoration: BoxDecoration(
-                                                                                  border: Border
-                                                                                      .all(
-                                                                                      color: Colors
-                                                                                          .grey)),
+                                                                              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                                                                               child: Row(
                                                                                 children: [
                                                                                   CircleAvatar(
                                                                                     radius: 30.0,
-                                                                                    backgroundImage: NetworkImage(
-                                                                                        "https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
-                                                                                    backgroundColor: Colors
-                                                                                        .transparent,
+                                                                                    backgroundImage: NetworkImage("https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
+                                                                                    backgroundColor: Colors.transparent,
                                                                                   ),
                                                                                   Padding(
-                                                                                    padding: const EdgeInsets
-                                                                                        .all(
-                                                                                        8.0),
+                                                                                    padding: const EdgeInsets.all(8.0),
                                                                                     child: Column(
-                                                                                      mainAxisAlignment: MainAxisAlignment
-                                                                                          .center,
+                                                                                      mainAxisAlignment: MainAxisAlignment.center,
                                                                                       children: [
-                                                                                        Text(
-                                                                                            "username"),
+                                                                                        Text("username"),
                                                                                         Row(
                                                                                           children: [
-                                                                                            Icon(
-                                                                                                Icons
-                                                                                                    .monetization_on_rounded,
-                                                                                                color: Colors
-                                                                                                    .orange),
+                                                                                            Icon(Icons.monetization_on_rounded, color: Colors.orange),
                                                                                             SizedBox(
                                                                                               width: 10,
                                                                                             ),
-                                                                                            Text(
-                                                                                                "0"),
+                                                                                            Text("0"),
                                                                                           ],
                                                                                         )
                                                                                       ],
@@ -2070,27 +1980,26 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             textDirection: TextDirection.ltr,
                                             child: Row(
                                                 mainAxisAlignment:
-                                                MainAxisAlignment
-                                                    .spaceBetween,
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Expanded(
                                                     // flex: 1,
                                                     child: ListView.separated(
                                                       scrollDirection:
-                                                      Axis.horizontal,
+                                                          Axis.horizontal,
                                                       shrinkWrap: true,
                                                       itemBuilder:
                                                           (BuildContext context,
-                                                          int index) {
+                                                              int index) {
                                                         var roomUserModel =
-                                                            HomeCubit
-                                                                .get(
-                                                                context)
+                                                            HomeCubit.get(
+                                                                    context)
                                                                 .roomUserModel;
                                                         if (roomUserModel !=
-                                                            null &&
+                                                                null &&
                                                             roomUserModel
-                                                                .data !=
+                                                                    .data !=
                                                                 null) {
                                                           return builditem(
                                                               roomUserModel
@@ -2101,18 +2010,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         }
                                                       },
                                                       itemCount:
-                                                      HomeCubit
-                                                          .get(context)
-                                                          .roomUserModel
-                                                          ?.data
-                                                          ?.length ??
-                                                          0,
+                                                          HomeCubit.get(context)
+                                                                  .roomUserModel
+                                                                  ?.data
+                                                                  ?.length ??
+                                                              0,
                                                       separatorBuilder:
                                                           (BuildContext context,
-                                                          int index) =>
-                                                          SizedBox(
-                                                            width: 10,
-                                                          ),
+                                                                  int index) =>
+                                                              SizedBox(
+                                                        width: 10,
+                                                      ),
                                                     ),
                                                   )
                                                 ]),
@@ -2125,23 +2033,23 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               children: [
                                                 message == null
                                                     ? Text(
-                                                  '0',
-                                                  style: theme
-                                                      .textTheme.bodyText1
-                                                      .copyWith(
-                                                      color: Colors
-                                                          .white,
-                                                      fontSize: 18),
-                                                )
+                                                        '0',
+                                                        style: theme
+                                                            .textTheme.bodyText1
+                                                            .copyWith(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 18),
+                                                      )
                                                     : Text(
-                                                  totalnum.toString(),
-                                                  style: theme
-                                                      .textTheme.bodyText1
-                                                      .copyWith(
-                                                      color: Colors
-                                                          .white,
-                                                      fontSize: 18),
-                                                ),
+                                                        totalnum.toString(),
+                                                        style: theme
+                                                            .textTheme.bodyText1
+                                                            .copyWith(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 18),
+                                                      ),
                                                 Icon(Icons.person_outline,
                                                     color: Colors.white),
                                               ],
@@ -2224,7 +2132,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.black26,
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(16.0)),
+                                      BorderRadius.all(Radius.circular(16.0)),
                                 ),
                                 child: TextField(
                                   keyboardType: TextInputType.text,
@@ -2238,6 +2146,58 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                             ),
                             8.width,
+                            // add new icon button open emoji keyboard dialog and add the selected emoji to the textfield value and close the dialog
+                            IconButton(
+                              icon: Icon(Icons.insert_emoticon),
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return EmojiPicker(
+                                      onEmojiSelected:
+                                          (Category category, Emoji emoji) {
+                                        _messageController.text =
+                                            _messageController.text +
+                                                emoji.emoji;
+                                      },
+                                      onBackspacePressed: () {
+                                        _messageController.text =
+                                            _messageController.text.isNotEmpty
+                                                ? _messageController.text
+                                                    .substring(
+                                                        0,
+                                                        _messageController
+                                                                .text.length -
+                                                            1)
+                                                : _messageController.text;
+                                      },
+                                      textEditingController: _messageController,
+                                      config: Config(
+                                        height: 256,
+                                        bgColor: const Color(0xFFF2F2F2),
+                                        checkPlatformCompatibility: true,
+                                        emojiViewConfig: EmojiViewConfig(
+                                          emojiSizeMax: 28 *
+                                              (foundation.defaultTargetPlatform ==
+                                                      TargetPlatform.iOS
+                                                  ? 1.20
+                                                  : 1.0),
+                                        ),
+                                        swapCategoryAndBottomBar: false,
+                                        skinToneConfig: const SkinToneConfig(),
+                                        categoryViewConfig:
+                                            const CategoryViewConfig(),
+                                        bottomActionBarConfig:
+                                            const BottomActionBarConfig(),
+                                        searchViewConfig:
+                                            const SearchViewConfig(),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+
                             Container(
                               padding: const EdgeInsets.all(5.0),
                               decoration: BoxDecoration(
@@ -2282,8 +2242,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   ),
                                   onSelected: (item) =>
                                       onSelected(context, item, _controller),
-                                  itemBuilder: (context) =>
-                                  [
+                                  itemBuilder: (context) => [
                                     PopupMenuItem<int>(
                                         value: 3,
                                         child: Container(
@@ -2303,7 +2262,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             children: [
                                               Column(
                                                 mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                                    MainAxisAlignment.center,
                                                 children: [
                                                   Icon(
                                                     Icons.music_note,
@@ -2319,7 +2278,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               Spacer(),
                                               Column(
                                                 mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                                    MainAxisAlignment.center,
                                                 children: [
                                                   Icon(
                                                     Icons.album,
@@ -2331,7 +2290,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         "البوم الصور",
                                                         style: TextStyle(
                                                             color:
-                                                            Colors.white),
+                                                                Colors.white),
                                                       ),
                                                     ),
                                                     onTap: () {
@@ -2357,14 +2316,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   iconSize: 22,
                                   color: Colors.white,
                                   icon: Icon(Icons.card_giftcard_rounded),
-                                  onPressed: () =>
-                                      showModalBottomSheet(
-                                          backgroundColor: Colors.transparent,
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return GiftScreen(
-                                                roomID: widget.roomId);
-                                          })),
+                                  onPressed: () => showModalBottomSheet(
+                                      backgroundColor: Colors.transparent,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return GiftScreen(
+                                            roomID: widget.roomId);
+                                      })),
                             ),
                             8.width,
                             InkWell(
@@ -2387,20 +2345,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         height: 350,
                                         child: Scaffold(
                                             backgroundColor:
-                                            Colors.black.withOpacity(0.7),
+                                                Colors.black.withOpacity(0.7),
                                             body: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                                  MainAxisAlignment.start,
                                               children: [
                                                 Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                                      MainAxisAlignment.center,
                                                   children: [
                                                     Expanded(
                                                       child: Padding(
                                                         padding:
-                                                        const EdgeInsets
-                                                            .all(8.0),
+                                                            const EdgeInsets
+                                                                .all(8.0),
                                                         child: Container(
                                                           height: 50,
                                                           child: Center(
@@ -2419,7 +2377,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 ),
                                                 Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                                      MainAxisAlignment.start,
                                                   children: [
                                                     SizedBox(
                                                       width: 20,
@@ -2428,48 +2386,48 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       decoration: BoxDecoration(
                                                           color: Colors.grey,
                                                           borderRadius:
-                                                          BorderRadius
-                                                              .circular(
-                                                              10)),
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10)),
                                                       height: 120,
                                                       width: 80,
                                                       child: Center(
                                                           child: Column(
-                                                            mainAxisAlignment:
+                                                        mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
+                                                        children: [
+                                                          Icon(
+                                                            Icons.games,
+                                                            size: 40,
+                                                            color: Colors
+                                                                .redAccent,
+                                                          ),
+                                                          // SizedBox(
+                                                          //   height: 20,
+                                                          // ),
+                                                          Column(
                                                             children: [
-                                                              Icon(
-                                                                Icons.games,
-                                                                size: 40,
-                                                                color: Colors
-                                                                    .redAccent,
+                                                              Text(
+                                                                "حجرة ورقة",
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                        16),
                                                               ),
-                                                              // SizedBox(
-                                                              //   height: 20,
-                                                              // ),
-                                                              Column(
-                                                                children: [
-                                                                  Text(
-                                                                    "حجرة ورقة",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
+                                                              Text(
+                                                                "مقص",
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
                                                                         16),
-                                                                  ),
-                                                                  Text(
-                                                                    "مقص",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                        16),
-                                                                  ),
-                                                                ],
-                                                              )
+                                                              ),
                                                             ],
-                                                          )),
+                                                          )
+                                                        ],
+                                                      )),
                                                     ),
                                                     SizedBox(
                                                       width: 10,
@@ -2478,73 +2436,36 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       decoration: BoxDecoration(
                                                           color: Colors.grey,
                                                           borderRadius:
-                                                          BorderRadius
-                                                              .circular(
-                                                              10)),
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10)),
                                                       height: 120,
                                                       width: 80,
                                                       child: Center(
                                                           child: Column(
-                                                            mainAxisAlignment:
+                                                        mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .monetization_on_rounded,
-                                                                size: 40,
-                                                                color:
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .monetization_on_rounded,
+                                                            size: 40,
+                                                            color:
                                                                 Colors.orange,
-                                                              ),
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              Text(
-                                                                "حقيبة الحظ",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize: 16),
-                                                              ),
-                                                            ],
-                                                          )),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Container(
-                                                      height: 120,
-                                                      width: 80,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.grey,
-                                                          borderRadius:
-                                                          BorderRadius
-                                                              .circular(
-                                                              10)),
-                                                      child: Center(
-                                                          child: Column(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Icon(
-                                                                Icons.circle,
-                                                                size: 40,
+                                                          ),
+                                                          SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          Text(
+                                                            "حقيبة الحظ",
+                                                            style: TextStyle(
                                                                 color: Colors
-                                                                    .blue,
-                                                              ),
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              Text(
-                                                                "عجلة الحظ",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize: 16),
-                                                              ),
-                                                            ],
-                                                          )),
+                                                                    .white,
+                                                                fontSize: 16),
+                                                          ),
+                                                        ],
+                                                      )),
                                                     ),
                                                     SizedBox(
                                                       width: 10,
@@ -2555,34 +2476,70 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       decoration: BoxDecoration(
                                                           color: Colors.grey,
                                                           borderRadius:
-                                                          BorderRadius
-                                                              .circular(
-                                                              10)),
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10)),
                                                       child: Center(
                                                           child: Column(
-                                                            mainAxisAlignment:
+                                                        mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .people_alt_sharp,
-                                                                size: 40,
-                                                                color:
+                                                        children: [
+                                                          Icon(
+                                                            Icons.circle,
+                                                            size: 40,
+                                                            color: Colors.blue,
+                                                          ),
+                                                          SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          Text(
+                                                            "عجلة الحظ",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 16),
+                                                          ),
+                                                        ],
+                                                      )),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Container(
+                                                      height: 120,
+                                                      width: 80,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.grey,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10)),
+                                                      child: Center(
+                                                          child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .people_alt_sharp,
+                                                            size: 40,
+                                                            color:
                                                                 kPrimaryColor,
-                                                              ),
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              Text(
-                                                                "استطلاع الرأي",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize: 16),
-                                                              ),
-                                                            ],
-                                                          )),
+                                                          ),
+                                                          SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          Text(
+                                                            "استطلاع الرأي",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 16),
+                                                          ),
+                                                        ],
+                                                      )),
                                                     ),
                                                   ],
                                                 ),
@@ -2591,7 +2548,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 ),
                                                 Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                                      MainAxisAlignment.start,
                                                   children: [
                                                     SizedBox(
                                                       width: 20,
@@ -2602,34 +2559,34 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                       decoration: BoxDecoration(
                                                           color: Colors.grey,
                                                           borderRadius:
-                                                          BorderRadius
-                                                              .circular(
-                                                              10)),
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10)),
                                                       child: Center(
                                                           child: Column(
-                                                            mainAxisAlignment:
+                                                        mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .confirmation_number_rounded,
-                                                                size: 40,
-                                                                color:
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .confirmation_number_rounded,
+                                                            size: 40,
+                                                            color:
                                                                 kPrimaryColor,
-                                                              ),
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              Text(
-                                                                "رقم الحظ",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize: 16),
-                                                              ),
-                                                            ],
-                                                          )),
+                                                          ),
+                                                          SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          Text(
+                                                            "رقم الحظ",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 16),
+                                                          ),
+                                                        ],
+                                                      )),
                                                     ),
                                                   ],
                                                 )
@@ -2670,7 +2627,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  void onSelected2(//   BuildContext context,
+  void onSelected2(
+      //   BuildContext context,
       int item,
       String userID,
       String roomid) {
@@ -2695,8 +2653,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  void onSelected(BuildContext context, int item,
-      TextEditingController _controller) {
+  void onSelected(
+      BuildContext context, int item, TextEditingController _controller) {
     switch (item) {
       case 0:
         Navigator.of(context).push(
@@ -2707,86 +2665,84 @@ class _DetailsScreenState extends State<DetailsScreen> {
         if (userstateInroom == 'owner') {
           showDialog<String>(
             context: context,
-            builder: (BuildContext context) =>
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: AlertDialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(15))),
-                    title: Center(
-                      child: const Text('برجاء تعين كلمة المرور للغرفة'),
-                    ),
-                    // content: const Text('AlertDialog description'),
-                    actions: <Widget>[
-                      Column(
+            builder: (BuildContext context) => Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
+                title: Center(
+                  child: const Text('برجاء تعين كلمة المرور للغرفة'),
+                ),
+                // content: const Text('AlertDialog description'),
+                actions: <Widget>[
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 250,
-                                child: Directionality(
-                                  textDirection: TextDirection.rtl,
-                                  child: CommonFunctions().nbAppTextFieldWidget(
-                                    _controller,
-                                    'Password',
-                                    "ادخل كلمة المرور",
-                                    'برجاء ادخال كلمه المرور',
-                                    TextFieldType.PASSWORD,
-                                  ),
-                                ),
+                          Container(
+                            width: 250,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: CommonFunctions().nbAppTextFieldWidget(
+                                _controller,
+                                'Password',
+                                "ادخل كلمة المرور",
+                                'برجاء ادخال كلمه المرور',
+                                TextFieldType.PASSWORD,
                               ),
-                            ],
+                            ),
                           ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  color: kPrimaryLightColor,
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(10),
-                                    bottomRight: Radius.circular(10),
-                                    bottomLeft: Radius.circular(10),
-                                    topLeft: Radius.circular(10),
-                                  ),
-                                ),
-                                child: TextButton(
-                                  onPressed: () {
-                                    HomeCubit.get(context).setRoomPassword(
-                                        roompassword: _controller.text);
-
-                                    // ShopCubit.get(context)
-                                    //     .lockPurchase(id: model.id);
-                                    Navigator.pop(context, 'yes');
-
-                                    CommonFunctions.showToast(
-                                        'تم تعين كلمة مرور للغرفة ',
-                                        Colors.green);
-                                  },
-                                  child: const Text(
-                                    'تعين',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: kPrimaryLightColor,
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                                bottomRight: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                                topLeft: Radius.circular(10),
                               ),
-                              // TextButton(
-                              //   onPressed: () => Navigator.pop(context, 'no'),
-                              //   child: const Text('لا'),
-                              // ),
-                            ],
-                          )
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                HomeCubit.get(context).setRoomPassword(
+                                    roompassword: _controller.text);
+
+                                // ShopCubit.get(context)
+                                //     .lockPurchase(id: model.id);
+                                Navigator.pop(context, 'yes');
+
+                                CommonFunctions.showToast(
+                                    'تم تعين كلمة مرور للغرفة ', Colors.green);
+                              },
+                              child: const Text(
+                                'تعين',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          // TextButton(
+                          //   onPressed: () => Navigator.pop(context, 'no'),
+                          //   child: const Text('لا'),
+                          // ),
                         ],
                       )
                     ],
-                  ),
-                ),
+                  )
+                ],
+              ),
+            ),
           );
         } else {
           CommonFunctions.showToast('خاص بمالك الغرفة', Colors.red);
@@ -2796,444 +2752,124 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  Widget buildItem(int index,
-      DocumentSnapshot document,
-      Size size,) {
+  Widget buildItem(
+    int index,
+    DocumentSnapshot document,
+    Size size,
+  ) {
     if (document != null) {
       // Right (my message)
       return document.get('type') == 0
-      // Text
+          // Text
           ? Container(
-        width: size.width * 0.7,
-        padding: const EdgeInsets.all(6.0),
-        child: InkWell(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 50),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      child: ClipRRect(
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(16.0)),
-                        child: Image.asset(
-                          kDefaultProfileImage,
-                          width: 36,
-                          height: 36,
+              width: size.width * 0.7,
+              padding: const EdgeInsets.all(6.0),
+              child: InkWell(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 50),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16.0)),
+                              child: Image.asset(
+                                kDefaultProfileImage,
+                                width: 36,
+                                height: 36,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  10.width,
-                  Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              document.get('userType') == 'owner'
-                                  ? Icon(
-                                Icons.person,
-                                color: Colors.red,
-                              )
-                                  : Container(),
-                              document.get('userType') == 'user'
-                                  ? Icon(
-                                Icons.person,
-                                color: Colors.blue,
-                              )
-                                  : Container(),
-                              document.get('userType') == 'supervisor'
-                                  ? Icon(
-                                Icons.person,
-                                color: kPrimaryLightColor,
-                              )
-                                  : Container(),
-                              document.get('packageColor') == null
-                                  ? Container(
-                                child: Text(
-                                  document.get('username'),
-                                  style: TextStyle(
-                                      color: kPrimaryColor,
-                                      fontWeight: FontWeight.bold),
-                                  maxLines: 2,
-                                  textAlign: TextAlign.start,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                color: Colors.transparent,
-                              )
-                                  : Container(
-                                child: Text(
-                                  document.get('username'),
-                                  style: TextStyle(
-                                      color: HexColor(document
-                                          .get('packageColor')),
-                                      fontWeight: FontWeight.bold),
-                                  maxLines: 2,
-                                  textAlign: TextAlign.start,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                color: Colors.transparent,
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              document.get('hasSpecialID') == true
-                                  ? Container(
-                                height: 18,
-                                width: 20,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.red,
-                                    border: Border.all(
-                                      width: 2,
-                                      color: Colors.amber,
-                                    )),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Colors.amber,
-                                    size: 12,
-                                  ),
-                                ),
-                              )
-                                  : Container(),
-                              document.get('packageBadge') != null
-                                  ? Container(
-                                height: 25,
-                                width: 25,
-                                child: Center(
-                                    child: Image.network(document
-                                        .get('packageBadge'))),
-                              )
-                                  : Container(),
-                              Container(
-                                height: 18,
-                                width: 20,
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.red,
-                                    border: Border.all(
-                                      width: 2,
-                                      color: Colors.amber,
-                                    )),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.home,
-                                    color: Colors.amber,
-                                    size: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-
-                          //#Start#// Firebase message Content Display  //#Start#//
-                          /* Row Name : Firebase_Message_Row*/
-                          Row(children: [
-                            Expanded(
-                              child: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.black26,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(16.0)),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      top: 15.0, right: 5.0),
-                                  child: Text(
-                                    document.get('content'),
-                                    style: secondaryTextStyle(
-                                        color: Colors.white),
-                                    maxLines: 2,
-                                    textAlign: TextAlign.start,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ]),
-                          //E// Row Name : Firebase_Message_Row //E//
-                          //#END#// Firebase message Content Display  //#END#//
-                        ]),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          onTap: () {
-            showModalBottomSheet(
-                context: context,
-                backgroundColor: Colors.transparent, // <-- SEE HERE
-
-                isScrollControlled: true,
-                builder: (context) {
-                  DocumentReference docRef = FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userid)
-                      .collection('friends')
-                      .doc(document.get('idFrom'));
-                  docRef.get().then((DocumentSnapshot documentSnapshot) {
-                    if (documentSnapshot.exists) {
-                      print('Document exists on the database');
-                      print(documentSnapshot.get('isFriend'));
-                      isfriendfirebase = documentSnapshot.get('isFriend');
-                    } else {
-                      isfriendfirebase = false;
-                    }
-                  });
-
-                  return FractionallySizedBox(
-                    heightFactor: 0.41,
-                    child: Stack(children: [
-                      Column(
-                        children: [
-                          new Container(
-                            height: 25,
-                            color: Colors.transparent.withOpacity(0.0),
-                          ),
-                          Container(
-                            height: 290,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(30),
-                                  topRight: Radius.circular(30)),
-                            ),
-                            // color: Colors.amber,
-
-                            child: Column(
+                        10.width,
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 20, top: 12),
-                                      child: Container(
-                                        height: 22,
-                                        width: 25,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.orange,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            "@",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight:
-                                                FontWeight.bold),
+                                    document.get('userType') == 'owner'
+                                        ? Icon(
+                                            Icons.person,
+                                            color: Colors.red,
+                                          )
+                                        : Container(),
+                                    document.get('userType') == 'user'
+                                        ? Icon(
+                                            Icons.person,
+                                            color: Colors.blue,
+                                          )
+                                        : Container(),
+                                    document.get('userType') == 'supervisor'
+                                        ? Icon(
+                                            Icons.person,
+                                            color: kPrimaryLightColor,
+                                          )
+                                        : Container(),
+                                    document.get('packageColor') == null
+                                        ? Container(
+                                            child: Text(
+                                              document.get('username'),
+                                              style: TextStyle(
+                                                  color: kPrimaryColor,
+                                                  fontWeight: FontWeight.bold),
+                                              maxLines: 2,
+                                              textAlign: TextAlign.start,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            color: Colors.transparent,
+                                          )
+                                        : Container(
+                                            child: Text(
+                                              document.get('username'),
+                                              style: TextStyle(
+                                                  color: HexColor(document
+                                                      .get('packageColor')),
+                                                  fontWeight: FontWeight.bold),
+                                              maxLines: 2,
+                                              textAlign: TextAlign.start,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            color: Colors.transparent,
                                           ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 20, top: 12),
-                                      child: Container(
-                                        height: 22,
-                                        width: 25,
-                                        child: Icon(
-                                          Icons.report_problem_outlined,
-                                          color: Colors.grey.shade400,
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Text(document.get('username')),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: [
-                                    if (document.get('userType') ==
-                                        'user')
-                                      Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Container(
-                                            width: 50,
-                                            decoration: BoxDecoration(
-                                              color: kPrimaryColor,
-                                              borderRadius:
-                                              BorderRadius.only(
-                                                topRight:
-                                                Radius.circular(10),
-                                                bottomRight:
-                                                Radius.circular(10),
-                                                bottomLeft:
-                                                Radius.circular(10),
-                                                topLeft:
-                                                Radius.circular(10),
-                                              ),
-                                              border: Border.all(
-                                                width: 1,
-                                                color: kPrimaryColor,
-                                                style: BorderStyle.solid,
-                                              ),
-                                              // shape: BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                                child: Text(
-                                                  'عضو',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12),
-                                                ))),
-                                      ),
-                                    if (document.get('userType') ==
-                                        'supervisor')
-                                      Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Container(
-                                            width: 50,
-                                            decoration: BoxDecoration(
-                                              color: kPrimaryColor,
-                                              borderRadius:
-                                              BorderRadius.only(
-                                                topRight:
-                                                Radius.circular(10),
-                                                bottomRight:
-                                                Radius.circular(10),
-                                                bottomLeft:
-                                                Radius.circular(10),
-                                                topLeft:
-                                                Radius.circular(10),
-                                              ),
-                                              border: Border.all(
-                                                width: 1,
-                                                color: kPrimaryColor,
-                                                style: BorderStyle.solid,
-                                              ),
-                                              // shape: BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                                child: Text(
-                                                  'مشرف',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12),
-                                                ))),
-                                      ),
-                                    if (document.get('userType') ==
-                                        'owner')
-                                      Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Container(
-                                            width: 50,
-                                            decoration: BoxDecoration(
-                                              color: kPrimaryColor,
-                                              borderRadius:
-                                              BorderRadius.only(
-                                                topRight:
-                                                Radius.circular(10),
-                                                bottomRight:
-                                                Radius.circular(10),
-                                                bottomLeft:
-                                                Radius.circular(10),
-                                                topLeft:
-                                                Radius.circular(10),
-                                              ),
-                                              border: Border.all(
-                                                width: 1,
-                                                color: kPrimaryColor,
-                                                style: BorderStyle.solid,
-                                              ),
-                                              // shape: BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                                child: Text(
-                                                  'مالك',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12),
-                                                ))),
-                                      ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      'ID:${document.get('idFrom').toString()}',
-                                      style:
-                                      TextStyle(color: Colors.grey),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      'LV ${document.get('userLevel')
-                                          .toString()}',
-                                      style: TextStyle(
-                                          color: kPrimaryColor,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      width: 30,
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      height: 18,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.red,
-                                          border: Border.all(
-                                            width: 2,
-                                            color: Colors.amber,
-                                          )),
-                                      child: Center(
-                                        child: Icon(
-                                          Icons.person,
-                                          color: Colors.amber,
-                                          size: 12,
-                                        ),
-                                      ),
-                                    ),
                                     SizedBox(
                                       width: 5,
                                     ),
-                                    Container(
-                                      height: 18,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.red,
-                                          border: Border.all(
-                                            width: 2,
-                                            color: Colors.amber,
-                                          )),
-                                      child: Center(
-                                        child: Icon(
-                                          Icons.markunread_mailbox,
-                                          color: Colors.amber,
-                                          size: 10,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
+                                    document.get('hasSpecialID') == true
+                                        ? Container(
+                                            height: 18,
+                                            width: 20,
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.red,
+                                                border: Border.all(
+                                                  width: 2,
+                                                  color: Colors.amber,
+                                                )),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.person,
+                                                color: Colors.amber,
+                                                size: 12,
+                                              ),
+                                            ),
+                                          )
+                                        : Container(),
+                                    document.get('packageBadge') != null
+                                        ? Container(
+                                            height: 25,
+                                            width: 25,
+                                            child: Center(
+                                                child: Image.network(document
+                                                    .get('packageBadge'))),
+                                          )
+                                        : Container(),
                                     Container(
                                       height: 18,
                                       width: 20,
@@ -3254,661 +2890,952 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     ),
                                   ],
                                 ),
-                                Spacer(),
-                                Padding(
-                                  padding: const EdgeInsets.all(20.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.center,
-                                    children: [
-                                      // if (isfriendfirebase == true)
-                                      isfriendfirebase == true
-                                          ? Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {},
-                                            color: Colors.yellow,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.message_rounded,
-                                              size: 14,
-                                            ),
-                                            padding:
-                                            EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            "الرسائل",
-                                            style: TextStyle(
-                                                color: Colors.grey),
-                                          )
-                                        ],
-                                      )
-                                          : Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {},
-                                            color: Colors.yellow,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.person_add,
-                                              size: 14,
-                                            ),
-                                            padding:
-                                            EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            'إضافه صديق',
-                                            style: TextStyle(
-                                                color: Colors.grey),
-                                          )
-                                        ],
-                                      ),
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {},
-                                            color: kPrimaryLightColor,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons
-                                                  .mic_external_off_rounded,
-                                              size: 14,
-                                            ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            'كتم الصوت',
-                                            style: TextStyle(
-                                                color: Colors.grey),
-                                          )
-                                        ],
-                                      ),
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {
-                                              //     Get.to(StackDemo());
-                                            },
-                                            color: Colors.red,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.star,
-                                              size: 14,
-                                            ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            'البطاقات السحرية',
-                                            style: TextStyle(
-                                                color: Colors.grey),
-                                          )
-                                        ],
-                                      ),
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
+                                SizedBox(
+                                  height: 5,
+                                ),
 
-                                              showModalBottomSheet(
-                                                  backgroundColor:
-                                                  Colors.transparent,
-                                                  context: context,
-                                                  builder: (BuildContext
-                                                  context) {
-                                                    return GiftScreen(
-                                                        roomID: roomID,
-                                                        userID: document.get(
-                                                            'ApiUserID'),
-                                                        check: true,
-                                                        username: document
-                                                            .get('username'
-                                                            .toString()) // userID: model.userId
-                                                      // .toString(),
-                                                    );
-                                                  });
-                                            },
-                                            color: Colors.blueAccent,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.card_giftcard,
-                                              size: 14,
+                                //#Start#// Firebase message Content Display  //#Start#//
+                                /* Row Name : Firebase_Message_Row*/
+                                Row(children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black26,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16.0)),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 15.0, right: 5.0),
+                                        child: Text(
+                                          document.get('content'),
+                                          style: secondaryTextStyle(
+                                              color: Colors.white),
+                                          maxLines: 2,
+                                          textAlign: TextAlign.start,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                                //E// Row Name : Firebase_Message_Row //E//
+                                //#END#// Firebase message Content Display  //#END#//
+                              ]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent, // <-- SEE HERE
+
+                      isScrollControlled: true,
+                      builder: (context) {
+                        DocumentReference docRef = FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(userid)
+                            .collection('friends')
+                            .doc(document.get('idFrom'));
+                        docRef.get().then((DocumentSnapshot documentSnapshot) {
+                          if (documentSnapshot.exists) {
+                            print('Document exists on the database');
+                            print(documentSnapshot.get('isFriend'));
+                            isfriendfirebase = documentSnapshot.get('isFriend');
+                          } else {
+                            isfriendfirebase = false;
+                          }
+                        });
+
+                        return FractionallySizedBox(
+                          heightFactor: 0.41,
+                          child: Stack(children: [
+                            Column(
+                              children: [
+                                new Container(
+                                  height: 25,
+                                  color: Colors.transparent.withOpacity(0.0),
+                                ),
+                                Container(
+                                  height: 290,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(30),
+                                        topRight: Radius.circular(30)),
+                                  ),
+                                  // color: Colors.amber,
+
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 20, top: 12),
+                                            child: Container(
+                                              height: 22,
+                                              width: 25,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.orange,
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  "@",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
                                             ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 20, top: 12),
+                                            child: Container(
+                                              height: 22,
+                                              width: 25,
+                                              child: Icon(
+                                                Icons.report_problem_outlined,
+                                                color: Colors.grey.shade400,
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      Text(document.get('username')),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          if (document.get('userType') ==
+                                              'user')
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Container(
+                                                  width: 50,
+                                                  decoration: BoxDecoration(
+                                                    color: kPrimaryColor,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                      topRight:
+                                                          Radius.circular(10),
+                                                      bottomRight:
+                                                          Radius.circular(10),
+                                                      bottomLeft:
+                                                          Radius.circular(10),
+                                                      topLeft:
+                                                          Radius.circular(10),
+                                                    ),
+                                                    border: Border.all(
+                                                      width: 1,
+                                                      color: kPrimaryColor,
+                                                      style: BorderStyle.solid,
+                                                    ),
+                                                    // shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                      child: Text(
+                                                    'عضو',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12),
+                                                  ))),
+                                            ),
+                                          if (document.get('userType') ==
+                                              'supervisor')
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Container(
+                                                  width: 50,
+                                                  decoration: BoxDecoration(
+                                                    color: kPrimaryColor,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                      topRight:
+                                                          Radius.circular(10),
+                                                      bottomRight:
+                                                          Radius.circular(10),
+                                                      bottomLeft:
+                                                          Radius.circular(10),
+                                                      topLeft:
+                                                          Radius.circular(10),
+                                                    ),
+                                                    border: Border.all(
+                                                      width: 1,
+                                                      color: kPrimaryColor,
+                                                      style: BorderStyle.solid,
+                                                    ),
+                                                    // shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                      child: Text(
+                                                    'مشرف',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12),
+                                                  ))),
+                                            ),
+                                          if (document.get('userType') ==
+                                              'owner')
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Container(
+                                                  width: 50,
+                                                  decoration: BoxDecoration(
+                                                    color: kPrimaryColor,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                      topRight:
+                                                          Radius.circular(10),
+                                                      bottomRight:
+                                                          Radius.circular(10),
+                                                      bottomLeft:
+                                                          Radius.circular(10),
+                                                      topLeft:
+                                                          Radius.circular(10),
+                                                    ),
+                                                    border: Border.all(
+                                                      width: 1,
+                                                      color: kPrimaryColor,
+                                                      style: BorderStyle.solid,
+                                                    ),
+                                                    // shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                      child: Text(
+                                                    'مالك',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12),
+                                                  ))),
+                                            ),
+                                          SizedBox(
+                                            width: 10,
                                           ),
                                           Text(
-                                            'إرسال هديه',
+                                            'ID:${document.get('idFrom').toString()}',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'LV ${document.get('userLevel').toString()}',
                                             style: TextStyle(
-                                                color: Colors.grey),
+                                                color: kPrimaryColor,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(
+                                            width: 30,
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            height: 18,
+                                            width: 20,
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.red,
+                                                border: Border.all(
+                                                  width: 2,
+                                                  color: Colors.amber,
+                                                )),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.person,
+                                                color: Colors.amber,
+                                                size: 12,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Container(
+                                            height: 18,
+                                            width: 20,
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.red,
+                                                border: Border.all(
+                                                  width: 2,
+                                                  color: Colors.amber,
+                                                )),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.markunread_mailbox,
+                                                color: Colors.amber,
+                                                size: 10,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Container(
+                                            height: 18,
+                                            width: 20,
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.red,
+                                                border: Border.all(
+                                                  width: 2,
+                                                  color: Colors.amber,
+                                                )),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.home,
+                                                color: Colors.amber,
+                                                size: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Spacer(),
+                                      Padding(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            // if (isfriendfirebase == true)
+                                            isfriendfirebase == true
+                                                ? Column(
+                                                    children: [
+                                                      MaterialButton(
+                                                        onPressed: () {},
+                                                        color: Colors.yellow,
+                                                        textColor: Colors.white,
+                                                        child: Icon(
+                                                          Icons.message_rounded,
+                                                          size: 14,
+                                                        ),
+                                                        padding:
+                                                            EdgeInsets.all(16),
+                                                        shape: CircleBorder(),
+                                                      ),
+                                                      Text(
+                                                        "الرسائل",
+                                                        style: TextStyle(
+                                                            color: Colors.grey),
+                                                      )
+                                                    ],
+                                                  )
+                                                : Column(
+                                                    children: [
+                                                      MaterialButton(
+                                                        onPressed: () {},
+                                                        color: Colors.yellow,
+                                                        textColor: Colors.white,
+                                                        child: Icon(
+                                                          Icons.person_add,
+                                                          size: 14,
+                                                        ),
+                                                        padding:
+                                                            EdgeInsets.all(16),
+                                                        shape: CircleBorder(),
+                                                      ),
+                                                      Text(
+                                                        'إضافه صديق',
+                                                        style: TextStyle(
+                                                            color: Colors.grey),
+                                                      )
+                                                    ],
+                                                  ),
+                                            Column(
+                                              children: [
+                                                MaterialButton(
+                                                  onPressed: () {},
+                                                  color: kPrimaryLightColor,
+                                                  textColor: Colors.white,
+                                                  child: Icon(
+                                                    Icons
+                                                        .mic_external_off_rounded,
+                                                    size: 14,
+                                                  ),
+                                                  padding: EdgeInsets.all(16),
+                                                  shape: CircleBorder(),
+                                                ),
+                                                Text(
+                                                  'كتم الصوت',
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                )
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                MaterialButton(
+                                                  onPressed: () {
+                                                    //     Get.to(StackDemo());
+                                                  },
+                                                  color: Colors.red,
+                                                  textColor: Colors.white,
+                                                  child: Icon(
+                                                    Icons.star,
+                                                    size: 14,
+                                                  ),
+                                                  padding: EdgeInsets.all(16),
+                                                  shape: CircleBorder(),
+                                                ),
+                                                Text(
+                                                  'البطاقات السحرية',
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                )
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                MaterialButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+
+                                                    showModalBottomSheet(
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return GiftScreen(
+                                                              roomID: roomID,
+                                                              userID: document.get(
+                                                                  'ApiUserID'),
+                                                              check: true,
+                                                              username: document
+                                                                  .get('username'
+                                                                      .toString()) // userID: model.userId
+                                                              // .toString(),
+                                                              );
+                                                        });
+                                                  },
+                                                  color: Colors.blueAccent,
+                                                  textColor: Colors.white,
+                                                  child: Icon(
+                                                    Icons.card_giftcard,
+                                                    size: 14,
+                                                  ),
+                                                  padding: EdgeInsets.all(16),
+                                                  shape: CircleBorder(),
+                                                ),
+                                                Text(
+                                                  'إرسال هديه',
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                                height: 45,
+                                                decoration: BoxDecoration(
+                                                  border: Border(
+                                                    top: BorderSide(
+                                                        width: 1.0,
+                                                        color: Colors
+                                                            .grey.shade300),
+                                                    bottom: BorderSide(
+                                                        width: 1.0,
+                                                        color: Colors.lightBlue
+                                                            .shade900),
+                                                  ),
+                                                  color: Colors.white,
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          showDialog<String>(
+                                                            context: context,
+                                                            builder: (BuildContext
+                                                                    context) =>
+                                                                Directionality(
+                                                              textDirection:
+                                                                  TextDirection
+                                                                      .rtl,
+                                                              child:
+                                                                  AlertDialog(
+                                                                shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.all(
+                                                                            Radius.circular(15))),
+                                                                title: Center(
+                                                                  child: const Text(
+                                                                      'هل تريد حظر العضو'),
+                                                                ),
+                                                                actions: <
+                                                                    Widget>[
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceAround,
+                                                                    children: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          HomeCubit.get(context)
+                                                                              .addBlockList(id: document.get('ApiUserID'));
+                                                                          Navigator.pop(
+                                                                              context,
+                                                                              'yes');
+
+                                                                          CommonFunctions.showToast(
+                                                                              'تم حظر العضو',
+                                                                              Colors.green);
+                                                                        },
+                                                                        child: const Text(
+                                                                            'نعم'),
+                                                                      ),
+                                                                      TextButton(
+                                                                        onPressed: () => Navigator.pop(
+                                                                            context,
+                                                                            'no'),
+                                                                        child: const Text(
+                                                                            'لا'),
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                          // print(model.userId);
+                                                        },
+                                                        icon: Icon(
+                                                          Icons.logout,
+                                                          color: Colors
+                                                              .grey.shade400,
+                                                          size: 25,
+                                                        )),
+                                                    VerticalDivider(),
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          showDialog<String>(
+                                                            context: context,
+                                                            builder: (BuildContext
+                                                                    context) =>
+                                                                Directionality(
+                                                              textDirection:
+                                                                  TextDirection
+                                                                      .rtl,
+                                                              child:
+                                                                  AlertDialog(
+                                                                shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.all(
+                                                                            Radius.circular(15))),
+                                                                title: Center(
+                                                                  child: const Text(
+                                                                      'هل تريد اصمات العضو'),
+                                                                ),
+                                                                // content: const Text('AlertDialog description'),
+                                                                actions: <
+                                                                    Widget>[
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceAround,
+                                                                    children: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          ismuted =
+                                                                              false;
+                                                                          _updateuserDataFirebase(
+                                                                              roomID,
+                                                                              document.get('username'),
+                                                                              document.get('idFrom'));
+
+                                                                          _updateMutedFirebase(
+                                                                            roomID,
+                                                                          );
+
+                                                                          Navigator.pop(
+                                                                              context,
+                                                                              'yes');
+
+                                                                          CommonFunctions.showToast(
+                                                                              'تم اصمات العضو',
+                                                                              Colors.green);
+                                                                        },
+                                                                        child: const Text(
+                                                                            'نعم'),
+                                                                      ),
+                                                                      TextButton(
+                                                                        onPressed: () => Navigator.pop(
+                                                                            context,
+                                                                            'no'),
+                                                                        child: const Text(
+                                                                            'لا'),
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        icon: Icon(
+                                                          Icons.block_rounded,
+                                                          color: Colors
+                                                              .grey.shade400,
+                                                          size: 25,
+                                                        )),
+                                                    VerticalDivider(),
+                                                    IconButton(
+                                                        onPressed: () {},
+                                                        icon: Icon(
+                                                          Icons.mic,
+                                                          color: Colors
+                                                              .grey.shade400,
+                                                          size: 25,
+                                                        )),
+                                                    VerticalDivider(),
+                                                    Theme(
+                                                        data: Theme.of(context)
+                                                            .copyWith(
+                                                          dividerTheme:
+                                                              DividerThemeData(
+                                                            color: Colors.white,
+                                                          ),
+                                                          cardColor: Colors
+                                                              .black
+                                                              .withOpacity(0.7),
+                                                        ),
+                                                        child: PopupMenuButton<
+                                                            int>(
+                                                          icon: Icon(
+                                                            Icons.person,
+                                                            color: Colors.green,
+                                                            size: 25,
+                                                          ),
+                                                          onSelected: (item) =>
+                                                              onSelected2(
+                                                                  // context,
+                                                                  item,
+                                                                  document.get(
+                                                                      'ApiUserID'),
+                                                                  roomID),
+                                                          itemBuilder:
+                                                              (context) => [
+                                                            PopupMenuItem<int>(
+                                                                value: 0,
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    Center(
+                                                                      child:
+                                                                          Text(
+                                                                        "تعين مشرف",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.white),
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                            PopupMenuDivider(),
+                                                            PopupMenuItem<int>(
+                                                                value: 1,
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    Center(
+                                                                      child: Text(
+                                                                          "تعين عضو",
+                                                                          style:
+                                                                              TextStyle(color: Colors.white)),
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                            PopupMenuDivider(),
+                                                            PopupMenuItem<int>(
+                                                                value: 2,
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    Text(
+                                                                      "ازالة العضو",
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.white),
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                          ],
+                                                        )),
+                                                  ],
+                                                )),
                                           )
                                         ],
                                       ),
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                          height: 45,
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              top: BorderSide(
-                                                  width: 1.0,
-                                                  color: Colors
-                                                      .grey.shade300),
-                                              bottom: BorderSide(
-                                                  width: 1.0,
-                                                  color: Colors.lightBlue
-                                                      .shade900),
-                                            ),
-                                            color: Colors.white,
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment
-                                                .spaceAround,
-                                            children: [
-                                              IconButton(
-                                                  onPressed: () {
-                                                    showDialog<String>(
-                                                      context: context,
-                                                      builder: (BuildContext
-                                                      context) =>
-                                                          Directionality(
-                                                            textDirection:
-                                                            TextDirection
-                                                                .rtl,
-                                                            child:
-                                                            AlertDialog(
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                  BorderRadius
-                                                                      .all(
-                                                                      Radius
-                                                                          .circular(
-                                                                          15))),
-                                                              title: Center(
-                                                                child: const Text(
-                                                                    'هل تريد حظر العضو'),
-                                                              ),
-                                                              actions: <
-                                                                  Widget>[
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceAround,
-                                                                  children: [
-                                                                    TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        HomeCubit
-                                                                            .get(
-                                                                            context)
-                                                                            .addBlockList(
-                                                                            id: document
-                                                                                .get(
-                                                                                'ApiUserID'));
-                                                                        Navigator
-                                                                            .pop(
-                                                                            context,
-                                                                            'yes');
-
-                                                                        CommonFunctions
-                                                                            .showToast(
-                                                                            'تم حظر العضو',
-                                                                            Colors
-                                                                                .green);
-                                                                      },
-                                                                      child: const Text(
-                                                                          'نعم'),
-                                                                    ),
-                                                                    TextButton(
-                                                                      onPressed: () =>
-                                                                          Navigator
-                                                                              .pop(
-                                                                              context,
-                                                                              'no'),
-                                                                      child: const Text(
-                                                                          'لا'),
-                                                                    ),
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                    );
-                                                    // print(model.userId);
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.logout,
-                                                    color: Colors
-                                                        .grey.shade400,
-                                                    size: 25,
-                                                  )),
-                                              VerticalDivider(),
-                                              IconButton(
-                                                  onPressed: () {
-                                                    showDialog<String>(
-                                                      context: context,
-                                                      builder: (BuildContext
-                                                      context) =>
-                                                          Directionality(
-                                                            textDirection:
-                                                            TextDirection
-                                                                .rtl,
-                                                            child:
-                                                            AlertDialog(
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                  BorderRadius
-                                                                      .all(
-                                                                      Radius
-                                                                          .circular(
-                                                                          15))),
-                                                              title: Center(
-                                                                child: const Text(
-                                                                    'هل تريد اصمات العضو'),
-                                                              ),
-                                                              // content: const Text('AlertDialog description'),
-                                                              actions: <
-                                                                  Widget>[
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceAround,
-                                                                  children: [
-                                                                    TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        ismuted =
-                                                                        false;
-                                                                        _updateuserDataFirebase(
-                                                                            roomID,
-                                                                            document
-                                                                                .get(
-                                                                                'username'),
-                                                                            document
-                                                                                .get(
-                                                                                'idFrom'));
-
-                                                                        _updateMutedFirebase(
-                                                                          roomID,
-                                                                        );
-
-                                                                        Navigator
-                                                                            .pop(
-                                                                            context,
-                                                                            'yes');
-
-                                                                        CommonFunctions
-                                                                            .showToast(
-                                                                            'تم اصمات العضو',
-                                                                            Colors
-                                                                                .green);
-                                                                      },
-                                                                      child: const Text(
-                                                                          'نعم'),
-                                                                    ),
-                                                                    TextButton(
-                                                                      onPressed: () =>
-                                                                          Navigator
-                                                                              .pop(
-                                                                              context,
-                                                                              'no'),
-                                                                      child: const Text(
-                                                                          'لا'),
-                                                                    ),
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                    );
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.block_rounded,
-                                                    color: Colors
-                                                        .grey.shade400,
-                                                    size: 25,
-                                                  )),
-                                              VerticalDivider(),
-                                              IconButton(
-                                                  onPressed: () {},
-                                                  icon: Icon(
-                                                    Icons.mic,
-                                                    color: Colors
-                                                        .grey.shade400,
-                                                    size: 25,
-                                                  )),
-                                              VerticalDivider(),
-                                              Theme(
-                                                  data: Theme.of(context)
-                                                      .copyWith(
-                                                    dividerTheme:
-                                                    DividerThemeData(
-                                                      color: Colors.white,
-                                                    ),
-                                                    cardColor: Colors
-                                                        .black
-                                                        .withOpacity(0.7),
-                                                  ),
-                                                  child: PopupMenuButton<
-                                                      int>(
-                                                    icon: Icon(
-                                                      Icons.person,
-                                                      color: Colors.green,
-                                                      size: 25,
-                                                    ),
-                                                    onSelected: (item) =>
-                                                        onSelected2(
-                                                          // context,
-                                                            item,
-                                                            document.get(
-                                                                'ApiUserID'),
-                                                            roomID),
-                                                    itemBuilder:
-                                                        (context) =>
-                                                    [
-                                                      PopupMenuItem<int>(
-                                                          value: 0,
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Center(
-                                                                child:
-                                                                Text(
-                                                                  "تعين مشرف",
-                                                                  style: TextStyle(
-                                                                      color:
-                                                                      Colors
-                                                                          .white),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          )),
-                                                      PopupMenuDivider(),
-                                                      PopupMenuItem<int>(
-                                                          value: 1,
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Center(
-                                                                child: Text(
-                                                                    "تعين عضو",
-                                                                    style:
-                                                                    TextStyle(
-                                                                        color: Colors
-                                                                            .white)),
-                                                              )
-                                                            ],
-                                                          )),
-                                                      PopupMenuDivider(),
-                                                      PopupMenuItem<int>(
-                                                          value: 2,
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                            children: [
-                                                              Text(
-                                                                "ازالة العضو",
-                                                                style: TextStyle(
-                                                                    color:
-                                                                    Colors
-                                                                        .white),
-                                                              )
-                                                            ],
-                                                          )),
-                                                    ],
-                                                  )),
-                                            ],
-                                          )),
-                                    )
-                                  ],
-                                ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        // height: 70,
+                            Container(
+                              // height: 70,
 
-                        alignment: Alignment.topCenter,
-                        child: FloatingActionButton(
-                          onPressed: () {},
-                          child: CircleAvatar(
-                            child: Image.asset(
-                                "assets/images/Profile Image.png"),
-                            backgroundColor: kPrimaryColor,
-                            radius: 50,
+                              alignment: Alignment.topCenter,
+                              child: FloatingActionButton(
+                                onPressed: () {},
+                                child: CircleAvatar(
+                                  child: Image.asset(
+                                      "assets/images/Profile Image.png"),
+                                  backgroundColor: kPrimaryColor,
+                                  radius: 50,
+                                ),
+                              ),
+                            ),
+                          ]),
+                        );
+                      });
+                },
+              ),
+            )
+          : document.get('type') == 1
+              // Image
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                          child: Image.asset(
+                            kDefaultProfileImage,
+                            width: 36,
+                            height: 36,
                           ),
                         ),
                       ),
-                    ]),
-                  );
-                });
-          },
-        ),
-      )
-          : document.get('type') == 1
-      // Image
-          ? Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 5),
-            child: Container(
-              width: 36,
-              height: 36,
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                child: Image.asset(
-                  kDefaultProfileImage,
-                  width: 36,
-                  height: 36,
-                ),
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                // mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 10,
-                  ),
-                  document.get('userType') == 'owner'
-                      ? Icon(
-                    Icons.person,
-                    color: Colors.red,
-                  )
-                      : Container(),
-                  document.get('userType') == 'user'
-                      ? Icon(
-                    Icons.person,
-                    color: Colors.blue,
-                  )
-                      : Container(),
-                  document.get('userType') == 'supervisor'
-                      ? Icon(
-                    Icons.person,
-                    color: kPrimaryLightColor,
-                  )
-                      : Container(),
-                  document.get('packageColor') == null
-                      ? Container(
-                    child: Text(
-                      document.get('username'),
-                      style: TextStyle(
-                          color: kPrimaryColor,
-                          fontWeight: FontWeight.bold),
-                      maxLines: 2,
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    // padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                    color: Colors.transparent,
-                  )
-                      : Container(
-                    child: Text(
-                      document.get('username'),
-                      style: TextStyle(
-                          color: HexColor(
-                              document.get('packageColor')),
-                          fontWeight: FontWeight.bold),
-                      maxLines: 2,
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    // padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
-                    color: Colors.transparent,
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  document.get('hasSpecialID') == true
-                      ? Container(
-                    height: 18,
-                    width: 20,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                        border: Border.all(
-                          width: 2,
-                          color: Colors.amber,
-                        )),
-                    child: Center(
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.amber,
-                        size: 12,
-                      ),
-                    ),
-                  )
-                      : Container(),
-                  document.get('packageBadge') != null
-                      ? Container(
-                    height: 25,
-                    width: 25,
-                    child: Center(
-                        child: Image.network(
-                            document.get('packageBadge'))),
-                  )
-                      : Container(),
-                  Container(
-                    height: 18,
-                    width: 20,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                        border: Border.all(
-                          width: 2,
-                          color: Colors.amber,
-                        )),
-                    child: Center(
-                      child: Icon(
-                        Icons.home,
-                        color: Colors.amber,
-                        size: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  child: OutlinedButton(
-                    child: Material(
-                      child: Image.network(
-                        document.get("content"),
-                        loadingBuilder: (BuildContext context,
-                            Widget child,
-                            ImageChunkEvent loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade600,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8.0),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 10,
+                            ),
+                            document.get('userType') == 'owner'
+                                ? Icon(
+                                    Icons.person,
+                                    color: Colors.red,
+                                  )
+                                : Container(),
+                            document.get('userType') == 'user'
+                                ? Icon(
+                                    Icons.person,
+                                    color: Colors.blue,
+                                  )
+                                : Container(),
+                            document.get('userType') == 'supervisor'
+                                ? Icon(
+                                    Icons.person,
+                                    color: kPrimaryLightColor,
+                                  )
+                                : Container(),
+                            document.get('packageColor') == null
+                                ? Container(
+                                    child: Text(
+                                      document.get('username'),
+                                      style: TextStyle(
+                                          color: kPrimaryColor,
+                                          fontWeight: FontWeight.bold),
+                                      maxLines: 2,
+                                      textAlign: TextAlign.start,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                                    color: Colors.transparent,
+                                  )
+                                : Container(
+                                    child: Text(
+                                      document.get('username'),
+                                      style: TextStyle(
+                                          color: HexColor(
+                                              document.get('packageColor')),
+                                          fontWeight: FontWeight.bold),
+                                      maxLines: 2,
+                                      textAlign: TextAlign.start,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                                    color: Colors.transparent,
+                                  ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            document.get('hasSpecialID') == true
+                                ? Container(
+                                    height: 18,
+                                    width: 20,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.red,
+                                        border: Border.all(
+                                          width: 2,
+                                          color: Colors.amber,
+                                        )),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.amber,
+                                        size: 12,
+                                      ),
+                                    ),
+                                  )
+                                : Container(),
+                            document.get('packageBadge') != null
+                                ? Container(
+                                    height: 25,
+                                    width: 25,
+                                    child: Center(
+                                        child: Image.network(
+                                            document.get('packageBadge'))),
+                                  )
+                                : Container(),
+                            Container(
+                              height: 18,
+                              width: 20,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.red,
+                                  border: Border.all(
+                                    width: 2,
+                                    color: Colors.amber,
+                                  )),
+                              child: Center(
+                                child: Icon(
+                                  Icons.home,
+                                  color: Colors.amber,
+                                  size: 12,
+                                ),
                               ),
                             ),
-                            width: 200.0,
-                            height: 200.0,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress
-                                    .expectedTotalBytes !=
-                                    null &&
-                                    loadingProgress
-                                        .expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress
-                                    .cumulativeBytesLoaded /
-                                    loadingProgress
-                                        .expectedTotalBytes
-                                    : null,
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            child: OutlinedButton(
+                              child: Material(
+                                child: Image.network(
+                                  document.get("content"),
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade600,
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(8.0),
+                                        ),
+                                      ),
+                                      width: 200.0,
+                                      height: 200.0,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null &&
+                                                  loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes
+                                              : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, object, stackTrace) {
+                                    return Material(
+                                      child: Image.asset(
+                                        'images/img_not_available.jpeg',
+                                        width: 200.0,
+                                        height: 200.0,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8.0),
+                                      ),
+                                      clipBehavior: Clip.hardEdge,
+                                    );
+                                  },
+                                  width: 200.0,
+                                  height: 200.0,
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8.0)),
+                                clipBehavior: Clip.hardEdge,
                               ),
+                              onPressed: () {},
+                              style: ButtonStyle(
+                                  padding:
+                                      MaterialStateProperty.all<EdgeInsets>(
+                                          EdgeInsets.all(0))),
                             ),
-                          );
-                        },
-                        errorBuilder: (context, object, stackTrace) {
-                          return Material(
-                            child: Image.asset(
-                              'images/img_not_available.jpeg',
-                              width: 200.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
-                            ),
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(8.0),
-                            ),
-                            clipBehavior: Clip.hardEdge,
-                          );
-                        },
-                        width: 200.0,
-                        height: 200.0,
-                        fit: BoxFit.cover,
-                      ),
-                      borderRadius:
-                      BorderRadius.all(Radius.circular(8.0)),
-                      clipBehavior: Clip.hardEdge,
-                    ),
-                    onPressed: () {},
-                    style: ButtonStyle(
-                        padding:
-                        MaterialStateProperty.all<EdgeInsets>(
-                            EdgeInsets.all(0))),
-                  ),
-                ),
-              )
-            ],
-          )
-        ],
-      )
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                )
 
-      // Sticker
-          : Container(
-        child: Image.asset(
-          'images/${document.get('content')}.gif',
-          width: 100.0,
-          height: 100.0,
-          fit: BoxFit.cover,
-        ),
-      );
+              // Sticker
+              : Container(
+                  child: Image.asset(
+                    'images/${document.get('content')}.gif',
+                    width: 100.0,
+                    height: 100.0,
+                    fit: BoxFit.cover,
+                  ),
+                );
     } else {
       return SizedBox.shrink();
     }
@@ -3918,44 +3845,43 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return Flexible(
       child: widget.roomId.isNotEmpty
           ? StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('messages')
-            .doc(widget.roomId.toString())
-            .collection(widget.roomId.toString())
-            .orderBy('timestamp', descending: true)
-            .limit(limit)
-            .snapshots(),
-        builder: (BuildContext context,
-            AsyncSnapshot<QuerySnapshot> snapshot) {
-          print("messaegs: ${snapshot.toString()}");
-          if (snapshot.hasData) {
-            listMessage.addAll(snapshot.data.docs);
-            return ListView.builder(
-              padding: EdgeInsets.all(10.0),
-              itemBuilder: (context, index) =>
-                  buildItem(
-                    index,
-                    snapshot.data?.docs[index],
-                    size,
-                  ),
-              itemCount: snapshot.data?.docs.length,
-              reverse: true,
-              controller: listScrollController,
-            );
-          } else {
-            return Center(
+              stream: FirebaseFirestore.instance
+                  .collection('messages')
+                  .doc(widget.roomId.toString())
+                  .collection(widget.roomId.toString())
+                  .orderBy('timestamp', descending: true)
+                  .limit(limit)
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                print("messaegs: ${snapshot.toString()}");
+                if (snapshot.hasData) {
+                  listMessage.addAll(snapshot.data.docs);
+                  return ListView.builder(
+                    padding: EdgeInsets.all(10.0),
+                    itemBuilder: (context, index) => buildItem(
+                      index,
+                      snapshot.data?.docs[index],
+                      size,
+                    ),
+                    itemCount: snapshot.data?.docs.length,
+                    reverse: true,
+                    controller: listScrollController,
+                  );
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                    ),
+                  );
+                }
+              },
+            )
+          : Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
               ),
-            );
-          }
-        },
-      )
-          : Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
-        ),
-      ),
+            ),
     );
   }
 
@@ -3974,7 +3900,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   static StreamTransformer transformer<T>(
-      T Function(Map<String, dynamic> json) fromJson) =>
+          T Function(Map<String, dynamic> json) fromJson) =>
       StreamTransformer<QuerySnapshot<Map<String, dynamic>>,
           List<T>>.fromHandlers(
         handleData: (QuerySnapshot<Map<String, dynamic>> data,
@@ -3993,7 +3919,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
         .collection(widget.roomId)
         .snapshots()
         .transform(
-        transformer<UserMicModel>((json) => UserMicModel.fromJson(json)));
+            transformer<UserMicModel>((json) => UserMicModel.fromJson(json)));
     return StreamBuilder<List<UserMicModel>>(
         stream: _stream,
         builder:
@@ -4281,7 +4207,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             children: [
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(
@@ -4347,11 +4273,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ),
                                           child: Center(
                                               child: Text(
-                                                'عضو',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
-                                              ))),
+                                            'عضو',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ))),
                                     ),
                                   if (model.typeUser == 'supervisor')
                                     Padding(
@@ -4375,11 +4301,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ),
                                           child: Center(
                                               child: Text(
-                                                'مشرف',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
-                                              ))),
+                                            'مشرف',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ))),
                                     ),
                                   if (model.typeUser == 'owner')
                                     Padding(
@@ -4403,11 +4329,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           ),
                                           child: Center(
                                               child: Text(
-                                                'مالك',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
-                                              ))),
+                                            'مالك',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ))),
                                     ),
                                   SizedBox(
                                     width: 10,
@@ -4420,8 +4346,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     width: 10,
                                   ),
                                   Text(
-                                    "LV ${model.level.userCurrentLevel
-                                        .toString()}",
+                                    "LV ${model.level[0].userCurrentLevel.toString()}",
                                     style: TextStyle(
                                         color: kPrimaryColor,
                                         fontWeight: FontWeight.bold),
@@ -4524,7 +4449,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           Text(
                                             "الرسائل",
                                             style:
-                                            TextStyle(color: Colors.grey),
+                                                TextStyle(color: Colors.grey),
                                           )
                                         ],
                                       ),
@@ -4553,7 +4478,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                           Text(
                                             'إضافه صديق',
                                             style:
-                                            TextStyle(color: Colors.grey),
+                                                TextStyle(color: Colors.grey),
                                           )
                                         ],
                                       ),
@@ -4605,14 +4530,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                                             showModalBottomSheet(
                                                 backgroundColor:
-                                                Colors.transparent,
+                                                    Colors.transparent,
                                                 context: context,
                                                 builder:
                                                     (BuildContext context) {
                                                   return GiftScreen(
                                                     roomID: roomID,
                                                     userID:
-                                                    model.userId.toString(),
+                                                        model.userId.toString(),
                                                     check: true,
                                                     username: model.name,
                                                     // userID: model.userId
@@ -4651,79 +4576,76 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             bottom: BorderSide(
                                                 width: 1.0,
                                                 color:
-                                                Colors.lightBlue.shade900),
+                                                    Colors.lightBlue.shade900),
                                           ),
                                           color: Colors.white,
                                         ),
                                         child: Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
                                             IconButton(
                                                 onPressed: () {
                                                   showDialog<String>(
                                                     context: context,
                                                     builder: (BuildContext
-                                                    context) =>
+                                                            context) =>
                                                         Directionality(
-                                                          textDirection:
+                                                      textDirection:
                                                           TextDirection.rtl,
-                                                          child: AlertDialog(
-                                                            shape: RoundedRectangleBorder(
-                                                                borderRadius:
+                                                      child: AlertDialog(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
                                                                 BorderRadius
                                                                     .all(Radius
-                                                                    .circular(
-                                                                    15))),
-                                                            title: Center(
-                                                              child: const Text(
-                                                                  'هل تريد حظر العضو'),
-                                                            ),
-                                                            // content: const Text('AlertDialog description'),
-                                                            actions: <Widget>[
-                                                              Row(
-                                                                mainAxisAlignment:
+                                                                        .circular(
+                                                                            15))),
+                                                        title: Center(
+                                                          child: const Text(
+                                                              'هل تريد حظر العضو'),
+                                                        ),
+                                                        // content: const Text('AlertDialog description'),
+                                                        actions: <Widget>[
+                                                          Row(
+                                                            mainAxisAlignment:
                                                                 MainAxisAlignment
                                                                     .spaceAround,
-                                                                children: [
-                                                                  TextButton(
-                                                                    onPressed: () {
-                                                                      HomeCubit
-                                                                          .get(
+                                                            children: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  HomeCubit.get(
                                                                           context)
-                                                                          .addBlockList(
+                                                                      .addBlockList(
                                                                           id: model
                                                                               .userId);
-                                                                      Navigator
-                                                                          .pop(
-                                                                          context,
-                                                                          'yes');
+                                                                  Navigator.pop(
+                                                                      context,
+                                                                      'yes');
 
-                                                                      CommonFunctions
-                                                                          .showToast(
+                                                                  CommonFunctions
+                                                                      .showToast(
                                                                           'تم حظر العضو',
                                                                           Colors
                                                                               .green);
-                                                                    },
-                                                                    child:
+                                                                },
+                                                                child:
                                                                     const Text(
                                                                         'نعم'),
-                                                                  ),
-                                                                  TextButton(
-                                                                    onPressed: () =>
-                                                                        Navigator
-                                                                            .pop(
-                                                                            context,
-                                                                            'no'),
-                                                                    child:
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        context,
+                                                                        'no'),
+                                                                child:
                                                                     const Text(
                                                                         'لا'),
-                                                                  ),
-                                                                ],
-                                                              )
+                                                              ),
                                                             ],
-                                                          ),
-                                                        ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
                                                   );
                                                 },
                                                 icon: Icon(
@@ -4737,67 +4659,65 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                   showDialog<String>(
                                                     context: context,
                                                     builder: (BuildContext
-                                                    context) =>
+                                                            context) =>
                                                         Directionality(
-                                                          textDirection:
+                                                      textDirection:
                                                           TextDirection.rtl,
-                                                          child: AlertDialog(
-                                                            shape: RoundedRectangleBorder(
-                                                                borderRadius:
+                                                      child: AlertDialog(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
                                                                 BorderRadius
                                                                     .all(Radius
-                                                                    .circular(
-                                                                    15))),
-                                                            title: Center(
-                                                              child: const Text(
-                                                                  'هل تريد اصمات العضو'),
-                                                            ),
-                                                            // content: const Text('AlertDialog description'),
-                                                            actions: <Widget>[
-                                                              Row(
-                                                                mainAxisAlignment:
+                                                                        .circular(
+                                                                            15))),
+                                                        title: Center(
+                                                          child: const Text(
+                                                              'هل تريد اصمات العضو'),
+                                                        ),
+                                                        // content: const Text('AlertDialog description'),
+                                                        actions: <Widget>[
+                                                          Row(
+                                                            mainAxisAlignment:
                                                                 MainAxisAlignment
                                                                     .spaceAround,
-                                                                children: [
-                                                                  TextButton(
-                                                                    onPressed: () {
-                                                                      ismuted =
+                                                            children: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  ismuted =
                                                                       false;
-                                                                      _updateuserDataFirebase(
-                                                                          roomID,
-                                                                          model
-                                                                              .name,
-                                                                          model
-                                                                              .spacialId);
+                                                                  _updateuserDataFirebase(
+                                                                      roomID,
+                                                                      model
+                                                                          .name,
+                                                                      model
+                                                                          .spacialId);
 
-                                                                      _updateMutedFirebase(
-                                                                        roomID,
-                                                                      );
+                                                                  _updateMutedFirebase(
+                                                                    roomID,
+                                                                  );
 
-                                                                      Navigator
-                                                                          .pop(
-                                                                          context,
-                                                                          'yes');
-                                                                    },
-                                                                    child:
+                                                                  Navigator.pop(
+                                                                      context,
+                                                                      'yes');
+                                                                },
+                                                                child:
                                                                     const Text(
                                                                         'نعم'),
-                                                                  ),
-                                                                  TextButton(
-                                                                    onPressed: () =>
-                                                                        Navigator
-                                                                            .pop(
-                                                                            context,
-                                                                            'no'),
-                                                                    child:
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        context,
+                                                                        'no'),
+                                                                child:
                                                                     const Text(
                                                                         'لا'),
-                                                                  ),
-                                                                ],
-                                                              )
+                                                              ),
                                                             ],
-                                                          ),
-                                                        ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
                                                   );
                                                 },
                                                 icon: Icon(
@@ -4816,9 +4736,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             VerticalDivider(),
                                             Theme(
                                                 data:
-                                                Theme.of(context).copyWith(
+                                                    Theme.of(context).copyWith(
                                                   dividerTheme:
-                                                  DividerThemeData(
+                                                      DividerThemeData(
                                                     color: Colors.white,
                                                   ),
                                                   cardColor: Colors.black
@@ -4833,14 +4753,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                   onSelected: (item) =>
                                                       onSelected1(context, item,
                                                           model.userId, roomID),
-                                                  itemBuilder: (context) =>
-                                                  [
+                                                  itemBuilder: (context) => [
                                                     PopupMenuItem<int>(
                                                         value: 0,
                                                         child: Row(
                                                           mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
+                                                              MainAxisAlignment
+                                                                  .center,
                                                           children: [
                                                             Center(
                                                               child: Text(
@@ -4857,8 +4776,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         value: 1,
                                                         child: Row(
                                                           mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
+                                                              MainAxisAlignment
+                                                                  .center,
                                                           children: [
                                                             Center(
                                                               child: Text(
@@ -4874,8 +4793,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         value: 2,
                                                         child: Row(
                                                           mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
+                                                              MainAxisAlignment
+                                                                  .center,
                                                           children: [
                                                             Text(
                                                               "ازالة العضو",

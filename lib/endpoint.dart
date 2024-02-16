@@ -16,6 +16,7 @@ const frame = 'get_all_products/frame';
 const permiem = 'getAllPackages';
 const buypermiem = 'buy-new-package';
 const background = 'get_all_products/background';
+const buyshop = 'buy-new-product';
 const mybackground = 'backgrounds';
 const myinters = 'intres';
 const getwallet = 'getWalletAmount';
