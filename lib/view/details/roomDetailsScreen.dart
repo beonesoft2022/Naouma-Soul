@@ -14,7 +14,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:project/audiocall.dart';
@@ -41,6 +40,7 @@ import 'package:project/view/home/states.dart';
 import 'package:agora_rtm/agora_rtm.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 import '../../gift_screen.dart';
 import '../../models/firebaseModel.dart';
@@ -343,6 +343,28 @@ class _DetailsScreenState extends State<DetailsScreen> {
         });
   }
 
+  void showEmojiPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return EmojiPicker(
+          onEmojiSelected: (category, emoji) {
+            _messageController.text += emoji.emoji; // Add to message
+            Navigator.pop(context); // Close the picker
+          },
+        );
+      },
+    );
+  }
+
+// Optional - for clearing a selected emoji easily
+  void _clearSelectedEmoji() {
+    if (_messageController.text.isNotEmpty) {
+      final text = _messageController.text;
+      _messageController.text = text.substring(0, text.length - 2);
+    }
+  }
+
   //// Upload Image to firestore into chats collection inside chatroom collection
   Future uploadImage() async {
     String fileName = Uuid().v1();
@@ -502,366 +524,454 @@ class _DetailsScreenState extends State<DetailsScreen> {
     print(
         "_personInRoom index" + "${micModel.userName}" + "--- Hedra Adel ---");
 
-    return Expanded(
-      child: Container(
-        child: Column(
-          children: [
-            micModel.micStatus == true
-                ? Stack(
-                    children: [
-                      hasFrame == null
-                          ? Container(
-                              /*   // width: 70,
-                              // child: Image.network(
-                              //   hasFrame, */
-                              // )
-                              )
-                          : Container(
-                              width: 70,
-                              child: Image.network(
-                                hasFrame,
-                              )), // Back image
-                      Padding(
-                        padding: const EdgeInsets.all(9.0),
-                        child: Container(
-                          width: 50,
-                          child: Image.asset(
-                            "assets/images/Profile Image.png",
-                            // fit: BoxFit.cover,
-                          ),
+    if (micModel != null) {
+      return Expanded(
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              micModel.micStatus == true
+                  ? Flexible(
+                      child: Stack(
+                        children: [
+                          hasFrame == null
+                              ? Container(
+                                  /*   // width: 70,
+                                              // child: Image.network(
+                                              //   hasFrame, */
+                                  // )
+                                  )
+                              : Container(
+                                  width: 70,
+                                  child: Image.network(
+                                    hasFrame,
+                                  )), // Back image
+                          Padding(
+                            padding: const EdgeInsets.all(9.0),
+                            child: Container(
+                              width: 50,
+                              child: Image.asset(
+                                "assets/images/Profile Image.png",
+                                // fit: BoxFit.cover,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  : Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.all(6.0),
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            shape: BoxShape.circle,
+                            border: Border.all(width: 2, color: kPrimaryColor)),
+                        child: Icon(
+                          micModel.isLocked != null
+                              ? micModel.isLocked
+                                  ? Icons.lock
+                                  : Icons.mic
+                              : Icons.mic,
+                          color: Colors.white,
+                          size: 32,
                         ),
-                      )
-                    ],
-                  )
-                : Container(
-                    padding: const EdgeInsets.all(6.0),
-                    decoration: BoxDecoration(
-                        color: Colors.grey,
-                        shape: BoxShape.circle,
-                        border: Border.all(width: 2, color: kPrimaryColor)),
-                    child: Icon(
-                      micModel.isLocked != null
-                          ? micModel.isLocked
-                              ? Icons.lock
-                              : Icons.mic
-                          : Icons.mic,
-                      color: Colors.white,
-                      size: 32,
+                      ),
                     ),
-                  ),
-            2.height,
-            Text(
-              micModel.isLocked != null && micModel.isLocked
-                  ? "مقفل"
-                  : micModel.micStatus
-                      ? micModel.userName.length > 7
-                          ? ".${micModel.userName}"
-                          : micModel.userName
-                      : "${index + 1}",
-              overflow: TextOverflow.ellipsis,
-              style: secondaryTextStyle(size: 12, color: black),
-            ),
-          ],
-        ),
-      ).onTap(() {
-        if (ismuted == false) {
-          CommonFunctions.showToast('لا تملك الصلاحية', Colors.red);
-        } else if (!micModel.micStatus &&
-            !micModel.isLocked &&
-            micModel.userId == null &&
-            micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
-          // Iam room owner and mic is empty
-          print("Iam owner and mic is empty.");
+              2.height,
+              Text(
+                micModel.isLocked != null && micModel.isLocked
+                    ? "مقفل"
+                    : micModel.micStatus
+                        ? micModel.userName.length > 7
+                            ? ".${micModel.userName}"
+                            : micModel.userName
+                        : "${index + 1}",
+                overflow: TextOverflow.ellipsis,
+                style: secondaryTextStyle(size: 12, color: black),
+              ),
+            ],
+          ),
+        ).onTap(() {
+          if (ismuted == false) {
+            CommonFunctions.showToast('لا تملك الصلاحية', Colors.red);
+          } else if (!micModel.micStatus &&
+              !micModel.isLocked &&
+              micModel.userId == null &&
+              micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
+            // Iam room owner and mic is empty
+            print("Iam owner and mic is empty.");
 
-          // Check if user already holds mic before
-          var existingItem = _micUsersList.firstWhere(
-              (itemToCheck) =>
-                  itemToCheck.userId == PreferencesServices.getString(ID_KEY),
-              orElse: () => null);
+            // Check if user already holds mic before
+            var existingItem = _micUsersList.firstWhere(
+                (itemToCheck) =>
+                    itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+                orElse: () => null);
 
-          // user already holds mic before
-          // will leave the old mic , and use new one
-
-          if (existingItem != null) {
-            print(existingItem.micNumber);
-            print(existingItem.userName);
-            print("take other mic");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(
-                    takeMicFunction: () {
-                      print("clicked take");
-                      print("clicked index: $index");
-                      // leave old mic
-                      existingItem.id = null;
-                      existingItem.userName = null;
-                      existingItem.userId = null;
-                      existingItem.micNumber = existingItem.micNumber;
-                      existingItem.micStatus = false;
-                      _updateMicsToFirebase(
-                          existingItem.micNumber, existingItem);
-                      print("existname: ${existingItem.userName}");
-                      print("existuserId: ${existingItem.userId}");
-                      print("existmicNumber: ${existingItem.micNumber}");
-                      print("existid: ${existingItem.micNumber}");
-                      print("existmicStatus: ${existingItem.micStatus}");
-
-                      // go to new mic
-                      micModel.id = index.toString();
-                      micModel.userName =
-                          PreferencesServices.getString(Name_KEY);
-                      micModel.userId = PreferencesServices.getString(ID_KEY);
-                      micModel.micNumber = index;
-                      micModel.micStatus = true;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-
-                      /// Removes all previous screens from the back stack and redirect to new screen with provided screen tag
-                      finish(context);
-
-                      _updateMicsToFirebase(index, micModel);
-                    },
-                    leaveMicFunction: () {
-                      // Leave mic
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    lockMicFunction: () {
-                      // lock mic
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = true;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    unLockMicFunction: () {},
-                    showTakeMic: true,
-                    showLeaveMic: false,
-                    showLockMic: true,
-                    micIsLocked: false,
-                  );
-                });
-          } else {
-            print("not take other mic");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(
-                    takeMicFunction: () {
-                      // go to new mic
-                      micModel.id = index.toString();
-                      micModel.userName =
-                          PreferencesServices.getString(Name_KEY);
-                      micModel.userId = PreferencesServices.getString(ID_KEY);
-                      micModel.micNumber = index;
-                      micModel.micStatus = true;
-                      micModel.isLocked = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    leaveMicFunction: () {
-                      // Leave mic
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    lockMicFunction: () {
-                      // lock mic
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = true;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    unLockMicFunction: () {},
-                    showTakeMic: true,
-                    showLeaveMic: false,
-                    showLockMic: true,
-                    micIsLocked: false,
-                  );
-                });
-          }
-        } else if (!micModel.micStatus &&
-            micModel.isLocked &&
-            micModel.userId == null &&
-            micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
-          // Iam room owner and mic is locked
-          print("Iam room owner and mic is locked...");
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return MicClickDialog(
-                  takeMicFunction: () {},
-                  leaveMicFunction: () {
-                    // Leave mic
-                    micModel.id = null;
-                    micModel.userName = null;
-                    micModel.userId = null;
-                    micModel.micNumber = index;
-                    micModel.micStatus = false;
-                    micModel.isLocked = false;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    _updateMicsToFirebase(index, micModel);
-                    finish(context);
-                  },
-                  unLockMicFunction: () {
-                    print("unLock Mic index: $index");
-                    micModel.id = null;
-                    micModel.userName = null;
-                    micModel.userId = null;
-                    micModel.micNumber = index;
-                    micModel.micStatus = false;
-                    micModel.isLocked = false;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    _updateMicsToFirebase(index, micModel);
-                    finish(context);
-                  },
-                  showTakeMic: false,
-                  showLeaveMic: false,
-                  showLockMic: false,
-                  micIsLocked: true,
-                );
-              });
-        } else if (micModel.micStatus &&
-            !micModel.isLocked &&
-            micModel.userId == PreferencesServices.getString(ID_KEY) &&
-            micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
-          // Iam room owner and mic is locked
-          print("Iam room owner and mic is taken by me...");
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return MicClickDialog(
-                  takeMicFunction: () {},
-                  leaveMicFunction: () {
-                    print("unLock Mic index: $index");
-                    micModel.id = null;
-                    micModel.userName = null;
-                    micModel.userId = null;
-                    micModel.micNumber = index;
-                    micModel.micStatus = false;
-                    micModel.isLocked = false;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    _updateMicsToFirebase(index, micModel);
-                    finish(context);
-                  },
-                  unLockMicFunction: () {},
-                  showTakeMic: false,
-                  showLeaveMic: true,
-                  showLockMic: false,
-                  micIsLocked: false,
-                );
-              });
-        } else if (!micModel.micStatus &&
-            !micModel.isLocked &&
-            micModel.userId == null &&
-            micModel.roomOwnerId != PreferencesServices.getString(ID_KEY)) {
-          // Iam not room owner and mic is locked
-          print("Iam not room owner and mic is taken by me...");
-          var existingItem = _micUsersList.firstWhere(
-              (itemToCheck) =>
-                  itemToCheck.userId == PreferencesServices.getString(ID_KEY),
-              orElse: () => null);
-          if (existingItem != null) {
             // user already holds mic before
-            print(existingItem.micNumber);
-            print(existingItem.userName);
-            print("take other mic");
+            // will leave the old mic , and use new one
+
+            if (existingItem != null) {
+              print(existingItem.micNumber);
+              print(existingItem.userName);
+              print("take other mic");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MicClickDialog(
+                      takeMicFunction: () {
+                        print("clicked take");
+                        print("clicked index: $index");
+                        // leave old mic
+                        existingItem.id = null;
+                        existingItem.userName = null;
+                        existingItem.userId = null;
+                        existingItem.micNumber = existingItem.micNumber;
+                        existingItem.micStatus = false;
+                        _updateMicsToFirebase(
+                            existingItem.micNumber, existingItem);
+                        print("existname: ${existingItem.userName}");
+                        print("existuserId: ${existingItem.userId}");
+                        print("existmicNumber: ${existingItem.micNumber}");
+                        print("existid: ${existingItem.micNumber}");
+                        print("existmicStatus: ${existingItem.micStatus}");
+
+                        // go to new mic
+                        micModel.id = index.toString();
+                        micModel.userName =
+                            PreferencesServices.getString(Name_KEY);
+                        micModel.userId = PreferencesServices.getString(ID_KEY);
+                        micModel.micNumber = index;
+                        micModel.micStatus = true;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+
+                        /// Removes all previous screens from the back stack and redirect to new screen with provided screen tag
+                        finish(context);
+
+                        _updateMicsToFirebase(index, micModel);
+                      },
+                      leaveMicFunction: () {
+                        // Leave mic
+                        micModel.id = null;
+                        micModel.userName = null;
+                        micModel.userId = null;
+                        micModel.micNumber = index;
+                        micModel.micStatus = false;
+                        micModel.isLocked = false;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      lockMicFunction: () {
+                        // lock mic
+                        micModel.id = null;
+                        micModel.userName = null;
+                        micModel.userId = null;
+                        micModel.micNumber = index;
+                        micModel.micStatus = false;
+                        micModel.isLocked = true;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      unLockMicFunction: () {},
+                      showTakeMic: true,
+                      showLeaveMic: false,
+                      showLockMic: true,
+                      micIsLocked: false,
+                    );
+                  });
+            } else {
+              print("not take other mic");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MicClickDialog(
+                      takeMicFunction: () {
+                        // go to new mic
+                        micModel.id = index.toString();
+                        micModel.userName =
+                            PreferencesServices.getString(Name_KEY);
+                        micModel.userId = PreferencesServices.getString(ID_KEY);
+                        micModel.micNumber = index;
+                        micModel.micStatus = true;
+                        micModel.isLocked = false;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      leaveMicFunction: () {
+                        // Leave mic
+                        micModel.id = null;
+                        micModel.userName = null;
+                        micModel.userId = null;
+                        micModel.micNumber = index;
+                        micModel.micStatus = false;
+                        micModel.isLocked = false;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      lockMicFunction: () {
+                        // lock mic
+                        micModel.id = null;
+                        micModel.userName = null;
+                        micModel.userId = null;
+                        micModel.micNumber = index;
+                        micModel.micStatus = false;
+                        micModel.isLocked = true;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      unLockMicFunction: () {},
+                      showTakeMic: true,
+                      showLeaveMic: false,
+                      showLockMic: true,
+                      micIsLocked: false,
+                    );
+                  });
+            }
+          } else if (!micModel.micStatus &&
+              micModel.isLocked &&
+              micModel.userId == null &&
+              micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
+            // Iam room owner and mic is locked
+            print("Iam room owner and mic is locked...");
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return MicClickDialog(
-                    takeMicFunction: () {
-                      print("clicked take");
-                      print("clicked index: $index");
-                      // leave old mic
-                      existingItem.id = null;
-                      existingItem.userName = null;
-                      existingItem.userId = null;
-                      existingItem.micNumber = existingItem.micNumber;
-                      existingItem.micStatus = false;
-                      _updateMicsToFirebase(
-                          existingItem.micNumber, existingItem);
-                      print("existname: ${existingItem.userName}");
-                      print("existuserId: ${existingItem.userId}");
-                      print("existmicNumber: ${existingItem.micNumber}");
-                      print("existid: ${existingItem.micNumber}");
-                      print("existmicStatus: ${existingItem.micStatus}");
-
-                      // go to new mic
-                      micModel.id = index.toString();
-                      micModel.userName =
-                          PreferencesServices.getString(Name_KEY);
-                      micModel.userId = PreferencesServices.getString(ID_KEY);
+                    takeMicFunction: () {},
+                    leaveMicFunction: () {
+                      // Leave mic
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
                       micModel.micNumber = index;
-                      micModel.micStatus = true;
+                      micModel.micStatus = false;
+                      micModel.isLocked = false;
                       print("name: ${micModel.userName}");
                       print("userId: ${micModel.userId}");
                       print("micNumber: ${micModel.micNumber}");
                       print("id: ${micModel.micNumber}");
                       print("micStatus: ${micModel.micStatus}");
-                      // update firebase
                       _updateMicsToFirebase(index, micModel);
                       finish(context);
                     },
+                    unLockMicFunction: () {
+                      print("unLock Mic index: $index");
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    showTakeMic: false,
+                    showLeaveMic: false,
+                    showLockMic: false,
+                    micIsLocked: true,
+                  );
+                });
+          } else if (micModel.micStatus &&
+              !micModel.isLocked &&
+              micModel.userId == PreferencesServices.getString(ID_KEY) &&
+              micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
+            // Iam room owner and mic is locked
+            print("Iam room owner and mic is taken by me...");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(
+                    takeMicFunction: () {},
+                    leaveMicFunction: () {
+                      print("unLock Mic index: $index");
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    unLockMicFunction: () {},
+                    showTakeMic: false,
+                    showLeaveMic: true,
+                    showLockMic: false,
+                    micIsLocked: false,
+                  );
+                });
+          } else if (!micModel.micStatus &&
+              !micModel.isLocked &&
+              micModel.userId == null &&
+              micModel.roomOwnerId != PreferencesServices.getString(ID_KEY)) {
+            // Iam not room owner and mic is locked
+            print("Iam not room owner and mic is taken by me...");
+            var existingItem = _micUsersList.firstWhere(
+                (itemToCheck) =>
+                    itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+                orElse: () => null);
+            if (existingItem != null) {
+              // user already holds mic before
+              print(existingItem.micNumber);
+              print(existingItem.userName);
+              print("take other mic");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MicClickDialog(
+                      takeMicFunction: () {
+                        print("clicked take");
+                        print("clicked index: $index");
+                        // leave old mic
+                        existingItem.id = null;
+                        existingItem.userName = null;
+                        existingItem.userId = null;
+                        existingItem.micNumber = existingItem.micNumber;
+                        existingItem.micStatus = false;
+                        _updateMicsToFirebase(
+                            existingItem.micNumber, existingItem);
+                        print("existname: ${existingItem.userName}");
+                        print("existuserId: ${existingItem.userId}");
+                        print("existmicNumber: ${existingItem.micNumber}");
+                        print("existid: ${existingItem.micNumber}");
+                        print("existmicStatus: ${existingItem.micStatus}");
+
+                        // go to new mic
+                        micModel.id = index.toString();
+                        micModel.userName =
+                            PreferencesServices.getString(Name_KEY);
+                        micModel.userId = PreferencesServices.getString(ID_KEY);
+                        micModel.micNumber = index;
+                        micModel.micStatus = true;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        // update firebase
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      leaveMicFunction: () {
+                        print("leave index: $index");
+                        micModel.id = null;
+                        micModel.userName = null;
+                        micModel.userId = null;
+                        micModel.micNumber = index;
+                        micModel.micStatus = false;
+                        micModel.isLocked = false;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        // update firebase
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      lockMicFunction: () {},
+                      unLockMicFunction: () {},
+                      showTakeMic: true,
+                      showLeaveMic: true,
+                      showLockMic: false,
+                      micIsLocked: false,
+                    );
+                  });
+            } else {
+              print("not take other mic");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MicClickDialog(
+                      takeMicFunction: () {
+                        // go to new mic
+                        micModel.id = index.toString();
+                        micModel.userName = username;
+                        micModel.userId = specialId.toString();
+                        micModel.micNumber = index;
+                        micModel.micStatus = true;
+                        micModel.isLocked = false;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      leaveMicFunction: () {
+                        // Leave mic
+                        micModel.id = null;
+                        micModel.userName = null;
+                        micModel.userId = null;
+                        micModel.micNumber = index;
+                        micModel.micStatus = false;
+                        micModel.isLocked = false;
+                        print("name: ${micModel.userName}");
+                        print("userId: ${micModel.userId}");
+                        print("micNumber: ${micModel.micNumber}");
+                        print("id: ${micModel.micNumber}");
+                        print("micStatus: ${micModel.micStatus}");
+                        _updateMicsToFirebase(index, micModel);
+                        finish(context);
+                      },
+                      lockMicFunction: () {},
+                      unLockMicFunction: () {},
+                      showTakeMic: true,
+                      showLeaveMic: true,
+                      showLockMic: false,
+                      micIsLocked: false,
+                    );
+                  });
+            }
+          } else if (micModel.micStatus == true &&
+              !micModel.isLocked &&
+              micModel.userId != null &&
+              micModel.userId == specialId) {
+            // mic taken by me...
+            print("mic taken by me...");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(
+                    takeMicFunction: () {},
                     leaveMicFunction: () {
                       print("leave index: $index");
                       micModel.id = null;
@@ -869,47 +979,81 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       micModel.userId = null;
                       micModel.micNumber = index;
                       micModel.micStatus = false;
-                      micModel.isLocked = false;
                       print("name: ${micModel.userName}");
                       print("userId: ${micModel.userId}");
                       print("micNumber: ${micModel.micNumber}");
                       print("id: ${micModel.micNumber}");
                       print("micStatus: ${micModel.micStatus}");
-                      // update firebase
-                      _updateMicsToFirebase(index, micModel);
                       finish(context);
+                      _updateMicsToFirebase(index, micModel);
                     },
                     lockMicFunction: () {},
                     unLockMicFunction: () {},
-                    showTakeMic: true,
-                    showLeaveMic: true,
                     showLockMic: false,
                     micIsLocked: false,
+                    showTakeMic: false,
+                    showLeaveMic: true,
                   );
                 });
+          } else if (micModel.micStatus &&
+              !micModel.isLocked &&
+              micModel.userId != null &&
+              micModel.userId != specialId) {
+            // taken by other one
+            CommonFunctions.showToast("Mic already taken", Colors.red);
+          } else if (!micModel.micStatus &&
+              micModel.isLocked &&
+              micModel.userId != null &&
+              micModel.userId != PreferencesServices.getString(ID_KEY)) {
+            // Mic is locked
+            CommonFunctions.showToast("Mic is locked", Colors.red);
           } else {
-            print("not take other mic");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(
-                    takeMicFunction: () {
+            print("_micUsersList: ${_micUsersList.length}");
+            //find existing item per link criteria
+            var existingItem = _micUsersList.firstWhere(
+                (itemToCheck) =>
+                    itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+                orElse: () => null);
+            if (existingItem != null) {
+              // user already holds mic before
+              print(existingItem.micNumber);
+              print(existingItem.userName);
+              print("take other mic");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MicClickDialog(takeMicFunction: () {
+                      print("clicked take");
+                      print("clicked index: $index");
+                      // leave old mic
+                      existingItem.id = null;
+                      existingItem.userName = null;
+                      existingItem.userId = null;
+                      existingItem.micNumber = existingItem.micNumber;
+                      existingItem.micStatus = false;
+                      _updateMicsToFirebase(
+                          existingItem.micNumber, existingItem);
+                      print("existname: ${existingItem.userName}");
+                      print("existuserId: ${existingItem.userId}");
+                      print("existmicNumber: ${existingItem.micNumber}");
+                      print("existid: ${existingItem.micNumber}");
+                      print("existmicStatus: ${existingItem.micStatus}");
+
                       // go to new mic
                       micModel.id = index.toString();
-                      micModel.userName = username;
-                      micModel.userId = specialId.toString();
+                      micModel.userName =
+                          PreferencesServices.getString(Name_KEY);
+                      micModel.userId = PreferencesServices.getString(ID_KEY);
                       micModel.micNumber = index;
                       micModel.micStatus = true;
-                      micModel.isLocked = false;
                       print("name: ${micModel.userName}");
                       print("userId: ${micModel.userId}");
                       print("micNumber: ${micModel.micNumber}");
                       print("id: ${micModel.micNumber}");
                       print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
                       finish(context);
-                    },
-                    leaveMicFunction: () {
+                      _updateMicsToFirebase(index, micModel);
+                    }, leaveMicFunction: () {
                       // Leave mic
                       micModel.id = null;
                       micModel.userName = null;
@@ -924,164 +1068,59 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       print("micStatus: ${micModel.micStatus}");
                       _updateMicsToFirebase(index, micModel);
                       finish(context);
-                    },
-                    lockMicFunction: () {},
-                    unLockMicFunction: () {},
-                    showTakeMic: true,
-                    showLeaveMic: true,
-                    showLockMic: false,
-                    micIsLocked: false,
-                  );
-                });
-          }
-        } else if (micModel.micStatus == true &&
-            !micModel.isLocked &&
-            micModel.userId != null &&
-            micModel.userId == specialId) {
-          // mic taken by me...
-          print("mic taken by me...");
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return MicClickDialog(
-                  takeMicFunction: () {},
-                  leaveMicFunction: () {
-                    print("leave index: $index");
-                    micModel.id = null;
-                    micModel.userName = null;
-                    micModel.userId = null;
-                    micModel.micNumber = index;
-                    micModel.micStatus = false;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    finish(context);
-                    _updateMicsToFirebase(index, micModel);
-                  },
-                  lockMicFunction: () {},
-                  unLockMicFunction: () {},
-                  showLockMic: false,
-                  micIsLocked: false,
-                  showTakeMic: false,
-                  showLeaveMic: true,
-                );
-              });
-        } else if (micModel.micStatus &&
-            !micModel.isLocked &&
-            micModel.userId != null &&
-            micModel.userId != specialId) {
-          // taken by other one
-          CommonFunctions.showToast("Mic already taken", Colors.red);
-        } else if (!micModel.micStatus &&
-            micModel.isLocked &&
-            micModel.userId != null &&
-            micModel.userId != PreferencesServices.getString(ID_KEY)) {
-          // Mic is locked
-          CommonFunctions.showToast("Mic is locked", Colors.red);
-        } else {
-          print("_micUsersList: ${_micUsersList.length}");
-          //find existing item per link criteria
-          var existingItem = _micUsersList.firstWhere(
-              (itemToCheck) =>
-                  itemToCheck.userId == PreferencesServices.getString(ID_KEY),
-              orElse: () => null);
-          if (existingItem != null) {
-            // user already holds mic before
-            print(existingItem.micNumber);
-            print(existingItem.userName);
-            print("take other mic");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(takeMicFunction: () {
-                    print("clicked take");
-                    print("clicked index: $index");
-                    // leave old mic
-                    existingItem.id = null;
-                    existingItem.userName = null;
-                    existingItem.userId = null;
-                    existingItem.micNumber = existingItem.micNumber;
-                    existingItem.micStatus = false;
-                    _updateMicsToFirebase(existingItem.micNumber, existingItem);
-                    print("existname: ${existingItem.userName}");
-                    print("existuserId: ${existingItem.userId}");
-                    print("existmicNumber: ${existingItem.micNumber}");
-                    print("existid: ${existingItem.micNumber}");
-                    print("existmicStatus: ${existingItem.micStatus}");
-
-                    // go to new mic
-                    micModel.id = index.toString();
-                    micModel.userName = PreferencesServices.getString(Name_KEY);
-                    micModel.userId = PreferencesServices.getString(ID_KEY);
-                    micModel.micNumber = index;
-                    micModel.micStatus = true;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    finish(context);
-                    _updateMicsToFirebase(index, micModel);
-                  }, leaveMicFunction: () {
-                    // Leave mic
-                    micModel.id = null;
-                    micModel.userName = null;
-                    micModel.userId = null;
-                    micModel.micNumber = index;
-                    micModel.micStatus = false;
-                    micModel.isLocked = false;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    _updateMicsToFirebase(index, micModel);
-                    finish(context);
+                    });
                   });
-                });
-          } else {
-            print("not take other mic");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(takeMicFunction: () {
-                    print("clicked take");
-                    print("clicked index: $index");
-                    micModel.id = "$index";
-                    micModel.userName = PreferencesServices.getString(Name_KEY);
-                    micModel.userId = PreferencesServices.getString(ID_KEY);
-                    micModel.micNumber = index;
-                    micModel.micStatus = true;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    finish(context);
-                    _updateMicsToFirebase(index, micModel);
-                  }, leaveMicFunction: () {
-                    // Leave mic
-                    micModel.id = null;
-                    micModel.userName = null;
-                    micModel.userId = null;
-                    micModel.micNumber = index;
-                    micModel.micStatus = false;
-                    micModel.isLocked = false;
-                    print("name: ${micModel.userName}");
-                    print("userId: ${micModel.userId}");
-                    print("micNumber: ${micModel.micNumber}");
-                    print("id: ${micModel.micNumber}");
-                    print("micStatus: ${micModel.micStatus}");
-                    _updateMicsToFirebase(index, micModel);
-                    finish(context);
+            } else {
+              print("not take other mic");
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return MicClickDialog(takeMicFunction: () {
+                      print("clicked take");
+                      print("clicked index: $index");
+                      micModel.id = "$index";
+                      micModel.userName =
+                          PreferencesServices.getString(Name_KEY);
+                      micModel.userId = PreferencesServices.getString(ID_KEY);
+                      micModel.micNumber = index;
+                      micModel.micStatus = true;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      finish(context);
+                      _updateMicsToFirebase(index, micModel);
+                    }, leaveMicFunction: () {
+                      // Leave mic
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    });
                   });
-                });
+            }
           }
-        }
-      }),
-    );
+        }),
+      );
+    } else {
+      print("_personInRoom index" +
+          "${micModel.userName}" +
+          "--- Hedra Adel ---");
+      print("_personInRoom index" +
+          "${micModel.userName}" +
+          "--- Hedra Adel ---");
+      return Container();
+    }
   }
 
   //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
@@ -1252,6 +1291,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
       final theme = Theme.of(context);
       final size = MediaQuery.of(context).size;
       TextEditingController _controller = TextEditingController();
+      // Get the maximum width and height
+      double maxWidth = constraints.maxWidth;
+      double maxHeight = constraints.maxHeight;
 
       return BlocProvider(
         create: (context) => HomeCubit()
@@ -1419,7 +1461,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return LayoutBuilder(builder: (context, constraints) {
       final size = MediaQuery.of(context).size;
       final theme = Theme.of(context);
-
+      // Get the maximum width and height
+      double maxWidth = constraints.maxWidth;
+      double maxHeight = constraints.maxHeight;
       return Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
@@ -1450,17 +1494,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 40.0, horizontal: 8.0),
                         child: SizedBox(
-                          child: Column(
-                            children: [
-                              Row(
+                            //the problem of overflowed by 19pixels on this coulmn and the problem is in the text widget
+
+                            child: Column(
+                          children: <Widget>[
+                            Flexible(
+                              child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      width: size.width / 2 - 16,
+                                      width: size.width / 2 - 18,
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 2.0, horizontal: 6.0),
+                                          vertical: 1.0, horizontal: 3.0),
                                       decoration: BoxDecoration(
                                         color: Colors.black26,
                                         borderRadius: BorderRadius.only(
@@ -1507,7 +1554,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             width: 10.0,
                                           ),
                                           Expanded(
-                                            child: Column(
+                                            child: Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
@@ -1520,6 +1567,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                           color: Colors.white,
                                                           fontSize: 17),
                                                 ),
+                                                Spacer(),
                                                 Text(
                                                   "ID :${widget.roomId}",
                                                   maxLines: 1,
@@ -1670,8 +1718,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   )
                                 ],
                               ),
-                              16.height,
-                              Container(
+                            ),
+                            16.height,
+                            Flexible(
+                              child: Container(
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -1984,7 +2034,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                         .spaceBetween,
                                                 children: [
                                                   Expanded(
-                                                    // flex: 1,
+                                                    flex: 1,
                                                     child: ListView.separated(
                                                       scrollDirection:
                                                           Axis.horizontal,
@@ -2076,8 +2126,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   ],
                                 ),
                               ),
-                              16.height,
-                              Container(
+                            ),
+                            16.height,
+                            Flexible(
+                              child: Container(
                                 padding: const EdgeInsets.all(6.0),
                                 child: Stack(
                                   // fit: StackFit.expand,
@@ -2092,32 +2144,32 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   ],
                                 ),
                               ),
-                              16.height,
-                              // Container(
-                              //   width: double.infinity,
-                              //   padding: const EdgeInsets.symmetric(
-                              //       vertical: 4.0, horizontal: 8.0),
-                              //   decoration: BoxDecoration(
-                              //     color: Colors.black54,
-                              //   ),
-                              //   child: Marquee(
-                              //     child: Text(
-                              //       'Some sample text that takes some space, Some sample text that takes some space. ',
-                              //       style: theme.textTheme.bodyText1
-                              //           .copyWith(color: Colors.white),
-                              //     ),
-                              //     direction: Axis.horizontal,
-                              //     textDirection: TextDirection.rtl,
-                              //     pauseDuration: Duration(seconds: 2),
-                              //     backDuration: Duration(seconds: 2),
-                              //     animationDuration: Duration(seconds: 6),
-                              //     directionMarguee: DirectionMarguee.oneDirection,
-                              //   ),
-                              // ),
-                              buildListMessage(size),
-                            ],
-                          ),
-                        ),
+                            ),
+                            16.height,
+                            // Container(
+                            //   width: double.infinity,
+                            //   padding: const EdgeInsets.symmetric(
+                            //       vertical: 4.0, horizontal: 8.0),
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.black54,
+                            //   ),
+                            //   child: Marquee(
+                            //     child: Text(
+                            //       'Some sample text that takes some space, Some sample text that takes some space. ',
+                            //       style: theme.textTheme.bodyText1
+                            //           .copyWith(color: Colors.white),
+                            //     ),
+                            //     direction: Axis.horizontal,
+                            //     textDirection: TextDirection.rtl,
+                            //     pauseDuration: Duration(seconds: 2),
+                            //     backDuration: Duration(seconds: 2),
+                            //     animationDuration: Duration(seconds: 6),
+                            //     directionMarguee: DirectionMarguee.oneDirection,
+                            //   ),
+                            // ),
+                            buildListMessage(size),
+                          ],
+                        )),
                       ),
                       Positioned(
                         bottom: 10,
@@ -2146,55 +2198,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
                               ),
                             ),
                             8.width,
-                            // add new icon button open emoji keyboard dialog and add the selected emoji to the textfield value and close the dialog
-                            IconButton(
-                              icon: Icon(Icons.insert_emoticon),
-                              onPressed: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return EmojiPicker(
-                                      onEmojiSelected:
-                                          (Category category, Emoji emoji) {
-                                        _messageController.text =
-                                            _messageController.text +
-                                                emoji.emoji;
-                                      },
-                                      onBackspacePressed: () {
-                                        _messageController.text =
-                                            _messageController.text.isNotEmpty
-                                                ? _messageController.text
-                                                    .substring(
-                                                        0,
-                                                        _messageController
-                                                                .text.length -
-                                                            1)
-                                                : _messageController.text;
-                                      },
-                                      textEditingController: _messageController,
-                                      config: Config(
-                                        height: 256,
-                                        bgColor: const Color(0xFFF2F2F2),
-                                        checkPlatformCompatibility: true,
-                                        emojiViewConfig: EmojiViewConfig(
-                                          emojiSizeMax: 28 *
-                                              (foundation.defaultTargetPlatform ==
-                                                      TargetPlatform.iOS
-                                                  ? 1.20
-                                                  : 1.0),
-                                        ),
-                                        swapCategoryAndBottomBar: false,
-                                        skinToneConfig: const SkinToneConfig(),
-                                        categoryViewConfig:
-                                            const CategoryViewConfig(),
-                                        bottomActionBarConfig:
-                                            const BottomActionBarConfig(),
-                                        searchViewConfig:
-                                            const SearchViewConfig(),
-                                      ),
-                                    );
-                                  },
-                                );
+                            // add the emoji button here
+                            InkWell(
+                              child: Container(
+                                padding: const EdgeInsets.all(5.0),
+                                // add left margin
+                                margin: const EdgeInsets.only(left: 8.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.orange,
+                                ),
+                                child: Icon(
+                                  Icons.emoji_emotions_outlined,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              onTap: () {
+                                FocusScope.of(context)
+                                    .unfocus(); // Dismiss keyboard (optional)
+                                showEmojiPicker(context); // Show picker
                               },
                             ),
 
@@ -2951,659 +2973,701 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         });
 
                         return FractionallySizedBox(
-                          heightFactor: 0.41,
+                          heightFactor: 0.5,
                           child: Stack(children: [
                             Column(
-                              children: [
-                                new Container(
-                                  height: 25,
-                                  color: Colors.transparent.withOpacity(0.0),
-                                ),
-                                Container(
-                                  height: 290,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(30),
-                                        topRight: Radius.circular(30)),
+                              children: <Widget>[
+                                SingleChildScrollView(
+                                  child: new Container(
+                                    height: 25,
+                                    color: Colors.transparent.withOpacity(0.0),
                                   ),
-                                  // color: Colors.amber,
+                                ),
+                                SingleChildScrollView(
+                                  child: Container(
+                                    height: 290,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(30),
+                                          topRight: Radius.circular(30)),
+                                    ),
+                                    // color: Colors.amber,
 
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                    child: Expanded(
+                                      child: Column(
                                         children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 20, top: 12),
-                                            child: Container(
-                                              height: 22,
-                                              width: 25,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.orange,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  "@",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 20, top: 12),
-                                            child: Container(
-                                              height: 22,
-                                              width: 25,
-                                              child: Icon(
-                                                Icons.report_problem_outlined,
-                                                color: Colors.grey.shade400,
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 20,
-                                      ),
-                                      Text(document.get('username')),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          if (document.get('userType') ==
-                                              'user')
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Container(
-                                                  width: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: kPrimaryColor,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topRight:
-                                                          Radius.circular(10),
-                                                      bottomRight:
-                                                          Radius.circular(10),
-                                                      bottomLeft:
-                                                          Radius.circular(10),
-                                                      topLeft:
-                                                          Radius.circular(10),
+                                          SingleChildScrollView(
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 20, top: 12),
+                                                  child: Container(
+                                                    height: 22,
+                                                    width: 25,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.orange,
                                                     ),
-                                                    border: Border.all(
-                                                      width: 1,
-                                                      color: kPrimaryColor,
-                                                      style: BorderStyle.solid,
-                                                    ),
-                                                    // shape: BoxShape.circle,
-                                                  ),
-                                                  child: Center(
+                                                    child: Center(
                                                       child: Text(
-                                                    'عضو',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 12),
-                                                  ))),
-                                            ),
-                                          if (document.get('userType') ==
-                                              'supervisor')
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Container(
-                                                  width: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: kPrimaryColor,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topRight:
-                                                          Radius.circular(10),
-                                                      bottomRight:
-                                                          Radius.circular(10),
-                                                      bottomLeft:
-                                                          Radius.circular(10),
-                                                      topLeft:
-                                                          Radius.circular(10),
-                                                    ),
-                                                    border: Border.all(
-                                                      width: 1,
-                                                      color: kPrimaryColor,
-                                                      style: BorderStyle.solid,
-                                                    ),
-                                                    // shape: BoxShape.circle,
-                                                  ),
-                                                  child: Center(
-                                                      child: Text(
-                                                    'مشرف',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 12),
-                                                  ))),
-                                            ),
-                                          if (document.get('userType') ==
-                                              'owner')
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Container(
-                                                  width: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: kPrimaryColor,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topRight:
-                                                          Radius.circular(10),
-                                                      bottomRight:
-                                                          Radius.circular(10),
-                                                      bottomLeft:
-                                                          Radius.circular(10),
-                                                      topLeft:
-                                                          Radius.circular(10),
-                                                    ),
-                                                    border: Border.all(
-                                                      width: 1,
-                                                      color: kPrimaryColor,
-                                                      style: BorderStyle.solid,
-                                                    ),
-                                                    // shape: BoxShape.circle,
-                                                  ),
-                                                  child: Center(
-                                                      child: Text(
-                                                    'مالك',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 12),
-                                                  ))),
-                                            ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            'ID:${document.get('idFrom').toString()}',
-                                            style:
-                                                TextStyle(color: Colors.grey),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            'LV ${document.get('userLevel').toString()}',
-                                            style: TextStyle(
-                                                color: kPrimaryColor,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          SizedBox(
-                                            width: 30,
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            height: 18,
-                                            width: 20,
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.red,
-                                                border: Border.all(
-                                                  width: 2,
-                                                  color: Colors.amber,
-                                                )),
-                                            child: Center(
-                                              child: Icon(
-                                                Icons.person,
-                                                color: Colors.amber,
-                                                size: 12,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Container(
-                                            height: 18,
-                                            width: 20,
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.red,
-                                                border: Border.all(
-                                                  width: 2,
-                                                  color: Colors.amber,
-                                                )),
-                                            child: Center(
-                                              child: Icon(
-                                                Icons.markunread_mailbox,
-                                                color: Colors.amber,
-                                                size: 10,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Container(
-                                            height: 18,
-                                            width: 20,
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.red,
-                                                border: Border.all(
-                                                  width: 2,
-                                                  color: Colors.amber,
-                                                )),
-                                            child: Center(
-                                              child: Icon(
-                                                Icons.home,
-                                                color: Colors.amber,
-                                                size: 12,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Spacer(),
-                                      Padding(
-                                        padding: const EdgeInsets.all(20.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            // if (isfriendfirebase == true)
-                                            isfriendfirebase == true
-                                                ? Column(
-                                                    children: [
-                                                      MaterialButton(
-                                                        onPressed: () {},
-                                                        color: Colors.yellow,
-                                                        textColor: Colors.white,
-                                                        child: Icon(
-                                                          Icons.message_rounded,
-                                                          size: 14,
-                                                        ),
-                                                        padding:
-                                                            EdgeInsets.all(16),
-                                                        shape: CircleBorder(),
-                                                      ),
-                                                      Text(
-                                                        "الرسائل",
+                                                        "@",
                                                         style: TextStyle(
-                                                            color: Colors.grey),
-                                                      )
-                                                    ],
-                                                  )
-                                                : Column(
-                                                    children: [
-                                                      MaterialButton(
-                                                        onPressed: () {},
-                                                        color: Colors.yellow,
-                                                        textColor: Colors.white,
-                                                        child: Icon(
-                                                          Icons.person_add,
-                                                          size: 14,
-                                                        ),
-                                                        padding:
-                                                            EdgeInsets.all(16),
-                                                        shape: CircleBorder(),
-                                                      ),
-                                                      Text(
-                                                        'إضافه صديق',
-                                                        style: TextStyle(
-                                                            color: Colors.grey),
-                                                      )
-                                                    ],
-                                                  ),
-                                            Column(
-                                              children: [
-                                                MaterialButton(
-                                                  onPressed: () {},
-                                                  color: kPrimaryLightColor,
-                                                  textColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons
-                                                        .mic_external_off_rounded,
-                                                    size: 14,
-                                                  ),
-                                                  padding: EdgeInsets.all(16),
-                                                  shape: CircleBorder(),
-                                                ),
-                                                Text(
-                                                  'كتم الصوت',
-                                                  style: TextStyle(
-                                                      color: Colors.grey),
-                                                )
-                                              ],
-                                            ),
-                                            Column(
-                                              children: [
-                                                MaterialButton(
-                                                  onPressed: () {
-                                                    //     Get.to(StackDemo());
-                                                  },
-                                                  color: Colors.red,
-                                                  textColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons.star,
-                                                    size: 14,
-                                                  ),
-                                                  padding: EdgeInsets.all(16),
-                                                  shape: CircleBorder(),
-                                                ),
-                                                Text(
-                                                  'البطاقات السحرية',
-                                                  style: TextStyle(
-                                                      color: Colors.grey),
-                                                )
-                                              ],
-                                            ),
-                                            Column(
-                                              children: [
-                                                MaterialButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-
-                                                    showModalBottomSheet(
-                                                        backgroundColor:
-                                                            Colors.transparent,
-                                                        context: context,
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return GiftScreen(
-                                                              roomID: roomID,
-                                                              userID: document.get(
-                                                                  'ApiUserID'),
-                                                              check: true,
-                                                              username: document
-                                                                  .get('username'
-                                                                      .toString()) // userID: model.userId
-                                                              // .toString(),
-                                                              );
-                                                        });
-                                                  },
-                                                  color: Colors.blueAccent,
-                                                  textColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons.card_giftcard,
-                                                    size: 14,
-                                                  ),
-                                                  padding: EdgeInsets.all(16),
-                                                  shape: CircleBorder(),
-                                                ),
-                                                Text(
-                                                  'إرسال هديه',
-                                                  style: TextStyle(
-                                                      color: Colors.grey),
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Container(
-                                                height: 45,
-                                                decoration: BoxDecoration(
-                                                  border: Border(
-                                                    top: BorderSide(
-                                                        width: 1.0,
-                                                        color: Colors
-                                                            .grey.shade300),
-                                                    bottom: BorderSide(
-                                                        width: 1.0,
-                                                        color: Colors.lightBlue
-                                                            .shade900),
-                                                  ),
-                                                  color: Colors.white,
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
-                                                  children: [
-                                                    IconButton(
-                                                        onPressed: () {
-                                                          showDialog<String>(
-                                                            context: context,
-                                                            builder: (BuildContext
-                                                                    context) =>
-                                                                Directionality(
-                                                              textDirection:
-                                                                  TextDirection
-                                                                      .rtl,
-                                                              child:
-                                                                  AlertDialog(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.all(
-                                                                            Radius.circular(15))),
-                                                                title: Center(
-                                                                  child: const Text(
-                                                                      'هل تريد حظر العضو'),
-                                                                ),
-                                                                actions: <
-                                                                    Widget>[
-                                                                  Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceAround,
-                                                                    children: [
-                                                                      TextButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          HomeCubit.get(context)
-                                                                              .addBlockList(id: document.get('ApiUserID'));
-                                                                          Navigator.pop(
-                                                                              context,
-                                                                              'yes');
-
-                                                                          CommonFunctions.showToast(
-                                                                              'تم حظر العضو',
-                                                                              Colors.green);
-                                                                        },
-                                                                        child: const Text(
-                                                                            'نعم'),
-                                                                      ),
-                                                                      TextButton(
-                                                                        onPressed: () => Navigator.pop(
-                                                                            context,
-                                                                            'no'),
-                                                                        child: const Text(
-                                                                            'لا'),
-                                                                      ),
-                                                                    ],
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          );
-                                                          // print(model.userId);
-                                                        },
-                                                        icon: Icon(
-                                                          Icons.logout,
-                                                          color: Colors
-                                                              .grey.shade400,
-                                                          size: 25,
-                                                        )),
-                                                    VerticalDivider(),
-                                                    IconButton(
-                                                        onPressed: () {
-                                                          showDialog<String>(
-                                                            context: context,
-                                                            builder: (BuildContext
-                                                                    context) =>
-                                                                Directionality(
-                                                              textDirection:
-                                                                  TextDirection
-                                                                      .rtl,
-                                                              child:
-                                                                  AlertDialog(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.all(
-                                                                            Radius.circular(15))),
-                                                                title: Center(
-                                                                  child: const Text(
-                                                                      'هل تريد اصمات العضو'),
-                                                                ),
-                                                                // content: const Text('AlertDialog description'),
-                                                                actions: <
-                                                                    Widget>[
-                                                                  Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceAround,
-                                                                    children: [
-                                                                      TextButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          ismuted =
-                                                                              false;
-                                                                          _updateuserDataFirebase(
-                                                                              roomID,
-                                                                              document.get('username'),
-                                                                              document.get('idFrom'));
-
-                                                                          _updateMutedFirebase(
-                                                                            roomID,
-                                                                          );
-
-                                                                          Navigator.pop(
-                                                                              context,
-                                                                              'yes');
-
-                                                                          CommonFunctions.showToast(
-                                                                              'تم اصمات العضو',
-                                                                              Colors.green);
-                                                                        },
-                                                                        child: const Text(
-                                                                            'نعم'),
-                                                                      ),
-                                                                      TextButton(
-                                                                        onPressed: () => Navigator.pop(
-                                                                            context,
-                                                                            'no'),
-                                                                        child: const Text(
-                                                                            'لا'),
-                                                                      ),
-                                                                    ],
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                        icon: Icon(
-                                                          Icons.block_rounded,
-                                                          color: Colors
-                                                              .grey.shade400,
-                                                          size: 25,
-                                                        )),
-                                                    VerticalDivider(),
-                                                    IconButton(
-                                                        onPressed: () {},
-                                                        icon: Icon(
-                                                          Icons.mic,
-                                                          color: Colors
-                                                              .grey.shade400,
-                                                          size: 25,
-                                                        )),
-                                                    VerticalDivider(),
-                                                    Theme(
-                                                        data: Theme.of(context)
-                                                            .copyWith(
-                                                          dividerTheme:
-                                                              DividerThemeData(
                                                             color: Colors.white,
-                                                          ),
-                                                          cardColor: Colors
-                                                              .black
-                                                              .withOpacity(0.7),
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 20, top: 12),
+                                                  child: Container(
+                                                    height: 22,
+                                                    width: 25,
+                                                    child: Icon(
+                                                      Icons
+                                                          .report_problem_outlined,
+                                                      color:
+                                                          Colors.grey.shade400,
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Text(document.get('username')),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              if (document.get('userType') ==
+                                                  'user')
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                      width: 50,
+                                                      decoration: BoxDecoration(
+                                                        color: kPrimaryColor,
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  10),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  10),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  10),
                                                         ),
-                                                        child: PopupMenuButton<
-                                                            int>(
-                                                          icon: Icon(
-                                                            Icons.person,
-                                                            color: Colors.green,
-                                                            size: 25,
+                                                        border: Border.all(
+                                                          width: 1,
+                                                          color: kPrimaryColor,
+                                                          style:
+                                                              BorderStyle.solid,
+                                                        ),
+                                                        // shape: BoxShape.circle,
+                                                      ),
+                                                      child: Center(
+                                                          child: Text(
+                                                        'عضو',
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12),
+                                                      ))),
+                                                ),
+                                              if (document.get('userType') ==
+                                                  'supervisor')
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                      width: 50,
+                                                      decoration: BoxDecoration(
+                                                        color: kPrimaryColor,
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  10),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  10),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                        ),
+                                                        border: Border.all(
+                                                          width: 1,
+                                                          color: kPrimaryColor,
+                                                          style:
+                                                              BorderStyle.solid,
+                                                        ),
+                                                        // shape: BoxShape.circle,
+                                                      ),
+                                                      child: Center(
+                                                          child: Text(
+                                                        'مشرف',
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12),
+                                                      ))),
+                                                ),
+                                              if (document.get('userType') ==
+                                                  'owner')
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                      width: 50,
+                                                      decoration: BoxDecoration(
+                                                        color: kPrimaryColor,
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  10),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  10),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  10),
+                                                        ),
+                                                        border: Border.all(
+                                                          width: 1,
+                                                          color: kPrimaryColor,
+                                                          style:
+                                                              BorderStyle.solid,
+                                                        ),
+                                                        // shape: BoxShape.circle,
+                                                      ),
+                                                      child: Center(
+                                                          child: Text(
+                                                        'مالك',
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12),
+                                                      ))),
+                                                ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text(
+                                                'ID:${document.get('idFrom').toString()}',
+                                                style: TextStyle(
+                                                    color: Colors.grey),
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              Text(
+                                                'LV ${document.get('userLevel').toString()}',
+                                                style: TextStyle(
+                                                    color: kPrimaryColor,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              SizedBox(
+                                                width: 30,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                height: 18,
+                                                width: 20,
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Colors.red,
+                                                    border: Border.all(
+                                                      width: 2,
+                                                      color: Colors.amber,
+                                                    )),
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.person,
+                                                    color: Colors.amber,
+                                                    size: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Container(
+                                                height: 18,
+                                                width: 20,
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Colors.red,
+                                                    border: Border.all(
+                                                      width: 2,
+                                                      color: Colors.amber,
+                                                    )),
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.markunread_mailbox,
+                                                    color: Colors.amber,
+                                                    size: 10,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Container(
+                                                height: 18,
+                                                width: 20,
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Colors.red,
+                                                    border: Border.all(
+                                                      width: 2,
+                                                      color: Colors.amber,
+                                                    )),
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.home,
+                                                    color: Colors.amber,
+                                                    size: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Spacer(),
+                                          Padding(
+                                            padding: const EdgeInsets.all(20.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                // if (isfriendfirebase == true)
+                                                isfriendfirebase == true
+                                                    ? Column(
+                                                        children: [
+                                                          MaterialButton(
+                                                            onPressed: () {},
+                                                            color:
+                                                                Colors.yellow,
+                                                            textColor:
+                                                                Colors.white,
+                                                            child: Icon(
+                                                              Icons
+                                                                  .message_rounded,
+                                                              size: 14,
+                                                            ),
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    16),
+                                                            shape:
+                                                                CircleBorder(),
                                                           ),
-                                                          onSelected: (item) =>
-                                                              onSelected2(
-                                                                  // context,
-                                                                  item,
-                                                                  document.get(
-                                                                      'ApiUserID'),
-                                                                  roomID),
-                                                          itemBuilder:
-                                                              (context) => [
-                                                            PopupMenuItem<int>(
-                                                                value: 0,
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    Center(
-                                                                      child:
-                                                                          Text(
-                                                                        "تعين مشرف",
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.white),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                )),
-                                                            PopupMenuDivider(),
-                                                            PopupMenuItem<int>(
-                                                                value: 1,
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    Center(
-                                                                      child: Text(
-                                                                          "تعين عضو",
-                                                                          style:
-                                                                              TextStyle(color: Colors.white)),
-                                                                    )
-                                                                  ],
-                                                                )),
-                                                            PopupMenuDivider(),
-                                                            PopupMenuItem<int>(
-                                                                value: 2,
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    Text(
-                                                                      "ازالة العضو",
-                                                                      style: TextStyle(
-                                                                          color:
-                                                                              Colors.white),
-                                                                    )
-                                                                  ],
-                                                                )),
-                                                          ],
-                                                        )),
+                                                          Text(
+                                                            "الرسائل",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .grey),
+                                                          )
+                                                        ],
+                                                      )
+                                                    : Column(
+                                                        children: [
+                                                          MaterialButton(
+                                                            onPressed: () {},
+                                                            color:
+                                                                Colors.yellow,
+                                                            textColor:
+                                                                Colors.white,
+                                                            child: Icon(
+                                                              Icons.person_add,
+                                                              size: 14,
+                                                            ),
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    16),
+                                                            shape:
+                                                                CircleBorder(),
+                                                          ),
+                                                          Text(
+                                                            'إضافه صديق',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .grey),
+                                                          )
+                                                        ],
+                                                      ),
+                                                Column(
+                                                  children: [
+                                                    MaterialButton(
+                                                      onPressed: () {},
+                                                      color: kPrimaryLightColor,
+                                                      textColor: Colors.white,
+                                                      child: Icon(
+                                                        Icons
+                                                            .mic_external_off_rounded,
+                                                        size: 14,
+                                                      ),
+                                                      padding:
+                                                          EdgeInsets.all(16),
+                                                      shape: CircleBorder(),
+                                                    ),
+                                                    Text(
+                                                      'كتم الصوت',
+                                                      style: TextStyle(
+                                                          color: Colors.grey),
+                                                    )
                                                   ],
-                                                )),
-                                          )
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    MaterialButton(
+                                                      onPressed: () {
+                                                        //     Get.to(StackDemo());
+                                                      },
+                                                      color: Colors.red,
+                                                      textColor: Colors.white,
+                                                      child: Icon(
+                                                        Icons.star,
+                                                        size: 14,
+                                                      ),
+                                                      padding:
+                                                          EdgeInsets.all(16),
+                                                      shape: CircleBorder(),
+                                                    ),
+                                                    Text(
+                                                      'البطاقات السحرية',
+                                                      style: TextStyle(
+                                                          color: Colors.grey),
+                                                    )
+                                                  ],
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    MaterialButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+
+                                                        showModalBottomSheet(
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return GiftScreen(
+                                                                  roomID:
+                                                                      roomID,
+                                                                  userID: document
+                                                                      .get(
+                                                                          'ApiUserID'),
+                                                                  check: true,
+                                                                  username: document
+                                                                      .get('username'
+                                                                          .toString()) // userID: model.userId
+                                                                  // .toString(),
+                                                                  );
+                                                            });
+                                                      },
+                                                      color: Colors.blueAccent,
+                                                      textColor: Colors.white,
+                                                      child: Icon(
+                                                        Icons.card_giftcard,
+                                                        size: 14,
+                                                      ),
+                                                      padding:
+                                                          EdgeInsets.all(16),
+                                                      shape: CircleBorder(),
+                                                    ),
+                                                    Text(
+                                                      'إرسال هديه',
+                                                      style: TextStyle(
+                                                          color: Colors.grey),
+                                                    )
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Container(
+                                                    height: 45,
+                                                    decoration: BoxDecoration(
+                                                      border: Border(
+                                                        top: BorderSide(
+                                                            width: 1.0,
+                                                            color: Colors
+                                                                .grey.shade300),
+                                                        bottom: BorderSide(
+                                                            width: 1.0,
+                                                            color: Colors
+                                                                .lightBlue
+                                                                .shade900),
+                                                      ),
+                                                      color: Colors.white,
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: [
+                                                        IconButton(
+                                                            onPressed: () {
+                                                              showDialog<
+                                                                  String>(
+                                                                context:
+                                                                    context,
+                                                                builder: (BuildContext
+                                                                        context) =>
+                                                                    Directionality(
+                                                                  textDirection:
+                                                                      TextDirection
+                                                                          .rtl,
+                                                                  child:
+                                                                      AlertDialog(
+                                                                    shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.all(Radius.circular(15))),
+                                                                    title:
+                                                                        Center(
+                                                                      child: const Text(
+                                                                          'هل تريد حظر العضو'),
+                                                                    ),
+                                                                    actions: <
+                                                                        Widget>[
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceAround,
+                                                                        children: [
+                                                                          TextButton(
+                                                                            onPressed:
+                                                                                () {
+                                                                              HomeCubit.get(context).addBlockList(id: document.get('ApiUserID'));
+                                                                              Navigator.pop(context, 'yes');
+
+                                                                              CommonFunctions.showToast('تم حظر العضو', Colors.green);
+                                                                            },
+                                                                            child:
+                                                                                const Text('نعم'),
+                                                                          ),
+                                                                          TextButton(
+                                                                            onPressed: () =>
+                                                                                Navigator.pop(context, 'no'),
+                                                                            child:
+                                                                                const Text('لا'),
+                                                                          ),
+                                                                        ],
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                              // print(model.userId);
+                                                            },
+                                                            icon: Icon(
+                                                              Icons.logout,
+                                                              color: Colors.grey
+                                                                  .shade400,
+                                                              size: 25,
+                                                            )),
+                                                        VerticalDivider(),
+                                                        IconButton(
+                                                            onPressed: () {
+                                                              showDialog<
+                                                                  String>(
+                                                                context:
+                                                                    context,
+                                                                builder: (BuildContext
+                                                                        context) =>
+                                                                    Directionality(
+                                                                  textDirection:
+                                                                      TextDirection
+                                                                          .rtl,
+                                                                  child:
+                                                                      AlertDialog(
+                                                                    shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.all(Radius.circular(15))),
+                                                                    title:
+                                                                        Center(
+                                                                      child: const Text(
+                                                                          'هل تريد اصمات العضو'),
+                                                                    ),
+                                                                    // content: const Text('AlertDialog description'),
+                                                                    actions: <
+                                                                        Widget>[
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceAround,
+                                                                        children: [
+                                                                          TextButton(
+                                                                            onPressed:
+                                                                                () {
+                                                                              ismuted = false;
+                                                                              _updateuserDataFirebase(roomID, document.get('username'), document.get('idFrom'));
+
+                                                                              _updateMutedFirebase(
+                                                                                roomID,
+                                                                              );
+
+                                                                              Navigator.pop(context, 'yes');
+
+                                                                              CommonFunctions.showToast('تم اصمات العضو', Colors.green);
+                                                                            },
+                                                                            child:
+                                                                                const Text('نعم'),
+                                                                          ),
+                                                                          TextButton(
+                                                                            onPressed: () =>
+                                                                                Navigator.pop(context, 'no'),
+                                                                            child:
+                                                                                const Text('لا'),
+                                                                          ),
+                                                                        ],
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            },
+                                                            icon: Icon(
+                                                              Icons
+                                                                  .block_rounded,
+                                                              color: Colors.grey
+                                                                  .shade400,
+                                                              size: 25,
+                                                            )),
+                                                        VerticalDivider(),
+                                                        IconButton(
+                                                            onPressed: () {},
+                                                            icon: Icon(
+                                                              Icons.mic,
+                                                              color: Colors.grey
+                                                                  .shade400,
+                                                              size: 25,
+                                                            )),
+                                                        VerticalDivider(),
+                                                        Theme(
+                                                            data: Theme.of(
+                                                                    context)
+                                                                .copyWith(
+                                                              dividerTheme:
+                                                                  DividerThemeData(
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                              cardColor: Colors
+                                                                  .black
+                                                                  .withOpacity(
+                                                                      0.7),
+                                                            ),
+                                                            child:
+                                                                PopupMenuButton<
+                                                                    int>(
+                                                              icon: Icon(
+                                                                Icons.person,
+                                                                color: Colors
+                                                                    .green,
+                                                                size: 25,
+                                                              ),
+                                                              onSelected: (item) =>
+                                                                  onSelected2(
+                                                                      // context,
+                                                                      item,
+                                                                      document.get(
+                                                                          'ApiUserID'),
+                                                                      roomID),
+                                                              itemBuilder:
+                                                                  (context) => [
+                                                                PopupMenuItem<
+                                                                        int>(
+                                                                    value: 0,
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Center(
+                                                                          child:
+                                                                              Text(
+                                                                            "تعين مشرف",
+                                                                            style:
+                                                                                TextStyle(color: Colors.white),
+                                                                          ),
+                                                                        )
+                                                                      ],
+                                                                    )),
+                                                                PopupMenuDivider(),
+                                                                PopupMenuItem<
+                                                                        int>(
+                                                                    value: 1,
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Center(
+                                                                          child: Text(
+                                                                              "تعين عضو",
+                                                                              style: TextStyle(color: Colors.white)),
+                                                                        )
+                                                                      ],
+                                                                    )),
+                                                                PopupMenuDivider(),
+                                                                PopupMenuItem<
+                                                                        int>(
+                                                                    value: 2,
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Text(
+                                                                          "ازالة العضو",
+                                                                          style:
+                                                                              TextStyle(color: Colors.white),
+                                                                        )
+                                                                      ],
+                                                                    )),
+                                                              ],
+                                                            )),
+                                                      ],
+                                                    )),
+                                              )
+                                            ],
+                                          ),
                                         ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -3928,29 +3992,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
             print(":has data");
             _micUsersList = snapshot.data;
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3.0),
-              child: Column(children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(5, (index) {
-                    return _personInRoom(
-                      index,
-                      snapshot.data[index],
-                    );
-                  }).toList(),
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3.0),
+              child: Column(children: <Widget>[
+                Flexible(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(5, (index) {
+                      return _personInRoom(
+                        index,
+                        snapshot.data[index],
+                      );
+                    }).toList(),
+                  ),
                 ),
                 SizedBox(
                   height: 10,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(5, (index) {
-                    return _personInRoom(
-                      index + 5,
-                      snapshot.data[index + 5],
-                    );
-                  }).toList(),
-                  // children: snapshot.data.map((item) => _personInRoom(snapshot.data.indexOf(item), item)).toList(),
+                Flexible(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(5, (index) {
+                      return _personInRoom(
+                        index + 5,
+                        snapshot.data[index + 5],
+                      );
+                    }).toList(),
+                    // children: snapshot.data.map((item) => _personInRoom(snapshot.data.indexOf(item), item)).toList(),
+                  ),
                 ),
               ]),
             );
@@ -4028,58 +4096,56 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 micNumber: 9,
                 micStatus: false,
                 isLocked: false));
-            //  _micsList.add(UserMicModel(
-            // id: null,
-            // userId: null,
-            // userName: null,
-            // micNumber: 8,
-            // micStatus: false,
-            // isLocked: false));
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Row(
-                children: [
-                  _personInRoom(
-                    0,
-                    _micsList[0],
+
+            return Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Flexible(
+                  child: Row(
+                    children: [
+                      _personInRoom(
+                        0,
+                        _micsList[0],
+                      ),
+                      _personInRoom(
+                        1,
+                        _micsList[1],
+                      ),
+                      _personInRoom(
+                        2,
+                        _micsList[2],
+                      ),
+                      _personInRoom(
+                        3,
+                        _micsList[3],
+                      ),
+                      _personInRoom(
+                        4,
+                        _micsList[4],
+                      ),
+                      _personInRoom(
+                        5,
+                        _micsList[5],
+                      ),
+                      _personInRoom(
+                        6,
+                        _micsList[6],
+                      ),
+                      _personInRoom(
+                        7,
+                        _micsList[7],
+                      ),
+                      _personInRoom(
+                        8,
+                        _micsList[8],
+                      ),
+                      _personInRoom(
+                        9,
+                        _micsList[9],
+                      ),
+                    ],
                   ),
-                  _personInRoom(
-                    1,
-                    _micsList[1],
-                  ),
-                  _personInRoom(
-                    2,
-                    _micsList[2],
-                  ),
-                  _personInRoom(
-                    3,
-                    _micsList[3],
-                  ),
-                  _personInRoom(
-                    4,
-                    _micsList[4],
-                  ),
-                  _personInRoom(
-                    5,
-                    _micsList[5],
-                  ),
-                  _personInRoom(
-                    6,
-                    _micsList[6],
-                  ),
-                  _personInRoom(
-                    7,
-                    _micsList[7],
-                  ),
-                  _personInRoom(
-                    8,
-                    _micsList[8],
-                  ),
-                  _personInRoom(
-                    9,
-                    _micsList[9],
-                  ),
-                ],
+                ),
               ),
             );
           }

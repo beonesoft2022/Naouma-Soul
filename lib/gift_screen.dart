@@ -111,39 +111,39 @@ class _GiftScreenState extends State<GiftScreen> {
         height: MediaQuery.of(context).size.height * 0.40,
         child: Column(
           children: <Widget>[
-           Row(
-  mainAxisAlignment: MainAxisAlignment.start,
-  children: [
-    // Expanded for wallet amount
-    Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(
-            child: Container(
-              height: 30,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      model1.walletAmount.toString(),
-                      style: secondaryTextStyle(color: Colors.white),
-                      maxLines: 2,
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.visible,
-                    ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Expanded for wallet amount
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          height: 30,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  model1.walletAmount.toString(),
+                                  style:
+                                      secondaryTextStyle(color: Colors.white),
+                                  maxLines: 2,
+                                  textAlign: TextAlign.start,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          )
-        ],
-      ),
-    ),
-  ],
-),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -259,9 +259,9 @@ class _GiftScreenState extends State<GiftScreen> {
                       }
                       // print('userID is${widget.userID}');
                       // print('userID is${widget.check}');
-                      print('userID is$senduserId');
-                      print('giftID is$giftID');
-                      print('roomId is${widget.roomID}');
+                      print('userID is $senduserId');
+                      print('giftID is $giftID');
+                      print('roomId is ${widget.roomID}');
                       print(_controller.text);
                       HomeCubit.get(context).sendgift(
                           id: widget.roomID,

@@ -9,6 +9,7 @@
 import 'package:agora_rtc_engine/agora_rtc_engine_web.dart';
 import 'package:cloud_firestore_web/cloud_firestore_web.dart';
 import 'package:connectivity_plus_web/connectivity_plus_web.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter_web.dart';
 import 'package:firebase_analytics_web/firebase_analytics_web.dart';
 import 'package:firebase_auth_web/firebase_auth_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
@@ -27,6 +28,7 @@ void registerPlugins(Registrar registrar) {
   AgoraRtcEngineWeb.registerWith(registrar);
   FirebaseFirestoreWeb.registerWith(registrar);
   ConnectivityPlusPlugin.registerWith(registrar);
+  EmojiPickerFlutterPluginWeb.registerWith(registrar);
   FirebaseAnalyticsWeb.registerWith(registrar);
   FirebaseAuthWeb.registerWith(registrar);
   FirebaseCoreWeb.registerWith(registrar);

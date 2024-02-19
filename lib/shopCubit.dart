@@ -14,8 +14,10 @@ import 'package:project/endpoint.dart';
 import 'package:project/models/permeim_model.dart';
 import 'package:project/models/special_id_model.dart';
 import 'package:project/shopStates.dart';
+import 'package:project/utils/HedraTrace.dart';
 import 'package:project/utils/constants.dart';
 
+import 'common_functions.dart';
 import 'dioHelper.dart';
 import 'models/frames_model.dart';
 import 'models/get_wallet_model.dart';
@@ -30,6 +32,7 @@ import 'package:project/network/cache_helper.dart';
 
 class ShopCubit extends Cubit<ShopIntresStates> {
   ShopCubit() : super(ShopCubitIntialStates());
+  HedraTrace hedra = HedraTrace(StackTrace.current);
 
   static ShopCubit get(context) => BlocProvider.of(context);
   String fimage = "";
@@ -140,17 +143,66 @@ class ShopCubit extends Cubit<ShopIntresStates> {
 
   void shopPurchase({@required id}) {
     emit(ShopPurchaseLoadingStates());
-    DioHelper.postdata(
-        url: 'buy-new-product/$id',
-        token: token,
-        data: {'id': id}).then((value) {
+    DioHelper.postdata(url: 'buy-new-product', token: token, data: {'id': id})
+        .then((value) {
       print("id value of shopPurchaseModel is   " + value.data);
-      shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
 
-      emit(ShopPurchaseSuccessStates());
+      if (value.data == "success") {
+        emit(ShopPurchaseSuccessStates(ShopPurchaseModel.fromJson(value.data)));
+      } else {
+        emit(ShopPurchaseErrorStates(value.data));
+      }
+      shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
     }).catchError((error) {
       emit(ShopPurchaseErrorStates(error.toString()));
     });
+  }
+
+  void shopPurchase2({@required id}) async {
+    emit(ShopPurchaseLoadingStates());
+
+    try {
+      final response = await DioHelper.postdata(
+        url: 'buy-new-product',
+        token: token,
+        data: {'id': id},
+      );
+// Get data list
+      final product = response.data['data'];
+
+// Check that list is not empty
+      if (product != null && product.isNotEmpty) {
+        print("wooooooooooow is" + product.toString());
+        emit(ShopPurchaseSuccessStates(ShopPurchaseModel.fromJson(product)));
+      } else {
+        // Show toast message
+        Fluttertoast.showToast(
+            msg: 'No data in API response',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+
+      emit(
+          ShopPurchaseSuccessStates(ShopPurchaseModel.fromJson(response.data)));
+
+      CommonFunctions.showToast("Shop created in API ", Colors.greenAccent);
+      //getx.Get.offAll(() => HomeScreen());
+    } catch (e) {
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+      print(" - Error - There is Error in ${hedra.fileName} -- " +
+          "In Line : ${hedra.lineNumber} -- " +
+          "The caller function : ${hedra.callerFunctionName} -- " +
+          "The Details is in create not fire: :::: " +
+          e.toString() +
+          " :::: " +
+          "-- Hedra Adel - Error -");
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
   }
 
   void purchasePersonalID({@required id}) {

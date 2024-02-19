@@ -29,16 +29,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  AppLifecycleState state =
+      AppLifecycleState.resumed; // Declare and initialize the state variable
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return BlocProvider(
-      create: (context) => HomeCubit()
-        ..patchfcmtoken(fcmtoken: fcm_token)
-        ..showfriends()
-        ..getmyroom(),
-      // ..myroomcheckroom(),
+      create: (context) {
+        HomeCubit homeCubit = HomeCubit();
+        if (token != null) {
+          // Call the HomeCubit methods here
+          homeCubit.patchfcmtoken(fcmtoken: fcm_token);
+          homeCubit.showfriends();
+          homeCubit.getmyroom();
+        }
+        return homeCubit;
+      },
       child: BlocConsumer<HomeCubit, HomeStates>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -78,16 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               fit: BoxFit.cover,
                             ),
                           ),
-
-                    // Fro
-
-                    // Container(
-                    //     margin: const EdgeInsets.all(5.0),
-                    // child: Image.asset(
-                    //   "assets/images/Profile Image.png",
-                    //   fit: BoxFit.cover,
-                    // )
-                    // ),
                   ),
                   title: controller.currentIndex == 0
                       ? _homeTabAppBarTitle(controller)
@@ -107,27 +105,27 @@ class _HomeScreenState extends State<HomeScreen> {
                               Get.to(SearchRoom());
                             })
                         : Container(),
-                    // controller.showPublishIcon
-                    // ? Container(
-                    //     margin: const EdgeInsets.symmetric(horizontal: 24),
-                    //     width: 36,
-                    //     height: 36,
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.orangeAccent,
-                    //       shape: BoxShape.circle,
-                    //     ),
-                    //     // child: Center(
-                    //     //   child: IconButton(
-                    //     //       icon: Icon(
-                    //     //         Icons.send,
-                    //     //         color: Colors.white,
-                    //     //       ),
-                    //     //       onPressed: () {
-                    //     //         print("publish button clicked");
-                    //     //       }),
-                    //     // ),
-                    //   )
-                    // : Container(),
+                    controller.showPublishIcon
+                        ? Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 24),
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.orangeAccent,
+                              shape: BoxShape.circle,
+                            ),
+                            // child: Center(
+                            //   child: IconButton(
+                            //       icon: Icon(
+                            //         Icons.send,
+                            //         color: Colors.white,
+                            //       ),
+                            //       onPressed: () {
+                            //         print("publish button clicked");
+                            //       }),
+                            // ),
+                          )
+                        : Container(),
                   ],
                 ),
                 body: controller.children[controller.currentIndex],
@@ -192,17 +190,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   : kGreyColor.shade600,
             ),
           ),
-          // GestureDetector(
-          //   onTap: () {
-          //     controller.changeAppBarSelectedItem(2);
-          //   },
-          //   child: AppBarItem(
-          //     title: "اكتشاف",
-          //     textColor: controller.appBarCurrentItem == 2
-          //         ? Colors.white
-          //         : kGreyColor.shade600,
-          //   ),
-          // ),
+          GestureDetector(
+            onTap: () {
+              controller.changeAppBarSelectedItem(2);
+            },
+            child: AppBarItem(
+              title: "اكتشاف",
+              textColor: controller.appBarCurrentItem == 2
+                  ? Colors.white
+                  : kGreyColor.shade600,
+            ),
+          ),
         ],
       ),
     );

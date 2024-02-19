@@ -289,8 +289,9 @@ class _framesScreenState extends State<framesScreen> {
                                       children: [
                                         TextButton(
                                           onPressed: () {
-                                            ShopCubit.get(context).shopPurchase(
-                                                id: model.id.toString());
+                                            ShopCubit.get(context)
+                                                .shopPurchase2(
+                                                    id: model.id.toString());
                                             ShopCubit.get(context)
                                                 .getWalletAmount();
                                             Navigator.pop(context, 'yes');

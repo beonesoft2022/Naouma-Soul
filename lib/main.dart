@@ -24,6 +24,18 @@ import 'package:project/view/splash/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'edit_profile_screen.dart';
 import 'helper/binding.dart';
+import 'package:google_api_availability/google_api_availability.dart';
+
+void checkGooglePlayServices() async {
+  GooglePlayServicesAvailability availability = await GoogleApiAvailability
+      .instance
+      .checkGooglePlayServicesAvailability();
+  if (availability != GooglePlayServicesAvailability.success) {
+    // Google Play Services is not available, handle appropriately
+    print('Google Play Services are not available');
+    // You can show a dialog or a message to the user here
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +79,8 @@ void main() async {
   //   timeInSecForIosWeb: 5,
   // );
   // });
+  // Check Google Play Services availability
+  await checkGooglePlayServices();
   DioHelper.init();
   await CacheHelper.init();
 
@@ -106,14 +120,17 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => LoginScreenCubit()),
-          BlocProvider(
-              create: (context) => HomeCubit()
-                ..showfriends()
+          BlocProvider(create: (context) {
+            HomeCubit homeCubit = HomeCubit();
+            if (token != null && token.isNotEmpty) {
+              print('Hey, this is the token: >> $token');
+              homeCubit
+                ..showfriendsforhome(token)
                 ..addExperience()
-                // ..getfriendRequests()
-                ..getmyroom()
-              // ..getWalletAmount(),
-              ),
+                ..getmyroomhome(token);
+            }
+            return homeCubit;
+          }),
           BlocProvider(create: (context) => ProfileCubit()..getprofile()),
           BlocProvider(
             create: (context) => ShopCubit()
