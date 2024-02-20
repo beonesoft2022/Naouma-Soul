@@ -4712,36 +4712,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
     );
   }
 
-  Future<bool> _closeRoom() async {
-    await CommonFunctions.showAlertWithTwoActions(
-        widget.roomId, context, "خروج", "هل تريد الخروج من الغرفة؟", () async {
-      // check if this user hold mic or not first
-      // var existingItem = _micUsersList.firstWhere(
-      //     (itemToCheck) =>
-      //         itemToCheck.userId == PreferencesServices.getString(ID_KEY),
-      //     orElse: () => null);
-      // if (existingItem != null) {
-      //   // user already holds mic before
-      //   print(existingItem.micNumber);
-      //   print(existingItem.userName);
-      //   // leave mic
-      //   existingItem.userName = null;
-      //   existingItem.userId = null;
-      //   existingItem.micNumber = existingItem.micNumber;
-      //   existingItem.micStatus = false;
-      //   finish(context);
-      //   // _updateMicsToFirebase(existingItem.micNumber, existingItem);
-      // } else {
-      {
-        finish(context);
-      }
-
-      finish(
-        context,
-      );
-    });
-    return true;
-  }
 
   static StreamTransformer transformer<T>(
       T Function(Map<String, dynamic> json) fromJson) =>

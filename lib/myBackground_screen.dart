@@ -42,15 +42,7 @@ class _MyBackgroundScreenState extends State<MyBackgroundScreen> {
   Widget getIntresItem(MyBackgroundModel model) => Scaffold(
         backgroundColor: Colors.grey.shade300,
         appBar: AppBar(
-          actions: [
-            // TextButton(
-            //   child: Text(
-            //     "الخاص بي",
-            //     style: TextStyle(color: Colors.white, fontSize: 15),
-            //   ),
-            //   onPressed: () {},
-            // )
-          ],
+          actions: [],
           centerTitle: true,
           title: Text(
             "الموضوعات",
@@ -68,28 +60,8 @@ class _MyBackgroundScreenState extends State<MyBackgroundScreen> {
                   children: List.generate(model.data.length,
                       (index) => buildGridleProduct(model.data[index])))),
         ),
-        // bottomNavigationBar: BottomAppBar(
-        //   child: Row(
-        //     children: [
-        //       IconButton(
-        //           icon:
-        //               Icon(Icons.monetization_on_rounded, color: Colors.orange),
-        //           onPressed: () {}),
-        //       Text("0"),
-        //       Spacer(),
-        //       Padding(
-        //         padding: const EdgeInsets.all(10.0),
-        //         child: TextButton(
-        //             onPressed: () {},
-        //             child: Text(
-        //               "< الشحن",
-        //               style: TextStyle(color: kPrimaryColor),
-        //             )),
-        //       )
-        //     ],
-        //   ),
-        // ),
       );
+
   Widget buildGridleProduct(MyBackgroundData model) => Column(
         children: [
           InkWell(
@@ -101,6 +73,10 @@ class _MyBackgroundScreenState extends State<MyBackgroundScreen> {
                 height: 230,
                 width: double.infinity,
                 fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) {
+                  print('Error Handler: $error');
+                  return Image.asset('assets/images/fallback.png');
+                },
               ),
             ),
             onTap: () {
@@ -114,6 +90,10 @@ class _MyBackgroundScreenState extends State<MyBackgroundScreen> {
                         content: SingleChildScrollView(
                             child: Image.network(
                           model.url,
+                          errorBuilder: (context, error, stackTrace) {
+                            print('Error Handler: $error');
+                            return Image.asset('assets/images/fallback.png');
+                          },
                         )),
                       ),
                     );
@@ -124,17 +104,6 @@ class _MyBackgroundScreenState extends State<MyBackgroundScreen> {
               });
             },
           ),
-          // Container(child: Center(child: Text(model.price.toString()))),
-          // Container(
-          //   width: 180,
-          //   color: KstorebuttonColor,
-          //   child: Center(
-          //     child: Text(
-          //       "شراء",
-          //       style: TextStyle(color: Colors.white),
-          //     ),
-          //   ),
-          // )
         ],
       );
 }

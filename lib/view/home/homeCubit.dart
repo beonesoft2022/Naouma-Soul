@@ -7,7 +7,6 @@ import 'package:http_parser/http_parser.dart';
 import 'package:project/network/cache_helper.dart';
 import 'package:project/utils/HedraTrace.dart';
 import 'dart:math';
-import 'dart:convert';
 
 // import 'package:mime/mime.dart';
 // import 'package:dsio/dio.dart';
@@ -259,19 +258,6 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(GetMyRoomLoadingState());
 
     DioHelper.getdata(url: getroom, token: token).then((value) {
-      getMyRoomModel = GetMyRoomModel.fromJson(value.data);
-      print(value.data);
-
-      emit(GetMyRoomSuccessStates());
-    }).catchError((error) {
-      emit(GetMyRoomErrorStates("Error In getmyroom" + error.toString()));
-    });
-  }
-
-  void getmyroomhome($token) {
-    emit(GetMyRoomLoadingState());
-
-    DioHelper.getdata(url: getroom, token: $token).then((value) {
       getMyRoomModel = GetMyRoomModel.fromJson(value.data);
       print(value.data);
 
@@ -608,49 +594,40 @@ class HomeCubit extends Cubit<HomeStates> {
     DioHelper.getdata(url: 'onlineusersinroom/$id/', token: token)
         .then((value) {
       if (value != null && value.data != null) {
-        String jsonString = value.data.toString();
-        Map<String, dynamic> data = jsonDecode(jsonString);
-        roomUserModel = InRoomUserModelModel.fromJson(data);
-
+        roomUserModel = InRoomUserModelModel.fromJson(value.data);
         print(
             "roomUserModel.data.length" + roomUserModel.data.length.toString());
         print("ProDay For getroomuser() Has been Complete and data is " +
             value.data
                 .toString()); // Ensure 'value.data' can be converted to a String
-
-        try {
-          Map<String, dynamic> data = jsonDecode(jsonString);
-          if (data != null && data.isNotEmpty) {
-            for (int i = 0; i < roomUserModel.data.length; i++) {
-              if (apiid == roomUserModel.data[i].userId.toString()) {
-                print("roomUserModel api id is " +
-                    apiid.toString() +
-                    "--- Hedra Adel ---");
-                userstateInroom = roomUserModel.data[i].typeUser;
-                specialId = roomUserModel.data[i].spacialId;
-                // Check if package list is not empty before accessing it
-                if (roomUserModel.data[i].package != null &&
-                    roomUserModel.data[i].package.isNotEmpty) {
-                  nameOFPackage = roomUserModel.data[i].package[0].name;
-                  packageColor = roomUserModel.data[i].package[0].color;
-                  packagebadge = roomUserModel.data[i].package[0].url;
-                }
-
-                hasSpecialID = roomUserModel.data[i].isPurchaseId ??
-                    false; // Use '??' to provide a default value
+        if (roomUserModel.data != null && roomUserModel.data.isNotEmpty) {
+          for (int i = 0; i < roomUserModel.data.length; i++) {
+            if (apiid == roomUserModel.data[i].userId.toString()) {
+              print("roomUserModel api id is " +
+                  apiid.toString() +
+                  "--- Hedra Adel ---");
+              userstateInroom = roomUserModel.data[i].typeUser;
+              specialId = roomUserModel.data[i].spacialId;
+              // Check if package list is not empty before accessing it
+              if (roomUserModel.data[i].package != null &&
+                  roomUserModel.data[i].package.isNotEmpty) {
+                nameOFPackage = roomUserModel.data[i].package[0].name;
+                packageColor = roomUserModel.data[i].package[0].color;
+                packagebadge = roomUserModel.data[i].package[0].url;
               }
-            }
 
-            for (int i = 0; i < roomUserModel.data.length; i++) {
-              roomUsersNow(
-                  username: roomUserModel.data[i].name,
-                  roomid: id,
-                  state: true,
-                  userid: roomUserModel.data[i].spacialId);
+              hasSpecialID = roomUserModel.data[i].isPurchaseId ??
+                  false; // Use '??' to provide a default value
             }
           }
-        } on FormatException catch (e) {
-          print("there is ERROR IN LOOP here + " + e.toString());
+
+          for (int i = 0; i < roomUserModel.data.length; i++) {
+            roomUsersNow(
+                username: roomUserModel.data[i].name,
+                roomid: id,
+                state: true,
+                userid: roomUserModel.data[i].spacialId);
+          }
         }
 
         emit(InroomSuccessStates());
@@ -734,19 +711,22 @@ class HomeCubit extends Cubit<HomeStates> {
     print("prine type" + type.toString());
 
     print("--------------------");
-    print("sendgift  ok");
+    print("send sendgift  now");
     print("--------------------");
 
-    DioHelper.postdata(
-            url: 'room/$id/send-gift/$giftid',
-            token: token,
-            data: {'type': type, 'received': received, 'count': count})
-        .then((value) {
+    DioHelper.postdata(url: 'send-new-gift', token: token, data: {
+      'gift_id': giftid,
+      'user_gift_to_id': received,
+      'room_id': id,
+      'qty': count
+    }).then((value) {
       sendGiftModel = SendgiftModel.fromJson(value.data);
 
       showgift = sendGiftModel.data.user.entry;
       print(value.data);
-
+      print("--------------------");
+      print(" sendgift  success");
+      print("--------------------");
       emit(SendGiftSuccessStates());
       print('send gift success');
     }).catchError((error) {
@@ -929,23 +909,6 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(ShowFriendLoadingState());
 
     DioHelper.getdata(url: showfriend, token: token).then((value) {
-      showFriendsModel = ShowFriendsModel.fromJson(value.data);
-      print("the data of showfriends " + value.data);
-
-      print("--------------------");
-      print("showfriends 919191  ok");
-      print("--------------------");
-
-      emit(ShowFriendSuccessStates());
-    }).catchError((error) {
-      emit(ShowFriendErrorStates(error.toString()));
-    });
-  }
-
-  void showfriendsforhome($mytoken) {
-    emit(ShowFriendLoadingState());
-
-    DioHelper.getdata(url: showfriend, token: $mytoken).then((value) {
       showFriendsModel = ShowFriendsModel.fromJson(value.data);
       print("the data of showfriends " + value.data);
 

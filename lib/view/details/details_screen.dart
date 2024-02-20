@@ -4595,7 +4595,7 @@
 //             padding: EdgeInsets.all(5.0),
 //             // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(mainAxisSpacing: 6.0, crossAxisSpacing: 6.0, crossAxisCount: 5),
 //             itemBuilder: (context, index) {
-//               bool _isThisMic;
+//               bool _isTdhisMic;
 //               for (var map in roomUsersList) {
 //                 _micUsersList.add(UserMicModel.fromJson(map));
 //                 // if (roomUsersList[index].data().containsKey("micNumber")) {

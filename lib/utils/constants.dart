@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -43,6 +44,7 @@ bool hasperm;
 String expNum = "";
 List inroomList = [];
 bool isfriendfirebase;
+List<QueryDocumentSnapshot> roomUsersList = new List.from([]);
 
 /// Colors*
 const kPrimaryColor = Color(0xFFe10deb);

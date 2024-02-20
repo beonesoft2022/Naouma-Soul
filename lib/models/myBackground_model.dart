@@ -36,7 +36,6 @@ class MyBackgroundModel {
 }
 
 class MyBackgroundData {
-  int count;
   int id;
   String name;
   String type;
@@ -45,22 +44,18 @@ class MyBackgroundData {
   String createdAt;
   String updatedAt;
   String url;
-  Pivot pivot;
 
   MyBackgroundData(
-      {this.count,
-      this.id,
+      {this.id,
       this.name,
       this.type,
       this.giftLink,
       this.price,
       this.createdAt,
       this.updatedAt,
-      this.url,
-      this.pivot});
+      this.url});
 
   MyBackgroundData.fromJson(Map<String, dynamic> json) {
-    count = json['count'];
     id = json['id'];
     name = json['name'];
     type = json['type'];
@@ -69,12 +64,11 @@ class MyBackgroundData {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     url = json['url'];
-    pivot = json['pivot'] != null ? new Pivot.fromJson(json['pivot']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['count'] = this.count;
+
     data['id'] = this.id;
     data['name'] = this.name;
     data['type'] = this.type;
@@ -83,9 +77,7 @@ class MyBackgroundData {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['url'] = this.url;
-    if (this.pivot != null) {
-      data['pivot'] = this.pivot.toJson();
-    }
+   
     return data;
   }
 }

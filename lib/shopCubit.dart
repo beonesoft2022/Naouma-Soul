@@ -102,7 +102,7 @@ class ShopCubit extends Cubit<ShopIntresStates> {
   void myBackgroundData() {
     emit(MyBackgroundLoadingStates());
 
-    DioHelper.getdata(url: mybackground, token: token).then((value) {
+    DioHelper.getdata(url: background, token: token).then((value) {
       myBackgroundModel = MyBackgroundModel.fromJson(value.data);
       print(value.data);
       emit(MyBackgroundSuccessStates());
