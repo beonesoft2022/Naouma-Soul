@@ -10,6 +10,7 @@ import 'package:project/shopCubit.dart';
 import 'package:project/shopStates.dart';
 import 'package:project/store_screen.dart';
 import 'package:project/utils/constants.dart';
+
 // import 'package:project/view/home/homeCubit.dart';
 import 'package:project/wallet_screen.dart';
 
@@ -354,7 +355,7 @@ class _PersonalID_screenState extends State<PersonalID_screen> {
 
                             CommonFunctions.showToast(
                                 'تم شراء ID مميز', Colors.green);
-
+                            sginOut(context);
                             // Navigator.of(context).push(new MaterialPageRoute(
                             //     builder: (context) => PersonalID_screen()));
                           },

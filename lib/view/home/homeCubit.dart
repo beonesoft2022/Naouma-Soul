@@ -595,19 +595,24 @@ class HomeCubit extends Cubit<HomeStates> {
         .then((value) {
       if (value != null && value.data != null) {
         roomUserModel = InRoomUserModelModel.fromJson(value.data);
+
         print(
             "roomUserModel.data.length" + roomUserModel.data.length.toString());
+
         print("ProDay For getroomuser() Has been Complete and data is " +
-            value.data
-                .toString()); // Ensure 'value.data' can be converted to a String
+            value.data.toString());
+
+        // Ensure 'value.data' can be converted to a String
         if (roomUserModel.data != null && roomUserModel.data.isNotEmpty) {
           for (int i = 0; i < roomUserModel.data.length; i++) {
             if (apiid == roomUserModel.data[i].userId.toString()) {
               print("roomUserModel api id is " +
                   apiid.toString() +
                   "--- Hedra Adel ---");
+
               userstateInroom = roomUserModel.data[i].typeUser;
               specialId = roomUserModel.data[i].spacialId;
+
               // Check if package list is not empty before accessing it
               if (roomUserModel.data[i].package != null &&
                   roomUserModel.data[i].package.isNotEmpty) {

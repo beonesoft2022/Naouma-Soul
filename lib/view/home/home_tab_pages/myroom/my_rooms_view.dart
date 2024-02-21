@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:agora_rtc_engine/rtc_channel.dart';
-import 'package:agora_rtc_engine/rtc_engine.dart';
+// import 'package:agora_rtc_engine/rtc_channel.dart';
+// import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +21,10 @@ import 'package:project/widgets/my_rooms_item.dart';
 
 class MyRoomsView extends StatelessWidget {
   MyRoomsView({Key key}) : super(key: key);
-  RtcChannel _channel;
-  RtcEngine _engine;
-  ClientRole role = ClientRole.Broadcaster;
+
+  // RtcChannel _channel;
+  // RtcEngine _engine;
+  // ClientRole role = ClientRole.Broadcaster;
 
   @override
   Widget build(BuildContext context) {

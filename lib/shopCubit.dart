@@ -28,6 +28,8 @@ import 'models/shop_intres_model.dart';
 import 'models/shop_purchase_model.dart';
 import 'models/showLocks_model.dart';
 import 'models/specialRoomID_model.dart';
+import 'models/myInters_model.dart';
+
 import 'package:project/network/cache_helper.dart';
 
 class ShopCubit extends Cubit<ShopIntresStates> {
@@ -52,6 +54,7 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
+  //backend api checked
   IntresModel intresModel;
 
   void getIntresData() {
@@ -67,6 +70,7 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
+  //backend api checked
   FramesModel framesModel;
 
   void getFramesData() {
@@ -82,6 +86,7 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
+  //backend api checked
   BackgroundModel backgroundModel;
 
   void getBackgroundData() {
@@ -97,12 +102,12 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
+  //backend api checked
   MyBackgroundModel myBackgroundModel;
 
   void myBackgroundData() {
     emit(MyBackgroundLoadingStates());
-
-    DioHelper.getdata(url: background, token: token).then((value) {
+    DioHelper.getdata(url: mybackground, token: token).then((value) {
       myBackgroundModel = MyBackgroundModel.fromJson(value.data);
       print(value.data);
       emit(MyBackgroundSuccessStates());
@@ -112,13 +117,13 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
-  MyBackgroundModel myIntresModel;
+  //backend api checked
+  MyIntersModel myIntresModel;
 
   void myIntesData() {
     emit(MyIntesLoadingStates());
-
     DioHelper.getdata(url: myinters, token: token).then((value) {
-      myIntresModel = MyBackgroundModel.fromJson(value.data);
+      myIntresModel = MyIntersModel.fromJson(value.data);
       print(value.data);
       emit(MyIntesSuccessStates());
     }).catchError((error) {
@@ -127,19 +132,8 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
+  //backend api checked
   ShopPurchaseModel shopPurchaseModel;
-
-  // void shopPurchase({@required id}) {
-  //   emit(ShopPurchaseLoadingStates());
-  //   DioHelper.postdata(url: 'buy-new-product/$id', token: token).then((value) {
-  //     shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
-  //     print("id value of shopPurchaseModel is   " + value.data);
-  //     emit(ShopPurchaseSuccessStates());
-  //   }).catchError((error) {
-  //     print(error.toString());
-  //     emit(ShopPurchaseErrorStates(error.message)); // Pass the message property of the DioError object
-  //   });
-  // }
 
   void shopPurchase({@required id}) {
     emit(ShopPurchaseLoadingStates());
@@ -205,35 +199,96 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     }
   }
 
-  void purchasePersonalID({@required id}) {
+  void purchasePersonalID({@required id}) async {
     emit(PersonalPurchaseIDLoadingStates());
-    print(id);
-    DioHelper.getdata(url: 'special-id/$id', token: token).then((value) {
-      // shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
-      print(value.data);
+
+    try {
+      final response = await DioHelper.postdata(
+        url: 'buy-new-UserSpecialId',
+        token: token,
+        data: {'id': id},
+      );
+// Get data list
+      final PurchaseID = response.data['data'];
+
+// Check that list is not empty
+      if (PurchaseID != null && PurchaseID.isNotEmpty) {
+        print("wooooooooooow is" + PurchaseID.toString());
+        emit(PersonalPurchaseIDSuccessStates());
+      } else {
+        // Show toast message
+        Fluttertoast.showToast(
+            msg: 'No data in API response',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+
       emit(PersonalPurchaseIDSuccessStates());
-    }).catchError((error) {
-      print(error.toString());
-      emit(PersonalPurchaseIDErrorStates(error));
-    });
+
+      CommonFunctions.showToast("Shop created in API ", Colors.greenAccent);
+      //getx.Get.offAll(() => HomeScreen());
+    } catch (e) {
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+      print(" - Error - There is Error in ${hedra.fileName} -- " +
+          "In Line : ${hedra.lineNumber} -- " +
+          "The caller function : ${hedra.callerFunctionName} -- " +
+          "The Details is in create not fire: :::: " +
+          e.toString() +
+          " :::: " +
+          "-- Hedra Adel - Error -");
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
   }
 
-  // It has been disabled temporarily Till fix api
-  // By Abo Elkhier
-  void purchaseRoomlID({@required id}) {
+  void purchaseRoomlID({@required id}) async {
     emit(PersonalPurchaseIDLoadingStates());
-    print(id);
-    // It has been disabled temporarily Till fix api
-    // By Abo Elkhier
-    DioHelper.getdata(url: 'get_all_SpecialRoomID/$id', token: token)
-        .then((value) {
-      // shopPurchaseModel = ShopPurchaseModel.fromJson(value.data);
-      print(value.data);
+
+    try {
+      final response = await DioHelper.postdata(
+        url: 'buy-new-SpecialRoomID',
+        token: token,
+        data: {'id': id},
+      );
+// Get data list
+      final PurchaseID = response.data['data'];
+
+// Check that list is not empty
+      if (PurchaseID != null && PurchaseID.isNotEmpty) {
+        print("wooooooooooow is" + PurchaseID.toString());
+        emit(PersonalPurchaseIDSuccessStates());
+      } else {
+        // Show toast message
+        Fluttertoast.showToast(
+            msg: 'No data in API response',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+
       emit(PersonalPurchaseIDSuccessStates());
-    }).catchError((error) {
-      print(error.toString());
-      emit(PersonalPurchaseIDErrorStates(error));
-    });
+
+      CommonFunctions.showToast("Shop created in API ", Colors.greenAccent);
+      //getx.Get.offAll(() => HomeScreen());
+    } catch (e) {
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+      print(" - Error - There is Error in ${hedra.fileName} -- " +
+          "In Line : ${hedra.lineNumber} -- " +
+          "The caller function : ${hedra.callerFunctionName} -- " +
+          "The Details is in create not fire: :::: " +
+          e.toString() +
+          " :::: " +
+          "-- Hedra Adel - Error -");
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
   }
 
   SpecialIDModel specialIDModel;

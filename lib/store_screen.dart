@@ -39,9 +39,7 @@ class _StoreScreenState extends State<StoreScreen> {
   @override
   Widget build(BuildContext context) {
     final List<String> _tabs = <String>["منضم اليها", "متابعة"];
-    final size = MediaQuery
-        .of(context)
-        .size;
+    final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -119,25 +117,25 @@ class _StoreScreenState extends State<StoreScreen> {
                           InkWell(
                             child: Container(
                                 child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8.0)),
-                                      child: Image.asset(
-                                        "assets/icons/lock.png",
-                                        height: 80,
-                                        width: 80,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text('قفل الغرفه'),
-                                    ),
-                                  ],
-                                )),
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8.0)),
+                                  child: Image.asset(
+                                    "assets/icons/lock.png",
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text('قفل الغرفه'),
+                                ),
+                              ],
+                            )),
                             onTap: () {
-                              // Get.to(ShopLockRoom());
+                              Get.to(ShopLockRoom());
                             },
                           ),
                           // InkWell(
@@ -165,23 +163,23 @@ class _StoreScreenState extends State<StoreScreen> {
                           InkWell(
                             child: Container(
                                 child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8.0)),
-                                      child: Image.asset(
-                                        "assets/icons/mark.png",
-                                        height: 80,
-                                        width: 80,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text('الموضوعات'),
-                                    ),
-                                  ],
-                                )),
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8.0)),
+                                  child: Image.asset(
+                                    "assets/icons/mark.png",
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text('الموضوعات'),
+                                ),
+                              ],
+                            )),
                             onTap: () {
                               Get.to(() => ShopbackgroundGift());
                             },
@@ -189,25 +187,25 @@ class _StoreScreenState extends State<StoreScreen> {
                           InkWell(
                             child: Container(
                                 child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8.0)),
-                                      child: Image.asset(
-                                        "assets/icons/vippers.png",
-                                        height: 80,
-                                        width: 80,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text(' أي دي غرفه مميز'),
-                                    ),
-                                  ],
-                                )),
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8.0)),
+                                  child: Image.asset(
+                                    "assets/icons/vippers.png",
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text(' أي دي غرفه مميز'),
+                                ),
+                              ],
+                            )),
                             onTap: () {
-                              // Get.to(PrivteId_screen());
+                              Get.to(PrivteId_screen());
                             },
                           ),
                         ],
@@ -237,23 +235,23 @@ class _StoreScreenState extends State<StoreScreen> {
                           InkWell(
                             child: Container(
                                 child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8.0)),
-                                      child: Image.asset(
-                                        "assets/icons/vippers.png",
-                                        height: 80,
-                                        width: 80,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text('أي دي شخصي  '),
-                                    ),
-                                  ],
-                                )),
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8.0)),
+                                  child: Image.asset(
+                                    "assets/icons/vippers.png",
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text('أي دي شخصي  '),
+                                ),
+                              ],
+                            )),
                             onTap: () {
                               Get.to(PersonalID_screen());
                             },
@@ -261,23 +259,23 @@ class _StoreScreenState extends State<StoreScreen> {
                           InkWell(
                             child: Container(
                                 child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8.0)),
-                                      child: Image.asset(
-                                        "assets/icons/suprice.png",
-                                        height: 80,
-                                        width: 80,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text(' البطاقه السحريه '),
-                                    ),
-                                  ],
-                                )),
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8.0)),
+                                  child: Image.asset(
+                                    "assets/icons/suprice.png",
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text(' البطاقه السحريه '),
+                                ),
+                              ],
+                            )),
                             onTap: () {
                               Get.to(framesScreen());
                             },
@@ -285,23 +283,23 @@ class _StoreScreenState extends State<StoreScreen> {
                           InkWell(
                             child: Container(
                                 child: Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8.0)),
-                                      child: Image.asset(
-                                        "assets/icons/car.png",
-                                        height: 80,
-                                        width: 80,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Text('المركبات'),
-                                    ),
-                                  ],
-                                )),
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8.0)),
+                                  child: Image.asset(
+                                    "assets/icons/car.png",
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text('المركبات'),
+                                ),
+                              ],
+                            )),
                             onTap: () {
                               Get.to(ShopIntresScreen());
                             },

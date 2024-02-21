@@ -8,6 +8,7 @@ import 'package:project/utils/constants.dart';
 
 import 'models/myBackground_model.dart';
 import 'models/shop_background_mode.dart';
+import 'models/myInters_model.dart';
 
 class MyIntersScreen extends StatefulWidget {
   const MyIntersScreen({Key key}) : super(key: key);
@@ -40,7 +41,7 @@ class MyIntersScreenState extends State<MyIntersScreen> {
     );
   }
 
-  Widget getIntresItem(MyBackgroundModel model) => Scaffold(
+  Widget getIntresItem(MyIntersModel model) => Scaffold(
         backgroundColor: Colors.grey.shade300,
         appBar: AppBar(
           leading: IconButton(
@@ -83,7 +84,8 @@ class MyIntersScreenState extends State<MyIntersScreen> {
         //   ),
         // ),
       );
-  Widget buildGridleProduct(MyBackgroundData model) => Column(
+
+  Widget buildGridleProduct(MyIntersData model) => Column(
         children: [
           InkWell(
             child: Padding(

@@ -32,41 +32,7 @@ void main() async {
   var fcmtoken = await FirebaseMessaging.instance.getToken();
   fcm_token = fcmtoken;
   print('Hey, this is the FCM token: >> $fcmtoken');
-  NotificationModel notificationModel;
-  FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.instance;
-  // FirebaseMessaging.onMessage.listen((event) {
-  //   print(event.data.toString());
-  // notificationModel.name = event.data.toString();
-  // print(notificationModel.image);
-  // AlertDialog(
-  //   content: Stack(
-  //     alignment: Alignment.center,
-  //     children: <Widget>[
-  //       Container(
-  //         decoration: BoxDecoration(
-  //           image: DecorationImage(
-  //               image: NetworkImage(
-  //                   "https://nauma.smartlys.online/public/uploads/images/shop/CmrVxxJeXIxkQer3p2HEybSYMzHtJ06tnHhahrhI.png"),
-  //               fit: BoxFit.cover),
-  //         ),
-  //       ),
-  //       Text(
-  //         'This Is Some Text',
-  //         style: TextStyle(
-  //           fontSize: 24,
-  //         ),
-  //       ),
-  //     ],
-  //   ),
-  // );
 
-  // Fluttertoast.showToast(
-  //   msg: "هريدي دخل",
-  //   toastLength: Toast.LENGTH_SHORT,
-  //   webBgColor: "#e74c3c",
-  //   timeInSecForIosWeb: 5,
-  // );
-  // });
   // Check Google Play Services availability
   DioHelper.init();
   await CacheHelper.init();
@@ -76,13 +42,7 @@ void main() async {
 
   // Token of Api not firebase
   String token = CacheHelper.getData(key: 'token');
-  int level = CacheHelper.getData(key: 'level');
-  int expNum = CacheHelper.getData(key: 'expNum');
-
-  String username = CacheHelper.getData(key: 'username');
-  String userid = CacheHelper.getData(key: 'user_id');
-  String senderId = CacheHelper.getData(key: 'senderId');
-  int id = CacheHelper.getData(key: 'id');
+ 
   Widget widget;
   print(token);
 
