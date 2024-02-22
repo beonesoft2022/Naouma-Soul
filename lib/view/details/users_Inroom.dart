@@ -121,23 +121,25 @@ class _UsersInroomState extends State<UsersInroom> {
 }
 
 void _updateuserDataFirebase(String id, String name, String roomID) async {
-  print("inUpdate doc: $id");
-  print("name: $name");
-  print("id: $roomID");
-
   CollectionReference _collectionRef = FirebaseFirestore.instance
-      .collection('UsersInRoom')
-      .doc(id)
-      .collection(id);
-  await _collectionRef.doc(roomID).update({
-    'username': name,
-    'userID': roomID,
-    'roomId': id,
-    'state': ismuted
-  }).catchError((e) {
-    print(e);
-    return;
-  });
+      .collection('roomUsers')
+      .doc(roomID)
+      .collection('UsersInRoom');
+
+  DocumentReference documentReference = _collectionRef.doc(id);
+
+  // Check if the user document exists
+  DocumentSnapshot documentSnapshot = await documentReference.get();
+
+  if (documentSnapshot.exists) {
+    // If the user document exists, update it
+    await documentReference.update(
+        {'username': name, 'userID': id, 'roomId': roomID, 'ismuted': ismuted});
+  } else {
+    // If the user document doesn't exist, create it
+    await documentReference.set(
+        {'username': name, 'userID': id, 'roomId': roomID, 'ismuted': ismuted});
+  }
 }
 
 void _updateMutedFirebase(String roomID) async {
@@ -733,11 +735,10 @@ Widget builditem(InRoomUserModelModelData model, String text, String roomID,
                                                                         context,
                                                                         'yes');
 
-                                                                    // CommonFunctions
-                                                                    //     .showToast(
-                                                                    //         'تم اصمات العضو',
-                                                                    //         Colors
-                                                                    //             .green);
+                                                                    CommonFunctions.showToast(
+                                                                        'تم اصمات العضو',
+                                                                        Colors
+                                                                            .green);
                                                                   },
                                                                   child:
                                                                       const Text(

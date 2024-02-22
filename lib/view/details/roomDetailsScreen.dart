@@ -149,14 +149,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
   void _addMicsToFirebase(String roomId) async {
     try {
       // Factory method to create mic models
-      // This function takes in a micNumber, isLocked status, and micStatus
-      // It returns a new instance of UserMicModel with the provided values
       UserMicModel createMicModel(
           {int micNumber, bool isLocked = false, bool micStatus = false}) {
         return UserMicModel(
             id: null,
             userId: null,
-            // etc
             micNumber: micNumber,
             isLocked: isLocked,
             micStatus: micStatus);
@@ -165,34 +162,31 @@ class _DetailsScreenState extends State<DetailsScreen> {
       final mics = <UserMicModel>[];
 
       // Generate mic models in a loop
-      // This loop runs 10 times, creating a new UserMicModel each time
-      // The micNumber is set to the current loop index
       for (int i = 0; i < 10; i++) {
         mics.add(createMicModel(micNumber: i));
       }
 
-      // Write all models in a batch
-      // This creates a new batch write operation
-      // It then gets a reference to the Firestore collection where the mics will be stored
-      // It then adds each mic to the batch as a set operation
-      // Finally, it commits the batch to write all the mics to Firestore
-      final batch = FirebaseFirestore.instance.batch();
+      // Get a reference to the Firestore collection where the mics will be stored
       CollectionReference _collectionRef = FirebaseFirestore.instance
           .collection('roomUsers')
           .doc(roomId)
-          .collection(roomId);
+          .collection('roommics');
 
-      mics.forEach((mic) {
-        batch.set(_collectionRef.doc(mic.micNumber.toString()), mic.toJson());
-      });
+      // Check if the mics already exist
+      QuerySnapshot querySnapshot = await _collectionRef.get();
+      if (querySnapshot.docs.isEmpty) {
+        // If the mics do not exist, write all models in a batch
+        final batch = FirebaseFirestore.instance.batch();
 
-      // print mics to the console
-      print(mics);
+        mics.forEach((mic) {
+          batch.set(_collectionRef.doc('mic${mic.micNumber}'), mic.toJson());
+        });
 
-      await batch.commit();
+        // Commit the batch to write all the mics to Firestore
+        await batch.commit();
+      }
     } catch (e) {
       // If any error occurs during the execution of the code, it is caught here
-      // The error message is then printed to the console
       print('Error occurred in _addMicsToFirebase: $e');
     }
   }
@@ -203,10 +197,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
     try {
       // Get the Muted users in the Users in room From firestore
-      // getmuted();
+      isUserMuted();
 
       // Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
-      GetRoomsCollection();
+      countUsersInRoomAndUpdate();
 
       // Read local data
       readLocal();
@@ -595,7 +589,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             ],
           ),
         ).onTap(() {
-          if (ismuted == false) {
+          if (ismuted == true) {
             CommonFunctions.showToast('لا تملك الصلاحية', Colors.red);
           } else if (!micModel.micStatus &&
               !micModel.isLocked &&
@@ -1127,34 +1121,59 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
-  //// By Hedra Adel
-  void GetRoomsCollection() async {
+  Future<void> countUsersInRoomAndUpdate() async {
     try {
-      await for (var snapshot in _firestoreInstance
-          .collection('rooms')
+      // Get a reference to the 'UsersInRoom' collection in Firestore
+      CollectionReference usersInRoomRef = FirebaseFirestore.instance
+          .collection('roomUsers')
           .doc(widget.roomId)
-          .snapshots()) {
-        var messeage = snapshot.get('userNow');
+          .collection('UsersInRoom');
 
-        print("GetRoomsCollection() Has been Complete and message content is " +
-            messeage.toString() +
-            "--- Hedra Adel ---");
+      // Get a snapshot of the 'UsersInRoom' collection
+      QuerySnapshot snapshot = await usersInRoomRef.get();
 
-        totalnum = messeage.toString();
-      }
+      // Count the number of documents in the snapshot (each document represents a user)
+      int userCount = snapshot.docs.length;
+
+      // Update the 'totalnum' variable
+      totalnum = userCount.toString();
+
+      print(
+          "countUsersInRoomAndUpdate() has been completed. Total number of users in room is " +
+              totalnum);
     } catch (e) {
-      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      print(" - Error - There is Error in ${hedra.fileName} -- " +
-          "In Line : ${hedra.lineNumber} -- " +
-          "The caller function : ${hedra.callerFunctionName} -- " +
-          "The Details is : :::: " +
-          e.toString() +
-          " :::: " +
-          "-- Hedra Adel - Error -");
-      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      print("Error in countUsersInRoomAndUpdate(): " + e.toString());
     }
   }
+
+  //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
+  //// By Hedra Adel
+  // void GetRoomsCollection() async {
+  //   try {
+  //     await for (var snapshot in _firestoreInstance
+  //         .collection('rooms')
+  //         .doc(widget.roomId)
+  //         .snapshots()) {
+  //       var messeage = snapshot.get('userNow');
+  //
+  //       print("GetRoomsCollection() Has been Complete and message content is " +
+  //           messeage.toString() +
+  //           "--- Hedra Adel ---");
+  //
+  //       totalnum = messeage.toString();
+  //     }
+  //   } catch (e) {
+  //     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  //     print(" - Error - There is Error in ${hedra.fileName} -- " +
+  //         "In Line : ${hedra.lineNumber} -- " +
+  //         "The caller function : ${hedra.callerFunctionName} -- " +
+  //         "The Details is : :::: " +
+  //         e.toString() +
+  //         " :::: " +
+  //         "-- Hedra Adel - Error -");
+  //     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  //   }
+  // }
 
   void onUserLogout(String userId, String roomId) {
     // Remove the user from the backend API
@@ -1173,146 +1192,41 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   //// Get the Muted users in the Users in room(UsersInRoom) From firestore
   //// By Hedra Adel
-  void getmuted() async {
-    try {
-      await for (var snapshot in _firestoreInstance
-          .collection('UsersInRoom')
-          .doc(widget.roomId)
-          .collection(widget.roomId)
-          .doc('HdbIYSyq88vJlh9yjEXT')
-          .snapshots()) {
-        ismuted = snapshot.get('state');
-        print('getmuted Method has been Called --- Hedra adel ---');
+  void isUserMuted() async {
+    final firestoreInstance = FirebaseFirestore.instance;
 
-        print(ismuted.toString() + ' issmuted state Value --- Hedra adel ---');
-      }
-    } catch (e) {
-      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      print(" - Error - There is Error in getmuted() in ${hedra.fileName} -- " +
-          "In Line : ${hedra.lineNumber} -- " +
-          "The caller function : ${hedra.callerFunctionName} -- " +
-          "The Details is : :::: " +
-          e.toString() +
-          " :::: " +
-          "-- Hedra Adel - Error -");
-      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    // Check if the user document exists in the 'MutedList' sub-collection
+    DocumentSnapshot mutedListDoc = await firestoreInstance
+        .collection('roomUsers')
+        .doc(widget.roomId)
+        .collection(
+            'MutedList') // Assuming 'MutedList' is the sub-collection you want to access
+        .doc(widget.userID) // Provide the user's ID to the .doc() method
+        .get();
+
+    // Check if the 'ismuted' field exists in the 'FollowersUsers' sub-collection
+    DocumentSnapshot followersUsersDoc = await firestoreInstance
+        .collection('roomUsers')
+        .doc(widget.roomId)
+        .collection('FollowersUsers')
+        .doc(widget.userID)
+        .get();
+
+    if (followersUsersDoc.exists &&
+            followersUsersDoc.data() != null &&
+            (followersUsersDoc.data() as Map<String, dynamic>)['ismuted'] ==
+                true ||
+        mutedListDoc.exists) {
+      ismuted = true;
+    } else {
+      ismuted = false;
     }
   }
-
-  ////	Create _micslist array’s
-  ////	Create roomUsers Collection in firestore with roomID Doc
-  ////	Create second Collection inside roomID Doc and insert the 10 mics inside it
-  //// By Hedra Adel
-  // void _addMicsToFirebase(String roomID) async {
-  //   List<UserMicModel> _micsList = [];
-
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 0,
-  //       micStatus: false,
-  //       isLocked: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 1,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 2,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 3,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 4,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 5,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 6,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 7,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 8,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   _micsList.add(UserMicModel(
-  //       id: null,
-  //       userId: null,
-  //       userName: null,
-  //       micNumber: 9,
-  //       isLocked: false,
-  //       micStatus: false));
-  //   CollectionReference _collectionRef = FirebaseFirestore.instance
-  //       .collection('roomUsers')
-  //       .doc(roomID)
-  //       .collection(roomID);
-  //   await _collectionRef
-  //       .doc(_micsList[0].micNumber.toString())
-  //       .set(_micsList[0].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[1].micNumber.toString())
-  //       .set(_micsList[1].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[2].micNumber.toString())
-  //       .set(_micsList[2].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[3].micNumber.toString())
-  //       .set(_micsList[3].toJson());
-  //   await _collectionRef
-  //       .doc(_micsList[4].micNumber.toString())
-  //       .set(_micsList[4].toJson());
-  //   _micsList.forEach((element) async {
-  //     await _collectionRef
-  //         .doc("${_micsList.indexOf(element)}")
-  //         .set(element.toJson());
-  //   });
-  //   print(
-  //       'RoomUsers() Collection has been Created with 10 mics --- Hedra adel ---');
-  // }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final theme = Theme.of(context);
-      final size = MediaQuery.of(context).size;
       TextEditingController _controller = TextEditingController();
-      // Get the maximum width and height
-      double maxWidth = constraints.maxWidth;
-      double maxHeight = constraints.maxHeight;
 
       return BlocProvider(
         create: (context) => HomeCubit()
@@ -1460,29 +1374,27 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Widget getdata(
     BoxConstraints constraints,
-    GetUserExpModel model,
+    GetUserExpModel UserEXP_Model,
     String model1,
-    InRoomUserModelModel model2,
-    TextEditingController _controller,
+    InRoomUserModelModel RoomUserModelModelLoaded,
+    TextEditingController textedit_controller,
   ) {
     print(
         'getdata function is called'); // This will print when the function is called
 
     print('Constraints: $constraints'); // This will print the constraints value
     print(
-        'GetUserExpModel: ${model.toJson()}'); // This will print the GetUserExpModel data
+        'GetUserExpModel: ${UserEXP_Model.toJson()}'); // This will print the GetUserExpModel data
     print('Model1: $model1'); // This will print the model1 value
     print(
-        'InRoomUserModelModel: ${model2.toJson()}'); // This will print the InRoomUserModelModel data
+        'InRoomUserModelModel: ${RoomUserModelModelLoaded.toJson()}'); // This will print the InRoomUserModelModel data
     print(
-        'Controller: ${_controller.text}'); // This will print the text inside the controller
+        'Controller: ${textedit_controller.text}'); // This will print the text inside the controller
 
     return LayoutBuilder(builder: (context, constraints) {
       final size = MediaQuery.of(context).size;
       final theme = Theme.of(context);
-      // Get the maximum width and height
-      double maxWidth = constraints.maxWidth;
-      double maxHeight = constraints.maxHeight;
+
       return Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
@@ -1562,9 +1474,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                               widget.roomName,
                                                           roomID: widget.roomId
                                                               .toString(),
-                                                          currentlevel: model
-                                                              .data
-                                                              .userCurrentLevel),
+                                                          currentlevel:
+                                                              UserEXP_Model.data
+                                                                  .userCurrentLevel),
                                                     );
                                                   });
                                             },
@@ -1650,7 +1562,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               color: Colors.white,
                                             ),
                                             onSelected: (item) => onSelected(
-                                                context, item, _controller),
+                                                context,
+                                                item,
+                                                textedit_controller),
                                             itemBuilder: (context) => [
                                               PopupMenuItem<int>(
                                                   value: 0,
@@ -2223,13 +2137,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 color: Colors.white,
                               ),
                             ).onTap(() {
-                              if (ismuted == false) {
+                              if (ismuted == true) {
                                 CommonFunctions.showToast(
                                     'لا تملك الصلاحية', Colors.red);
                               } else {
                                 onSendMessage(
                                   _messageController.text, 0,
-                                  model.data.userCurrentLevel,
+                                  UserEXP_Model.data.userCurrentLevel,
                                   // model.data.userId
                                 );
                               }
@@ -2254,8 +2168,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                  onSelected: (item) =>
-                                      onSelected(context, item, _controller),
+                                  onSelected: (item) => onSelected(
+                                      context, item, textedit_controller),
                                   itemBuilder: (context) => [
                                     PopupMenuItem<int>(
                                         value: 3,
@@ -3526,7 +3440,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                           TextButton(
                                                                             onPressed:
                                                                                 () {
-                                                                              ismuted = false;
+                                                                              ismuted = true;
                                                                               _updateuserDataFirebase(roomID, document.get('username'), document.get('idFrom'));
 
                                                                               _updateMutedFirebase(
@@ -3974,7 +3888,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     Stream<List<UserMicModel>> _stream = _firestoreInstance
         .collection('roomUsers')
         .doc(widget.roomId)
-        .collection(widget.roomId)
+        .collection('roommics')
         .snapshots()
         .transform(
             transformer<UserMicModel>((json) => UserMicModel.fromJson(json)));
@@ -4141,23 +4055,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   void _updateuserDataFirebase(String id, String name, String roomID) async {
-    print("inUpdate doc: $id");
-    print("name: $name");
-    print("id: $roomID");
-
     CollectionReference _collectionRef = FirebaseFirestore.instance
-        .collection('UsersInRoom')
-        .doc(id)
-        .collection(id);
-    await _collectionRef.doc(roomID).update({
-      'username': name,
-      'userID': roomID,
-      'roomId': id,
-      'state': ismuted
-    }).catchError((e) {
-      print("error in _updateuserDataFirebase " + e);
-      return;
-    });
+        .collection('roomUsers')
+        .doc(roomID)
+        .collection('UsersInRoom');
+
+    DocumentReference documentReference = _collectionRef.doc(id);
+
+    // Check if the user document exists
+    DocumentSnapshot documentSnapshot = await documentReference.get();
+
+    if (documentSnapshot.exists) {
+      // If the user document exists, update it
+      await documentReference.update(
+          {'username': name, 'userID': id, 'roomId': roomID, 'state': ismuted});
+    } else {
+      // If the user document doesn't exist, create it
+      await documentReference.set(
+          {'username': name, 'userID': id, 'roomId': roomID, 'state': ismuted});
+    }
   }
 
   void _updateMutedFirebase(String roomID) async {
@@ -4223,7 +4139,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 // width: 10.0,
               ),
               Text(
-                "testuser",
+                model.name.toString(),
                 // style: TextStyle(fontSize: 10),
                 style: TextStyle(color: Colors.white, fontSize: 10),
               ),
@@ -4738,7 +4654,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                               TextButton(
                                                                 onPressed: () {
                                                                   ismuted =
-                                                                      false;
+                                                                      true;
                                                                   _updateuserDataFirebase(
                                                                       roomID,
                                                                       model

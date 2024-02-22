@@ -1257,11 +1257,11 @@ class _PerimemScreenState extends State<PerimemScreen> {
 
                           Navigator.pop(context, 'yes');
 
-                          // CommonFunctions.showToast(
-                          //     ShopCubit.get(context)
-                          //         .permiemPurchaseModel
-                          //         .message,
-                          //     Colors.green);
+                          CommonFunctions.showToast(
+                              ShopCubit.get(context)
+                                  .permiemPurchaseModel
+                                  .message,
+                              Colors.green);
                         },
                         child: const Text('نعم'),
                       ),

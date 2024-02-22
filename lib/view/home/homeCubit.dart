@@ -550,16 +550,38 @@ class HomeCubit extends Cubit<HomeStates> {
   */
   }
 
-  void logoutUserRoom({@required id}) {
+  Future<void> logoutUserRoom({@required id}) async {
     print(id);
-    DioHelper.getdata(url: 'rooms/$id/logout', token: token).then((value) {
+    try {
+      final value = await DioHelper.postdata(
+          url: 'rooms/$id/logout', token: token, data: {'room_id': id});
       print(value.data);
+
+      // delete the user from firebase UsersInRoom
+      var documentReference = FirebaseFirestore.instance
+          .collection('UsersInRoom')
+          .doc(id)
+          .collection(id)
+          .doc(specialId);
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.delete(documentReference);
+      });
+      // delete the user from firebase roomUsers
+      var documentReferencee = FirebaseFirestore.instance
+          .collection('roomUsers')
+          .doc(id)
+          .collection(id)
+          .doc(specialId);
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.delete(documentReferencee);
+      });
+
       print("--------------------");
       print("logoutUserRoom  ok");
       print("--------------------");
-    }).catchError((error) {
+    } catch (error) {
       print(error.toString());
-    });
+    }
   }
 
   void patchfcmtoken({
@@ -587,12 +609,14 @@ class HomeCubit extends Cubit<HomeStates> {
 
   List<InRoomUserModelModel> userList = [];
 
-  void getroomuser({@required String id}) {
+  Future<void> getroomuser({@required String id}) async {
     // Ensure 'id' is a String or the correct type
     emit(InroomLoadingStates());
 
-    DioHelper.getdata(url: 'onlineusersinroom/$id/', token: token)
-        .then((value) {
+    try {
+      final value =
+          await DioHelper.getdata(url: 'onlineusersinroom/$id/', token: token);
+
       if (value != null && value.data != null) {
         roomUserModel = InRoomUserModelModel.fromJson(value.data);
 
@@ -602,7 +626,6 @@ class HomeCubit extends Cubit<HomeStates> {
         print("ProDay For getroomuser() Has been Complete and data is " +
             value.data.toString());
 
-        // Ensure 'value.data' can be converted to a String
         if (roomUserModel.data != null && roomUserModel.data.isNotEmpty) {
           for (int i = 0; i < roomUserModel.data.length; i++) {
             if (apiid == roomUserModel.data[i].userId.toString()) {
@@ -613,7 +636,6 @@ class HomeCubit extends Cubit<HomeStates> {
               userstateInroom = roomUserModel.data[i].typeUser;
               specialId = roomUserModel.data[i].spacialId;
 
-              // Check if package list is not empty before accessing it
               if (roomUserModel.data[i].package != null &&
                   roomUserModel.data[i].package.isNotEmpty) {
                 nameOFPackage = roomUserModel.data[i].package[0].name;
@@ -640,67 +662,47 @@ class HomeCubit extends Cubit<HomeStates> {
         print('Response is null');
         emit(InroomErrorState());
       }
-    }).catchError((error) {
+    } catch (error) {
       print("there is errorrrrrrrrrr here + " + error.toString());
       emit(InroomErrorState());
-    });
+    }
   }
 
-  void roomUsersNow({
+  Future<void> roomUsersNow({
     @required String username,
     @required String roomid,
     @required String userid,
     @required bool state,
-  }) {
+  }) async {
     RoomModel model = RoomModel(roomID: roomid);
-    if (ismuted = null) {
+    if (ismuted == null) {
       ismuted = true;
     }
     var documentReference = FirebaseFirestore.instance
-        .collection('UsersInRoom')
+        .collection('roomUsers')
         .doc(roomid)
-        .collection(roomid)
+        .collection('UsersInRoom')
         .doc(userid);
     print("--------------------");
     print("roomUsersNow  ok");
     print("--------------------");
-    FirebaseFirestore.instance.runTransaction((transaction) async {
-      transaction.set(
-        documentReference,
-        {
-          'username': username,
-          'userID': userid,
-          'roomId': roomid,
-          'state': state
-          // 'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-          // 'content': content,
-          // 'type': type,
-          // 'userLevel': userCurrentlevel,
-          // 'ApiUserID': userId
-        },
-      );
-    });
-    FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(roomid)
-        .set(
-          model.toMap(),
-        )
-        .then((value) {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(
+          documentReference,
+          {
+            'username': username,
+            'userID': userid,
+            'roomId': roomid,
+            'state': state
+          },
+        );
+      });
       //add success
       emit(UserInroomSuccessStates());
-      // _addMicsToFirebase(roomid);
-      print("add Room success");
-      // print("id: ${value.id}");
-      // print(value.toString());
-
-      // Get.to(HomeScreen());
-      // Get.offAll(HomeScreen(),
-      //     duration: Duration(milliseconds: 1000),
-      //     transition: Transition.leftToRightWithFade);
-    }).catchError((error) {
+    } catch (error) {
       emit(UsersInroomErrorState());
-    });
+    }
   }
 
   SendgiftModel sendGiftModel;
