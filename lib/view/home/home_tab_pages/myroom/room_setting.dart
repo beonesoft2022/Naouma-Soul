@@ -24,6 +24,7 @@ class RoomSettings extends StatefulWidget {
   String giftId;
   String controller;
   bool status = false;
+
   RoomSettings(
       {this.roomName,
       this.type,
@@ -147,17 +148,24 @@ class _RoomSettingsState extends State<RoomSettings> {
                     "تعديل",
                     style: TextStyle(color: kPrimaryLightColor, fontSize: 15),
                   ),
-                  onPressed: () {
+                  // onPressed: () {
+                  //   print('imaaaaaaaaaaaaage');
+                  //   HomeCubit.get(context).editRoom(
+                  //       roomdesc: roomDesccontroller.text,
+                  //       name: roomNamecontroller.text,
+                  //       roomid: widget
+                  //           .roomID /*,
+                  //       countMics: 10,
+                  //       supervisor: 1,
+                  //       imagefile: imageFile*/
+                  //       );
+                  // },
+                  onPressed: () async {
                     print('imaaaaaaaaaaaaage');
-                    print(imageFile);
-
-                    HomeCubit.get(context).editRoom(
-                        roomdesc: roomDesccontroller.text,
+                    await HomeCubit.get(context).editRoom(
+                        room_desc: roomDesccontroller.text,
                         name: roomNamecontroller.text,
-                        countMics: 10,
-                        supervisor: 1,
-                        imagefile: imageFile,
-                        filename: imagename);
+                        roomid: widget.roomID);
                   },
                 )
               ],

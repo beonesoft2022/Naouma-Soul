@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder/conditional_builder.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -269,7 +270,56 @@ class _GiftScreenState extends State<GiftScreen> {
                           giftid: giftID,
                           received: senduserId.toInt(),
                           count: _controller.text);
+                      // Call sendGiftToFirebase function
+                      HomeCubit.get(context).sendGiftToFirebase(
+                        roomId: widget.roomID,
+                        giftId: giftID,
+                        receiverId: senduserId,
+                        count: _controller.text,
+                      );
                       giftID = '0';
+
+                      Navigator.pop(context);
+
+                      // Show a SnackBar with an image
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   SnackBar(
+                      //     backgroundColor: Colors.transparent,
+                      //     duration: Duration(seconds: 10),
+                      //     content: Column(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       children: [
+                      //         Center(
+                      //           child: Image.network(
+                      //             'https://nauma.smartlys.online/public/uploads/images/shop/VDMrqshf4qyScQJWEAXJ0D9huZto0exXdwmJSJJG.png',
+                      //             fit: BoxFit.cover,
+                      //           ),
+                      //         ),
+                      //         Text(
+                      //           '0121212',
+                      //           style: TextStyle(
+                      //             fontSize: 30.0,
+                      //             color: Colors.white,
+                      //           ),
+                      //         ),
+                      //         Text(
+                      //           '222 قد استلم هدية',
+                      //           style: TextStyle(
+                      //             fontSize: 30.0,
+                      //             color: Colors.white,
+                      //             shadows: [
+                      //               Shadow(
+                      //                 blurRadius: 10.0,
+                      //                 color: Colors.black,
+                      //                 offset: Offset(5.0, 5.0),
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // );
                     },
                   ),
                 ),

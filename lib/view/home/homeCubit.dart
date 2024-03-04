@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -620,8 +621,8 @@ class HomeCubit extends Cubit<HomeStates> {
       if (value != null && value.data != null) {
         roomUserModel = InRoomUserModelModel.fromJson(value.data);
 
-        print(
-            "roomUserModel.data.length" + roomUserModel.data.length.toString());
+        print("roomUserModel.data.length is " +
+            roomUserModel.data.length.toString());
 
         print("ProDay For getroomuser() Has been Complete and data is " +
             value.data.toString());
@@ -687,6 +688,12 @@ class HomeCubit extends Cubit<HomeStates> {
     print("roomUsersNow  ok");
     print("--------------------");
     try {
+      DocumentSnapshot docSnapshot = await documentReference.get();
+
+      if (docSnapshot.exists) {
+        // If the document exists, delete it
+        await documentReference.delete();
+      }
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         transaction.set(
           documentReference,
@@ -707,38 +714,105 @@ class HomeCubit extends Cubit<HomeStates> {
 
   SendgiftModel sendGiftModel;
 
-  void sendgift(
+  Future<void> sendgift(
       {@required id,
       @required type,
       @required received,
       @required giftid,
-      @required count}) {
-    emit(SendGiftLoadingState());
+      @required count}) async {
+    print(id);
+    try {
+      // Step 1: Trigger a Firebase Realtime Database event after sendgift() is executed
+      FirebaseDatabase.instance.ref().child('newGift').push().set({
+        'giftId': giftid,
+        'senderUserId': id,
+        'receiverUserId': received,
+        'roomId': id,
+        'isShown': false,
+      });
 
-    print("prine type" + type.toString());
+      final value = await DioHelper.postdata(
+          url: 'send-new-gift',
+          token: token,
+          data: {
+            'gift_id': giftid,
+            'user_gift_to_id': received,
+            'room_id': id,
+            'qty': count
+          });
 
-    print("--------------------");
-    print("send sendgift  now");
-    print("--------------------");
-
-    DioHelper.postdata(url: 'send-new-gift', token: token, data: {
-      'gift_id': giftid,
-      'user_gift_to_id': received,
-      'room_id': id,
-      'qty': count
-    }).then((value) {
-      sendGiftModel = SendgiftModel.fromJson(value.data);
-
-      showgift = sendGiftModel.data.user.entry;
       print(value.data);
+      sendGiftModel = SendgiftModel.fromJson(value.data);
+      print(value.data);
+      emit(SendGiftSuccessStates());
       print("--------------------");
       print(" sendgift  success");
       print("--------------------");
+    } catch (error) {
+      print(error.toString());
+    }
+  }
+
+  // void sendgift(
+  //     {@required id,
+  //     @required type,
+  //     @required received,
+  //     @required giftid,
+  //     @required count}) {
+  //   emit(SendGiftLoadingState());
+  //
+  //   print("prine type" + type.toString());
+  //
+  //   print("--------------------");
+  //   print("send sendgift  now");
+  //   print("--------------------");
+  //
+  //   DioHelper.postdata(url: 'send-new-gift', token: token, data: {
+  //     'gift_id': giftid,
+  //     'user_gift_to_id': received,
+  //     'room_id': id,
+  //     'qty': count
+  //   }).then((value) {
+  //     sendGiftModel = SendgiftModel.fromJson(value.data);
+  //
+  //     showgift = sendGiftModel.data.user.entry;
+  //     print(value.data);
+  //     print("--------------------");
+  //     print(" sendgift  success");
+  //     print("--------------------");
+  //     emit(SendGiftSuccessStates());
+  //     print('send gift success');
+  //   }).catchError((error) {
+  //     emit(SendGiftErrorStates(error.toString()));
+  //   });
+  // }
+
+  // Existing code...
+
+  Future<void> sendGiftToFirebase({
+    @required String giftId,
+    @required String receiverId,
+    @required String roomId,
+    @required dynamic count,
+  }) async {
+    try {
+      // Generate a new document ID
+      String newDocId = FirebaseFirestore.instance.collection('gifts').doc().id;
+
+      // Send the gift to Firebase
+      await FirebaseFirestore.instance.collection('gifts').doc(newDocId).set({
+        'giftId': giftId,
+        'receiverId': receiverId,
+        'roomId': roomId,
+        'count': count,
+      }, SetOptions(merge: true));
+
+      // Emit the SendGiftSuccessStates state
       emit(SendGiftSuccessStates());
-      print('send gift success');
-    }).catchError((error) {
-      emit(SendGiftErrorStates(error.toString()));
-    });
+    } catch (e) {
+      // Handle any errors here
+      print(e);
+    }
   }
 
   IsFollowModel isFollowModel;
@@ -1032,52 +1106,56 @@ class HomeCubit extends Cubit<HomeStates> {
     });
   }
 
-  // void editRoom(
-  //     {@required name,
-  //     @required roomdesc,
-  //     @required countMics,
-  //     @required supervisor,
-  //     @required imagefile}) async {
-  //   Blob blob = new Blob(imageFile.readAsBytesSync());
-  //   print(blob.bytes);
-  //   print(name);
-  //   print(roomdesc);
-  //   print(countMics);
+  Future<void> editRoom(
+      {@required name,
+      @required room_desc,
+      String
+          roomid /*,
+      @required countMics,
+      @required supervisor,
+  
+      @required imagefile*/
+      }) async {
+    /*  Blob blob = new Blob(imageFile.readAsBytesSync());
+    print(blob.bytes);*/
+    print(name);
+    print(room_desc);
+    print(roomid);
+    emit(EditRoomLoadingState());
 
-  //   print(supervisor);
-  //   print(imagefile);
-  //   emit(EditRoomLoadingState());
+    //  final mimeTypeData =
+    //     lookupMimeType(imageFile.path, headerBytes: [0xFF, 0xD8]).split('/');
+    //     FormData formData = FormData.fromMap({
 
-  //   //  final mimeTypeData =
-  //   //     lookupMimeType(imageFile.path, headerBytes: [0xFF, 0xD8]).split('/');
-  //   //     FormData formData = FormData.fromMap({
+    //       "image": await MultipartFile.fromFile(imageFile,
+    //           contentType: MediaType(mimeTypeData[0], mimeTypeData[1])),
+    //     });
 
-  //   //       "image": await MultipartFile.fromFile(imageFile,
-  //   //           contentType: MediaType(mimeTypeData[0], mimeTypeData[1])),
-  //   //     });
-  //   DioHelper.postdata(url: roomsetting, token: token, data: {
-  //     'name': name,
-  //     'room_desc': roomdesc,
-  //     'countMics': countMics,
-  //     'supervisor_lockmic_access': supervisor,
-  //     'room_background': blob.bytes
-  //   }).then((value) {
-  //     print(value.data);
+    await DioHelper.postdata(
+            url: roomsetting,
+            token: token,
+            data: {'name': name, 'room_desc': room_desc, 'roomid': roomid})
+        .then((value) {
+      print(value.data);
 
-  //     emit(EditRoomSuccessStates());
-  //     print('send');
-  //   }).catchError((error) {
-  //     emit(EditRoomErrorStates(error.toString()));
-  //   });
-  // }
+      emit(EditRoomSuccessStates());
 
-  void editRoom({
+      // emit(ShopRegisterSuccessStates(RegisterModel));
+    }).catchError((error) {
+      emit(AddExpErrorStates(error.toString()));
+    });
+
+    print('send');
+  }
+
+  void editRoomfirebase({
     @required name,
     @required roomdesc,
     @required countMics,
     @required supervisor,
     @required imagefile,
     @required filename,
+    String roomid,
   }) async {
     print(name);
     print(roomdesc);
@@ -1098,7 +1176,20 @@ class HomeCubit extends Cubit<HomeStates> {
             )
           : "",
     });
-    emit(EditRoomLoadingState());
+
+    RoomModel model =
+        RoomModel(roomname: name, roomDesc: roomdesc, roomID: roomid);
+    FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(roomid)
+        .update(
+          model.toMap(),
+        )
+        .then((value) {
+      emit(EditRoomLoadingState());
+    }).catchError((error) {
+      // Handle error
+    });
 
     //  final mimeTypeData =
     //     lookupMimeType(imageFile.path, headerBytes: [0xFF, 0xD8]).split('/');
@@ -1108,8 +1199,10 @@ class HomeCubit extends Cubit<HomeStates> {
     //           contentType: MediaType(mimeTypeData[0], mimeTypeData[1])),
     //     });
 
-    DioHelper.editroom(url: roomsetting, token: token, data: formData)
-        .then((value) {
+    DioHelper.editroom(
+        url: roomsetting,
+        token: token,
+        data: {'name': name, 'room_desc': roomdesc}).then((value) {
       print(value.data);
 
       emit(EditRoomSuccessStates());
@@ -1118,20 +1211,6 @@ class HomeCubit extends Cubit<HomeStates> {
     }).catchError((error) {
       emit(EditRoomErrorStates(error.toString()));
     });
-    // DioHelper.editroom(url: roomsetting, token: token, data: {
-    //   'name': name,
-    //   'room_desc': roomdesc,
-    //   'countMics': countMics,
-    //   'supervisor_lockmic_access': supervisor,
-    //   'room_background': imagefile
-    // }, roomname: null).then((value) {
-    //   print(value.data);
-
-    //   emit(EditRoomSuccessStates());
-    //   print('send');
-    // }).catchError((error) {
-    //   emit(EditRoomErrorStates(error.toString()));
-    // });
   }
 
   AddBlockListModel addBlockListModel;

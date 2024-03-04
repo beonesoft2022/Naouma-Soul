@@ -26,45 +26,33 @@ class DioHelper {
 
   final String basse = "https://nauma.smartlys.online/public/api/";
 
-static Future<Response> getdata({
-  @required String url,
-  Map<String, dynamic> query,
-  String token,
-}) async {
+  static Future<Response> getdata({
+    @required String url,
+    Map<String, dynamic> query,
+    String token,
+  }) async {
+    try {
+      // Set authorization header
+      dio.options.headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'
+      };
 
-  try {
+      // Make the GET request
+      final response = await dio.get(url, queryParameters: query);
 
-    // Set authorization header 
-    dio.options.headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    };
-
-    // Make the GET request
-    final response = await dio.get(
-      url,
-      queryParameters: query      
-    );
-
-    // Return response on success
-    return response;
-
-  } on DioError catch (e) {
-
-    // Handle DioErrors like network errors 
-    print(e);
-    return null;
-
-  } catch (e) {
-
-    // Handle other exceptions
-    print(e);
-    return null;
-
+      // Return response on success
+      return response;
+    } on DioError catch (e) {
+      // Handle DioErrors like network errors
+      print(e);
+      return null;
+    } catch (e) {
+      // Handle other exceptions
+      print(e);
+      return null;
+    }
   }
-
-}
-
 
   static Future<Response> postdata(
       {@required String url,

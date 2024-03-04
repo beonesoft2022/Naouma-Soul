@@ -5,7 +5,7 @@
 // import 'network_service.dart';
 // import 'models/file_data.dart';
 //
-// class SyncService {
+// class SyncService {2
 //   Timer? _syncTimer;
 //
 //   // ... other SyncService variables and setup ...

@@ -160,30 +160,30 @@ class _StoreScreenState extends State<StoreScreen> {
                           //   )),
                           //   onTap: () {},
                           // ),
-                          InkWell(
-                            child: Container(
-                                child: Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.horizontal(
-                                      right: Radius.circular(8.0)),
-                                  child: Image.asset(
-                                    "assets/icons/mark.png",
-                                    height: 80,
-                                    width: 80,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Text('الموضوعات'),
-                                ),
-                              ],
-                            )),
-                            onTap: () {
-                              Get.to(() => ShopbackgroundGift());
-                            },
-                          ),
+                          // InkWell(
+                          //   child: Container(
+                          //       child: Column(
+                          //     children: [
+                          //       ClipRRect(
+                          //         borderRadius: BorderRadius.horizontal(
+                          //             right: Radius.circular(8.0)),
+                          //         child: Image.asset(
+                          //           "assets/icons/mark.png",
+                          //           height: 80,
+                          //           width: 80,
+                          //           fit: BoxFit.fill,
+                          //         ),
+                          //       ),
+                          //       Padding(
+                          //         padding: const EdgeInsets.all(10.0),
+                          //         child: Text('الموضوعات'),
+                          //       ),
+                          //     ],
+                          //   )),
+                          //   onTap: () {
+                          //     Get.to(() => ShopbackgroundGift());
+                          //   },
+                          // ),
                           InkWell(
                             child: Container(
                                 child: Column(

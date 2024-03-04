@@ -1,0 +1,83 @@
+import 'dart:convert';
+
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
+import 'package:workmanager/workmanager.dart';
+
+import '../models/location_log.dart';
+
+class LocationService {
+  Future<bool> requestLocationPermission() async {
+    PermissionStatus status = await Permission.location.request();
+    return status.isGranted;
+  }
+
+  Future<LocationLog> getLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    return LocationLog(
+      username: 'username', // replace with actual username
+      longitude: position.longitude,
+      latitude: position.latitude,
+      time: DateTime.now(),
+    );
+  }
+
+  Future<void> sendLocationToAPI(LocationLog location) async {
+    var response = await http.post(
+      Uri.parse('www.smartlys.online/public/api/storelocation'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer token', // replace with actual token
+      },
+      body: jsonEncode(<String, String>{
+        'username': location.username,
+        'longitude': location.longitude.toString(),
+        'latitude': location.latitude.toString(),
+        'time': location.time.toIso8601String(),
+      }),
+    );
+  }
+
+  Future<void> startLocationTracking() async {
+    Workmanager().initialize(
+      callbackDispatcher,
+      isInDebugMode: true,
+    );
+    Workmanager().registerPeriodicTask(
+      "1",
+      "simpleTask",
+      frequency: Duration(minutes: 5),
+    );
+  }
+
+  Future<void> stopLocationTracking() async {
+    Workmanager().cancelAll();
+  }
+
+  void callbackDispatcher() {
+    Workmanager workmanager = Workmanager();
+    workmanager.executeTask((task, inputData) async {
+      // This is the code that will be executed in the background
+      final locationService = LocationService();
+      final location = await locationService.getLocation();
+      await locationService.sendLocationToAPI(location);
+      return Future.value(true);
+    });
+  }
+
+  void initWorkManager() {
+    Workmanager workmanager = Workmanager();
+    workmanager.initialize(
+      callbackDispatcher,
+      isInDebugMode: true,
+    );
+
+    workmanager.registerPeriodicTask(
+      "1",
+      "simplePeriodicTask",
+      frequency: Duration(minutes: 15),
+    );
+  }
+}

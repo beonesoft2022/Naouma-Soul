@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:project/utils/HedraTrace.dart';
 
 // import 'package:agora_rtc_engine/rtc_engine.dart';
@@ -140,97 +141,70 @@ class _DetailsScreenState extends State<DetailsScreen> {
   String totalnum;
   int limit = 20;
   final _firestoreInstance = FirebaseFirestore.instance;
-
+  File imageFile;
   bool _isRoomOnFirebase = false;
   var expmodel;
   DocumentSnapshot snapshot; //Define snapshot
   HedraTrace hedra = HedraTrace(StackTrace.current);
 
-  void _addMicsToFirebase(String roomId) async {
-    try {
-      // Factory method to create mic models
-      UserMicModel createMicModel(
-          {int micNumber, bool isLocked = false, bool micStatus = false}) {
-        return UserMicModel(
-            id: null,
-            userId: null,
-            micNumber: micNumber,
-            isLocked: isLocked,
-            micStatus: micStatus);
-      }
-
-      final mics = <UserMicModel>[];
-
-      // Generate mic models in a loop
-      for (int i = 0; i < 10; i++) {
-        mics.add(createMicModel(micNumber: i));
-      }
-
-      // Get a reference to the Firestore collection where the mics will be stored
-      CollectionReference _collectionRef = FirebaseFirestore.instance
-          .collection('roomUsers')
-          .doc(roomId)
-          .collection('roommics');
-
-      // Check if the mics already exist
-      QuerySnapshot querySnapshot = await _collectionRef.get();
-      if (querySnapshot.docs.isEmpty) {
-        // If the mics do not exist, write all models in a batch
-        final batch = FirebaseFirestore.instance.batch();
-
-        mics.forEach((mic) {
-          batch.set(_collectionRef.doc('mic${mic.micNumber}'), mic.toJson());
-        });
-
-        // Commit the batch to write all the mics to Firestore
-        await batch.commit();
-      }
-    } catch (e) {
-      // If any error occurs during the execution of the code, it is caught here
-      print('Error occurred in _addMicsToFirebase: $e');
-    }
-  }
-
   @override
   void initState() {
+    print("room image is : ${widget.roomImage}");
     super.initState();
-
+    FirebaseDatabase.instance
+        .ref()
+        .child('newGift')
+        .onChildAdded
+        .listen((event) {
+      Map<String, dynamic> giftData =
+          Map<String, dynamic>.from(event.snapshot.value);
+      if (!giftData['isShown'] && giftData['roomId'] == roomID) {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              Future.delayed(Duration(seconds: 5), () {
+                Navigator.of(context).pop(true);
+              });
+              return Dialog(
+                backgroundColor: Colors.transparent,
+                child: new Container(
+                  alignment: FractionalOffset.center,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Image.network(
+                          giftData['giftId'],
+                          fit: BoxFit.cover,
+                        ),
+                        Text('Your first text here'),
+                        Text('Your second text here'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            });
+        FirebaseDatabase.instance
+            .ref()
+            .child('newGift')
+            .child(event.snapshot.key)
+            .update({'isShown': true});
+      }
+    });
     try {
-      // Get the Muted users in the Users in room From firestore
       isUserMuted();
-
-      // Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
+      print("room image is : ${widget.roomImage}");
       countUsersInRoomAndUpdate();
-
-      // Read local data
-      readLocal();
-
-      // Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable
+      setRoomID();
       initialize();
-
-      // Add mics to Firebase
-      // _addMicsToFirebase();
-
+      setState(() {});
       print("initState has been completed and the  " +
           "roomId: $roomID" +
           "--- Hedra Adel ---");
     } catch (e) {
-      // If any error occurs during the execution of the code, it is caught here
-      // The error message is then printed to the console
       print('Error occurred in initState: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    // _users.clear();
-    // destroy sdk
-
-    // _engine.leaveChannel();
-    print("The Room has Been Closed" + "--- Hedra Adel ---");
-    // _engine.destroy();
-    super.dispose();
   }
 
   Future<void> initialize() async {
@@ -262,250 +236,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
     //     0);
   }
 
-  File imageFile;
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    // _users.clear();
+    // destroy sdk
 
-  //// Chose Image
-  Future<File> pickImage(ImageSource source) async {
-    var image = await ImagePicker().pickImage(source: source);
-    if (image != null) {
-      imageFile = File(image.path);
-      uploadImage();
-      imagename = imageFile.path.split("/").last;
-      print(imageFile.path);
-      return imageFile;
-    }
-  }
-
-  //// Pick Image with Camera
-  Future<File> imagePicker(BuildContext context, ThemeData themeData) {
-    showCupertinoModalPopup(
-        context: context,
-        builder: (BuildContext context) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: CupertinoActionSheet(
-              title: Text(
-                'التقاط الصورة عبر',
-                // style: themeData.textTheme.subtitle,
-              ),
-              cancelButton: CupertinoButton(
-                child: Text("اغلاق",
-                    style: themeData.textTheme.bodyText1.copyWith(
-                      color: kPrimaryColor,
-                    )),
-                onPressed: () => Navigator.pop(context),
-              ),
-              actions: <Widget>[
-                CupertinoButton(
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          CupertinoIcons.photo_camera_solid,
-                          color: themeData.primaryColor,
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Text(
-                          "الكاميرا",
-                          //  style: themeData.textTheme.body1,
-                        ),
-                      ],
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      File imageFile = await pickImage(ImageSource.camera);
-                      return imageFile;
-                    }),
-                CupertinoButton(
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.insert_photo,
-                          color: themeData.primaryColor,
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Text(
-                          "الاستوديو",
-                          // style: themeData.textTheme.body1,
-                        ),
-                      ],
-                    ),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      File imageFile = await pickImage(ImageSource.gallery);
-                      return imageFile;
-                    }),
-              ],
-            ),
-          );
-        });
-  }
-
-  void showEmojiPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return EmojiPicker(
-          onEmojiSelected: (category, emoji) {
-            _messageController.text += emoji.emoji; // Add to message
-            Navigator.pop(context); // Close the picker
-          },
-        );
-      },
-    );
-  }
-
-// Optional - for clearing a selected emoji easily
-  void _clearSelectedEmoji() {
-    if (_messageController.text.isNotEmpty) {
-      final text = _messageController.text;
-      _messageController.text = text.substring(0, text.length - 2);
-    }
-  }
-
-  //// Upload Image to firestore into chats collection inside chatroom collection
-  Future uploadImage() async {
-    String fileName = Uuid().v1();
-    int status = 1;
-
-    await _firestoreInstance
-        .collection('chatroom')
-        .doc(widget.roomId)
-        .collection('chats')
-        .doc(fileName)
-        .set({
-      "sendby": specialId,
-      "message": "",
-      "type": "img",
-      "time": FieldValue.serverTimestamp(),
-    });
-
-    var ref =
-        FirebaseStorage.instance.ref().child('images').child("$fileName.jpg");
-
-    //// Delete the image if Error has been catched
-    var uploadTask = await ref.putFile(imageFile).catchError((error) async {
-      await _firestoreInstance
-          .collection('chatroom')
-          .doc(widget.roomId)
-          .collection('chats')
-          .doc(fileName)
-          .delete();
-
-      status = 0;
-    });
-
-    if (status == 1) {
-      String imageUrl = await uploadTask.ref.getDownloadURL();
-
-      await _firestoreInstance
-          .collection('chatroom')
-          .doc(widget.roomId)
-          .collection('chats')
-          .doc(fileName)
-          .update({"message": imageUrl});
-      onSendMessage(imageUrl, 1, 1);
-      print(imageUrl);
-    }
-  }
-
-  //// Send New massage (content) from the user To the room chat , select the massage Type if text or image, etc ..
-  //// By Hedra Adel
-  void onSendMessage(
-    String content,
-    int type,
-    int currentlevel,
-  ) {
-    // type: 0 = text, 1 = image, 2 = sticker
-    if (content.trim() != '') {
-      _messageController.clear();
-
-      var documentReference = FirebaseFirestore.instance
-          .collection('messages')
-          .doc(widget.roomId)
-          .collection(widget.roomId)
-          .doc(DateTime.now().millisecondsSinceEpoch.toString());
-
-      FirebaseFirestore.instance.runTransaction((transaction) async {
-        transaction.set(
-          documentReference,
-          {
-            'username': username,
-            'idFrom': specialId,
-            'idTo': widget.roomId,
-            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-            'content': content,
-            'type': type,
-            'userLevel': currentlevel,
-            'ApiUserID': apiid,
-            'userType': userstateInroom,
-            'specialId': specialId,
-            'packageName': nameOFPackage,
-            'packageColor': packageColor,
-            'packageBadge': packagebadge,
-            'hasSpecialID': hasSpecialID
-          },
-        );
-      });
-      listScrollController.animateTo(0.0,
-          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-      print("The Message has Been Sent" + "--- Hedra Adel ---");
-    } else {
-      CommonFunctions.showToast('Nothing to send', Colors.red);
-      print("The Message hasn't Been Sent" + "--- Hedra Adel ---");
-    }
-  }
-
-  //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
-  //// By Hedra Adel
-  readLocal() async {
-    try {
-      if (apiid.hashCode <= widget.roomId.hashCode) {
-        setState(() {
-          groupChatId = '${widget.roomId}';
-          roomID = widget.roomId;
-        });
-      } else {
-        setState(() {
-          groupChatId = '${widget.roomId}';
-          roomID = widget.roomId;
-        });
-      }
-    } catch (e) {
-      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      print(
-          " - Error - There is Error in readLocal() in ${hedra.fileName} -- " +
-              "In Line : ${hedra.lineNumber} -- " +
-              "The caller function : ${hedra.callerFunctionName} -- " +
-              "The Details is : :::: " +
-              e.toString() +
-              " :::: " +
-              "-- Hedra Adel - Error -");
-      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    }
-  }
-
-// improve checkRoomFoundOrNot() code and handle the errors
-//// Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable and create room doc if it not exists
-//// By Hedra Adel
-  checkRoomFoundOrNot() async {
-    try {
-      DocumentSnapshot ds =
-          await _firestoreInstance.collection("roomUsers").doc(roomID).get();
-      this.setState(() {
-        _isRoomOnFirebase = ds.exists;
-        print("checkRoomFoundOrNot Has been Completed and " +
-            "_isRoomOnFirebase is : $_isRoomOnFirebase" +
-            "--- Hedra Adel ---");
-      });
-      // if room not exist add it to firebase
-      _isRoomOnFirebase ? null : _addMicsToFirebase(roomID);
-    } catch (e) {
-      print("Error in checkRoomFoundOrNot: $e");
-    }
+    // _engine.leaveChannel();
+    print("The Room has Been Closed" + "--- Hedra Adel ---");
+    // _engine.destroy();
+    super.dispose();
   }
 
   /// Widget for displaying a person in the room.
@@ -520,7 +260,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   /// Returns:
   /// The widget representing the person in the room.
 
-  Widget _personInRoom(int index, UserMicModel micModel) {
+  Widget RoomMicsWidget(int index, UserMicModel micModel) {
     print("_personInRoom index" + "$index" + "--- Hedra Adel ---");
     print(
         "_personInRoom index" + "${micModel.userName}" + "--- Hedra Adel ---");
@@ -531,18 +271,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
           child: Column(
             children: <Widget>[
               micModel.micStatus == true
-                  ? Flexible(
-                      child: Stack(
+                  ? Expanded(
+                      child: Row(
                         children: [
                           hasFrame == null
                               ? Container(
                                   //empty frame
                                   )
-                              : Container(
-                                  width: 70,
-                                  child: Image.network(
-                                    hasFrame,
-                                  )), // Back image
+                              : Expanded(
+                                  child: Container(
+                                      width: 70,
+                                      child: Image.network(
+                                        hasFrame,
+                                      )),
+                                ), // Back image
                           Padding(
                             padding: const EdgeInsets.all(9.0),
                             child: Container(
@@ -594,14 +336,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
           } else if (!micModel.micStatus &&
               !micModel.isLocked &&
               micModel.userId == null &&
-              micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
+              micModel.roomOwnerId == userid) {
             // Iam room owner and mic is empty
             print("Iam owner and mic is empty.");
 
             // Check if user already holds mic before
             var existingItem = _micUsersList.firstWhere(
-                (itemToCheck) =>
-                    itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+                (itemToCheck) => itemToCheck.userId == userid,
                 orElse: () => null);
 
             // user already holds mic before
@@ -634,9 +375,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                         // go to new mic
                         micModel.id = index.toString();
-                        micModel.userName =
-                            PreferencesServices.getString(Name_KEY);
-                        micModel.userId = PreferencesServices.getString(ID_KEY);
+                        micModel.userName = username;
+                        micModel.userId = userid;
                         micModel.micNumber = index;
                         micModel.micStatus = true;
                         print("name: ${micModel.userName}");
@@ -698,9 +438,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       takeMicFunction: () {
                         // go to new mic
                         micModel.id = index.toString();
-                        micModel.userName =
-                            PreferencesServices.getString(Name_KEY);
-                        micModel.userId = PreferencesServices.getString(ID_KEY);
+                        micModel.userName = username;
+                        micModel.userId = userid;
                         micModel.micNumber = index;
                         micModel.micStatus = true;
                         micModel.isLocked = false;
@@ -755,7 +494,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           } else if (!micModel.micStatus &&
               micModel.isLocked &&
               micModel.userId == null &&
-              micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
+              micModel.roomOwnerId == userid) {
             // Iam room owner and mic is locked
             print("Iam room owner and mic is locked...");
             showDialog(
@@ -803,8 +542,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 });
           } else if (micModel.micStatus &&
               !micModel.isLocked &&
-              micModel.userId == PreferencesServices.getString(ID_KEY) &&
-              micModel.roomOwnerId == PreferencesServices.getString(ID_KEY)) {
+              micModel.userId == userid &&
+              micModel.roomOwnerId == userid) {
             // Iam room owner and mic is locked
             print("Iam room owner and mic is taken by me...");
             showDialog(
@@ -838,12 +577,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
           } else if (!micModel.micStatus &&
               !micModel.isLocked &&
               micModel.userId == null &&
-              micModel.roomOwnerId != PreferencesServices.getString(ID_KEY)) {
+              micModel.roomOwnerId != specialId) {
             // Iam not room owner and mic is locked
             print("Iam not room owner and mic is taken by me...");
             var existingItem = _micUsersList.firstWhere(
-                (itemToCheck) =>
-                    itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+                (itemToCheck) => itemToCheck.userId == userid,
                 orElse: () => null);
             if (existingItem != null) {
               // user already holds mic before
@@ -873,9 +611,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                         // go to new mic
                         micModel.id = index.toString();
-                        micModel.userName =
-                            PreferencesServices.getString(Name_KEY);
-                        micModel.userId = PreferencesServices.getString(ID_KEY);
+                        micModel.userName = username;
+                        micModel.userId = userid;
                         micModel.micNumber = index;
                         micModel.micStatus = true;
                         print("name: ${micModel.userName}");
@@ -1002,15 +739,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
           } else if (!micModel.micStatus &&
               micModel.isLocked &&
               micModel.userId != null &&
-              micModel.userId != PreferencesServices.getString(ID_KEY)) {
+              micModel.userId != userid) {
             // Mic is locked
             CommonFunctions.showToast("Mic is locked", Colors.red);
           } else {
             print("_micUsersList: ${_micUsersList.length}");
             //find existing item per link criteria
             var existingItem = _micUsersList.firstWhere(
-                (itemToCheck) =>
-                    itemToCheck.userId == PreferencesServices.getString(ID_KEY),
+                (itemToCheck) => itemToCheck.userId == userid,
                 orElse: () => null);
             if (existingItem != null) {
               // user already holds mic before
@@ -1039,9 +775,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                       // go to new mic
                       micModel.id = index.toString();
-                      micModel.userName =
-                          PreferencesServices.getString(Name_KEY);
-                      micModel.userId = PreferencesServices.getString(ID_KEY);
+                      micModel.userName = username;
+                      micModel.userId = userid;
                       micModel.micNumber = index;
                       micModel.micStatus = true;
                       print("name: ${micModel.userName}");
@@ -1077,9 +812,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       print("clicked take");
                       print("clicked index: $index");
                       micModel.id = "$index";
-                      micModel.userName =
-                          PreferencesServices.getString(Name_KEY);
-                      micModel.userId = PreferencesServices.getString(ID_KEY);
+                      micModel.userName = username;
+                      micModel.userId = userid;
                       micModel.micNumber = index;
                       micModel.micStatus = true;
                       print("name: ${micModel.userName}");
@@ -1118,108 +852,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
           "${micModel.userName}" +
           "--- Hedra Adel ---");
       return Container();
-    }
-  }
-
-  Future<void> countUsersInRoomAndUpdate() async {
-    try {
-      // Get a reference to the 'UsersInRoom' collection in Firestore
-      CollectionReference usersInRoomRef = FirebaseFirestore.instance
-          .collection('roomUsers')
-          .doc(widget.roomId)
-          .collection('UsersInRoom');
-
-      // Get a snapshot of the 'UsersInRoom' collection
-      QuerySnapshot snapshot = await usersInRoomRef.get();
-
-      // Count the number of documents in the snapshot (each document represents a user)
-      int userCount = snapshot.docs.length;
-
-      // Update the 'totalnum' variable
-      totalnum = userCount.toString();
-
-      print(
-          "countUsersInRoomAndUpdate() has been completed. Total number of users in room is " +
-              totalnum);
-    } catch (e) {
-      print("Error in countUsersInRoomAndUpdate(): " + e.toString());
-    }
-  }
-
-  //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
-  //// By Hedra Adel
-  // void GetRoomsCollection() async {
-  //   try {
-  //     await for (var snapshot in _firestoreInstance
-  //         .collection('rooms')
-  //         .doc(widget.roomId)
-  //         .snapshots()) {
-  //       var messeage = snapshot.get('userNow');
-  //
-  //       print("GetRoomsCollection() Has been Complete and message content is " +
-  //           messeage.toString() +
-  //           "--- Hedra Adel ---");
-  //
-  //       totalnum = messeage.toString();
-  //     }
-  //   } catch (e) {
-  //     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-  //     print(" - Error - There is Error in ${hedra.fileName} -- " +
-  //         "In Line : ${hedra.lineNumber} -- " +
-  //         "The caller function : ${hedra.callerFunctionName} -- " +
-  //         "The Details is : :::: " +
-  //         e.toString() +
-  //         " :::: " +
-  //         "-- Hedra Adel - Error -");
-  //     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-  //   }
-  // }
-
-  void onUserLogout(String userId, String roomId) {
-    // Remove the user from the backend API
-    // OnlineRoomListBackend().removeOnlineUser(userId, roomId);
-
-    // Remove the user from Firebase
-    FirebaseFirestore.instance
-        .collection('UsersInRoom')
-        .doc(roomId)
-        .collection(roomId)
-        .doc(userId)
-        .delete();
-
-    // ... other logic for when the user logs out
-  }
-
-  //// Get the Muted users in the Users in room(UsersInRoom) From firestore
-  //// By Hedra Adel
-  void isUserMuted() async {
-    final firestoreInstance = FirebaseFirestore.instance;
-
-    // Check if the user document exists in the 'MutedList' sub-collection
-    DocumentSnapshot mutedListDoc = await firestoreInstance
-        .collection('roomUsers')
-        .doc(widget.roomId)
-        .collection(
-            'MutedList') // Assuming 'MutedList' is the sub-collection you want to access
-        .doc(widget.userID) // Provide the user's ID to the .doc() method
-        .get();
-
-    // Check if the 'ismuted' field exists in the 'FollowersUsers' sub-collection
-    DocumentSnapshot followersUsersDoc = await firestoreInstance
-        .collection('roomUsers')
-        .doc(widget.roomId)
-        .collection('FollowersUsers')
-        .doc(widget.userID)
-        .get();
-
-    if (followersUsersDoc.exists &&
-            followersUsersDoc.data() != null &&
-            (followersUsersDoc.data() as Map<String, dynamic>)['ismuted'] ==
-                true ||
-        mutedListDoc.exists) {
-      ismuted = true;
-    } else {
-      ismuted = false;
     }
   }
 
@@ -1284,41 +916,73 @@ class _DetailsScreenState extends State<DetailsScreen> {
               });
             });
           }
-
-          if (state is SendGiftSuccessStates) {
-            var model = HomeCubit.get(context).notificationModel;
-
-            FirebaseMessaging.onMessage.listen((event) {
-              print(
-                  "FirebaseMessaging.onMessage SendGiftSuccessStates event listen Has been fired data is " +
-                      event.data.toString() +
-                      "--- Hedra Adel ---");
-              SendgiftModel sendgiftModel;
-              sendgiftModel = SendgiftModel.fromJson(event.data);
-              // isHaveFrame = null;
-
-              new Future.delayed(Duration.zero, () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      Future.delayed(Duration(seconds: 5), () {
-                        Navigator.of(context).pop(true);
-                      });
-                      return Dialog(
-                        backgroundColor: Colors.transparent,
-                        child: new Container(
-                            alignment: FractionalOffset.center,
-                            // height: 80.0,
-                            // padding: const EdgeInsets.all(20.0),
-                            child: new Image.network(
-                              showgift,
-                              fit: BoxFit.cover,
-                            )),
-                      );
-                    });
-              });
-            });
-          }
+          // if (state is SendGiftSuccessStates) {
+          //   var model = HomeCubit.get(context).notificationModel;
+          //   String showgift =
+          //       'https://nauma.smartlys.online/public/uploads/images/shop/VDMrqshf4qyScQJWEAXJ0D9huZto0exXdwmJSJJG.png}'; // Ensure showgift is defined
+          //
+          //   FirebaseMessaging.onMessage.listen((event) {
+          //     print(
+          //         "FirebaseMessaging.onMessage SendGiftSuccessStates event listen Has been fired data is " +
+          //             event.data.toString() +
+          //             "--- Hedra Adel ---");
+          //     SendgiftModel sendgiftModel;
+          //     sendgiftModel = SendgiftModel.fromJson(event.data);
+          //
+          //     new Future.delayed(Duration.zero, () {
+          //       showDialog(
+          //           context: context,
+          //           builder: (BuildContext context) {
+          //             Future.delayed(Duration(seconds: 5), () {
+          //               Navigator.of(context).pop(true);
+          //             });
+          //             return Dialog(
+          //               backgroundColor: Colors.transparent,
+          //               child: new Container(
+          //                   alignment: FractionalOffset.center,
+          //                   child: new Image.network(
+          //                     showgift,
+          //                     fit: BoxFit.cover,
+          //                   )),
+          //             );
+          //           });
+          //     });
+          //   });
+          // }
+          // if (state is SendGiftSuccessStates) {
+          //   var model = HomeCubit.get(context).notificationModel;
+          //
+          //   FirebaseMessaging.onMessage.listen((event) {
+          //     print(
+          //         "FirebaseMessaging.onMessage SendGiftSuccessStates event listen Has been fired data is " +
+          //             event.data.toString() +
+          //             "--- Hedra Adel ---");
+          //     SendgiftModel sendgiftModel;
+          //     sendgiftModel = SendgiftModel.fromJson(event.data);
+          //     // isHaveFrame = null;
+          //
+          //     new Future.delayed(Duration.zero, () {
+          //       showDialog(
+          //           context: context,
+          //           builder: (BuildContext context) {
+          //             Future.delayed(Duration(seconds: 5), () {
+          //               Navigator.of(context).pop(true);
+          //             });
+          //             return Dialog(
+          //               backgroundColor: Colors.transparent,
+          //               child: new Container(
+          //                   alignment: FractionalOffset.center,
+          //                   // height: 80.0,
+          //                   // padding: const EdgeInsets.all(20.0),
+          //                   child: new Image.network(
+          //                     showgift,
+          //                     fit: BoxFit.cover,
+          //                   )),
+          //             );
+          //           });
+          //     });
+          //   });
+          // }
 
           if (state is FollowSuccessStates) {
             if (HomeCubit.get(context).isFollowModel.success == true) {
@@ -1374,23 +1038,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   Widget getdata(
     BoxConstraints constraints,
-    GetUserExpModel UserEXP_Model,
+    GetUserExpModel UserEXPModel,
     String model1,
     InRoomUserModelModel RoomUserModelModelLoaded,
-    TextEditingController textedit_controller,
+    TextEditingController texteditController,
   ) {
-    print(
-        'getdata function is called'); // This will print when the function is called
-
-    print('Constraints: $constraints'); // This will print the constraints value
-    print(
-        'GetUserExpModel: ${UserEXP_Model.toJson()}'); // This will print the GetUserExpModel data
-    print('Model1: $model1'); // This will print the model1 value
-    print(
-        'InRoomUserModelModel: ${RoomUserModelModelLoaded.toJson()}'); // This will print the InRoomUserModelModel data
-    print(
-        'Controller: ${textedit_controller.text}'); // This will print the text inside the controller
-
     return LayoutBuilder(builder: (context, constraints) {
       final size = MediaQuery.of(context).size;
       final theme = Theme.of(context);
@@ -1409,15 +1061,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           ? Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                    image: NetworkImage(background),
+                                    image: NetworkImage(widget.roomImage),
                                     fit: BoxFit.cover),
                               ),
                             )
                           : Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                    image: NetworkImage(
-                                        'https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80'),
+                                    image: NetworkImage(widget.roomImage),
                                     fit: BoxFit.cover),
                               ),
                             ),
@@ -1425,651 +1076,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 40.0, horizontal: 8.0),
                         child: SizedBox(
-                            //the problem of overflowed by 19pixels on this coulmn and the problem is in the text widget
-
                             child: Column(
                           children: <Widget>[
                             Flexible(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      width: size.width / 2 - 18,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 1.0, horizontal: 3.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black26,
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(16.0),
-                                            bottomLeft: Radius.circular(16.0)),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          InkWell(
-                                            child: Container(
-                                              height: 50,
-                                              width: 50,
-                                              child: Image.network(
-                                                'https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80',
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            onTap: () {
-                                              showModalBottomSheet(
-                                                  context: context,
-                                                  isScrollControlled: true,
-                                                  constraints: BoxConstraints(),
-                                                  builder: (builder) {
-                                                    return Container(
-                                                      color: Colors.transparent,
-                                                      child: RoomImageTap(
-                                                          roomDesc:
-                                                              widget.roomDesc,
-                                                          totalNum: totalnum,
-                                                          roomimage:
-                                                              widget.roomImage,
-                                                          roomname:
-                                                              widget.roomName,
-                                                          roomID: widget.roomId
-                                                              .toString(),
-                                                          currentlevel:
-                                                              UserEXP_Model.data
-                                                                  .userCurrentLevel),
-                                                    );
-                                                  });
-                                            },
-                                          ),
-                                          SizedBox(
-                                            width: 10.0,
-                                          ),
-                                          Expanded(
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  widget.roomName,
-                                                  maxLines: 1,
-                                                  style: theme
-                                                      .textTheme.bodyText1
-                                                      .copyWith(
-                                                          color: Colors.white,
-                                                          fontSize: 17),
-                                                ),
-                                                Spacer(),
-                                                Text(
-                                                  "ID :${widget.roomId}",
-                                                  maxLines: 1,
-                                                  style: theme
-                                                      .textTheme.bodyText2
-                                                      .copyWith(
-                                                          color: Colors.white,
-                                                          fontSize: 15),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          check == 0
-                                              // model.data.user.follow == 0
-                                              // model.data.user.follow == 0
-                                              ? IconButton(
-                                                  onPressed: () {
-                                                    HomeCubit.get(context)
-                                                        .followroom(id: roomID);
-                                                    setState(() {
-                                                      check = 1;
-                                                    });
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.favorite_border,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : IconButton(
-                                                  onPressed: () {
-                                                    HomeCubit.get(context)
-                                                        .followroom(id: roomID);
-                                                    // check = true;
-                                                  },
-                                                  icon: Icon(Icons.favorite,
-                                                      color: Colors.blue))
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                          icon: Icon(Icons.ios_share,
-                                              color: Colors.white),
-                                          onPressed: () {
-                                            // getreal();
-                                            print("share btn clicked");
-                                          }),
-                                      Theme(
-                                          data: Theme.of(context).copyWith(
-                                            dividerTheme: DividerThemeData(
-                                              color: Colors.white,
-                                            ),
-                                            cardColor:
-                                                Colors.black.withOpacity(0.7),
-                                          ),
-                                          child: PopupMenuButton<int>(
-                                            icon: Icon(
-                                              Icons.more_vert,
-                                              color: Colors.white,
-                                            ),
-                                            onSelected: (item) => onSelected(
-                                                context,
-                                                item,
-                                                textedit_controller),
-                                            itemBuilder: (context) => [
-                                              PopupMenuItem<int>(
-                                                  value: 0,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.subject,
-                                                        color: Colors.white,
-                                                      ),
-                                                      Spacer(),
-                                                      Text(
-                                                        "الموضوعات",
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      )
-                                                    ],
-                                                  )),
-                                              PopupMenuDivider(),
-                                              PopupMenuItem<int>(
-                                                  value: 1,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.developer_board,
-                                                        color: Colors.white,
-                                                      ),
-                                                      Spacer(),
-                                                      Text("تطوير",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white))
-                                                    ],
-                                                  )),
-                                              PopupMenuDivider(),
-                                              PopupMenuItem<int>(
-                                                  value: 2,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.lock,
-                                                        color: Colors.white,
-                                                      ),
-                                                      Spacer(),
-                                                      Text(
-                                                        "قفل",
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      )
-                                                    ],
-                                                  )),
-                                              PopupMenuDivider(),
-                                              PopupMenuItem<int>(
-                                                  value: 3,
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.share,
-                                                        color: Colors.white,
-                                                      ),
-                                                      Spacer(),
-                                                      Text(
-                                                        "مشاركة",
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      )
-                                                    ],
-                                                  )),
-                                            ],
-                                          )),
-                                      GestureDetector(
-                                          child: Icon(Icons.close,
-                                              color: Colors.white),
-                                          //Create api for room logout
-                                          onTap: () {
-                                            HomeCubit.get(context)
-                                                .logoutUserRoom(
-                                                    id: widget.roomId);
-                                            _closeRoom();
-                                          })
-                                    ],
-                                  )
-                                ],
-                              ),
+                              child: RoomTopHeaderRow(size, context,
+                                  UserEXPModel, theme, texteditController),
+                            ),
+                            5.height,
+                            Flexible(
+                              child: RoomUserDetailsRow(theme, context),
                             ),
                             16.height,
                             Flexible(
                               child: Container(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      width: 150,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 2.0, horizontal: 6.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black26,
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(16.0),
-                                            bottomLeft: Radius.circular(16.0)),
-                                      ),
-                                      child: InkWell(
-                                        child: Container(
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                  Icons.monetization_on_rounded,
-                                                  color: Colors.orange),
-                                              SizedBox(
-                                                width: 6.0,
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  widget.roomDesc,
-                                                  maxLines: 1,
-                                                  style: theme
-                                                      .textTheme.bodyText1
-                                                      .copyWith(
-                                                          color: Colors.white,
-                                                          fontSize: 17),
-                                                ),
-                                              ),
-                                              Icon(
-                                                Icons.arrow_back_ios_rounded,
-                                                color: Colors.grey,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          showModalBottomSheet(
-                                              context: context,
-                                              isScrollControlled: true,
-                                              builder: (builder) {
-                                                return Container(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      0.80,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(30.0),
-                                                      topRight:
-                                                          Radius.circular(30.0),
-                                                    ),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Container(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(14.0),
-                                                          child: Text(
-                                                            "قائمة الكرماء",
-                                                            style: TextStyle(
-                                                                fontSize: 16),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        width: double.infinity,
-                                                        height: 568,
-                                                        child:
-                                                            DefaultTabController(
-                                                          length: 2,
-                                                          child: Scaffold(
-                                                            appBar:
-                                                                PreferredSize(
-                                                                    preferredSize:
-                                                                        Size.fromHeight(
-                                                                            30.0),
-                                                                    child:
-                                                                        AppBar(
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white,
-                                                                      bottom:
-                                                                          TabBar(
-                                                                        indicator:
-                                                                            BoxDecoration(
-                                                                          color:
-                                                                              KstorebuttonColor,
-                                                                          borderRadius:
-                                                                              BorderRadius.all(
-                                                                            Radius.circular(5),
-                                                                          ),
-                                                                        ),
-                                                                        tabs: [
-                                                                          Text(
-                                                                            "اخر 24 ساعة",
-                                                                            style:
-                                                                                TextStyle(color: Colors.grey),
-                                                                          ),
-                                                                          Text(
-                                                                            "اخر 7 أيام",
-                                                                            style:
-                                                                                TextStyle(color: Colors.grey),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )),
-                                                            body: TabBarView(
-                                                              children: [
-                                                                GiftScreen(),
-                                                                Column(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    SizedBox(
-                                                                      height:
-                                                                          80,
-                                                                    ),
-                                                                    Padding(
-                                                                      padding:
-                                                                          const EdgeInsets.all(
-                                                                              8.0),
-                                                                      child:
-                                                                          Container(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        child:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .hourglass_empty_rounded,
-                                                                          size:
-                                                                              80,
-                                                                          color:
-                                                                              Colors.grey,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                    Padding(
-                                                                      padding:
-                                                                          const EdgeInsets.all(
-                                                                              8.0),
-                                                                      child:
-                                                                          Text(
-                                                                        "لم يرسل أحد الهدايا في ال 24 ساعة الماضية",
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.grey),
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          240,
-                                                                    ),
-                                                                    Row(
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child: Container(
-                                                                              height: 80,
-                                                                              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-                                                                              child: Row(
-                                                                                children: [
-                                                                                  CircleAvatar(
-                                                                                    radius: 30.0,
-                                                                                    backgroundImage: NetworkImage("https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
-                                                                                    backgroundColor: Colors.transparent,
-                                                                                  ),
-                                                                                  Padding(
-                                                                                    padding: const EdgeInsets.all(8.0),
-                                                                                    child: Column(
-                                                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                                                      children: [
-                                                                                        Text("username"),
-                                                                                        Row(
-                                                                                          children: [
-                                                                                            Icon(Icons.monetization_on_rounded, color: Colors.orange),
-                                                                                            SizedBox(
-                                                                                              width: 10,
-                                                                                            ),
-                                                                                            Text("0"),
-                                                                                          ],
-                                                                                        )
-                                                                                      ],
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              )),
-                                                                        )
-                                                                      ],
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                                Column(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    SizedBox(
-                                                                      height:
-                                                                          80,
-                                                                    ),
-                                                                    Padding(
-                                                                      padding:
-                                                                          const EdgeInsets.all(
-                                                                              8.0),
-                                                                      child:
-                                                                          Container(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        child:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .hourglass_empty_rounded,
-                                                                          size:
-                                                                              80,
-                                                                          color:
-                                                                              Colors.grey,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                    Padding(
-                                                                      padding:
-                                                                          const EdgeInsets.all(
-                                                                              8.0),
-                                                                      child:
-                                                                          Text(
-                                                                        "لم يرسل أحد الهدايا في السبعة أيام الماضية",
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.grey),
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height:
-                                                                          240,
-                                                                    ),
-                                                                    Row(
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child: Container(
-                                                                              height: 80,
-                                                                              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-                                                                              child: Row(
-                                                                                children: [
-                                                                                  CircleAvatar(
-                                                                                    radius: 30.0,
-                                                                                    backgroundImage: NetworkImage("https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
-                                                                                    backgroundColor: Colors.transparent,
-                                                                                  ),
-                                                                                  Padding(
-                                                                                    padding: const EdgeInsets.all(8.0),
-                                                                                    child: Column(
-                                                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                                                      children: [
-                                                                                        Text("username"),
-                                                                                        Row(
-                                                                                          children: [
-                                                                                            Icon(Icons.monetization_on_rounded, color: Colors.orange),
-                                                                                            SizedBox(
-                                                                                              width: 10,
-                                                                                            ),
-                                                                                            Text("0"),
-                                                                                          ],
-                                                                                        )
-                                                                                      ],
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              )),
-                                                                        )
-                                                                      ],
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              });
-                                        },
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 170,
-                                          height: 70,
-                                          child: Directionality(
-                                            textDirection: TextDirection.ltr,
-                                            child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Expanded(
-                                                    flex: 1,
-                                                    child: ListView.separated(
-                                                      scrollDirection:
-                                                          Axis.horizontal,
-                                                      shrinkWrap: true,
-                                                      itemBuilder:
-                                                          (BuildContext context,
-                                                              int index) {
-                                                        var roomUserModel =
-                                                            HomeCubit.get(
-                                                                    context)
-                                                                .roomUserModel;
-                                                        if (roomUserModel !=
-                                                                null &&
-                                                            roomUserModel
-                                                                    .data !=
-                                                                null) {
-                                                          return builditem(
-                                                              roomUserModel
-                                                                  .data[index],
-                                                              context);
-                                                        } else {
-                                                          return Container(); // return an empty container when roomUserModel or data is null
-                                                        }
-                                                      },
-                                                      itemCount:
-                                                          HomeCubit.get(context)
-                                                                  .roomUserModel
-                                                                  ?.data
-                                                                  ?.length ??
-                                                              0,
-                                                      separatorBuilder:
-                                                          (BuildContext context,
-                                                                  int index) =>
-                                                              SizedBox(
-                                                        width: 10,
-                                                      ),
-                                                    ),
-                                                  )
-                                                ]),
-                                          ),
-                                        ),
-                                        5.width,
-                                        InkWell(
-                                          child: Container(
-                                            child: Row(
-                                              children: [
-                                                message == null
-                                                    ? Text(
-                                                        '0',
-                                                        style: theme
-                                                            .textTheme.bodyText1
-                                                            .copyWith(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 18),
-                                                      )
-                                                    : Text(
-                                                        totalnum.toString(),
-                                                        style: theme
-                                                            .textTheme.bodyText1
-                                                            .copyWith(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 18),
-                                                      ),
-                                                Icon(Icons.person_outline,
-                                                    color: Colors.white),
-                                              ],
-                                            ),
-                                          ),
-                                          onTap: () {
-                                            showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                constraints: BoxConstraints(),
-                                                builder: (builder) {
-                                                  print(
-                                                      "Proday of UsersInroom Wedgit IS " +
-                                                          widget.roomId
-                                                              .toString());
-                                                  return UsersInroom(
-                                                      roomID: widget.roomId
-                                                          .toString());
-                                                });
-                                          },
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            16.height,
-                            Flexible(
-                              child: Container(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Container(
-                                  width: double.infinity,
-                                  margin:
-                                      const EdgeInsets.only(top: 10, right: 10),
-                                  child: _roomMicsLayout(),
-                                ),
+                                child: _roomMicsLayout(),
                               ),
                             ),
                             16.height,
@@ -2077,456 +1097,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           ],
                         )),
                       ),
-                      Positioned(
-                        bottom: 10,
-                        left: 10,
-                        right: 10,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.black26,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(16.0)),
-                                ),
-                                child: TextField(
-                                  keyboardType: TextInputType.text,
-                                  controller: _messageController,
-                                  style: TextStyle(color: Colors.white),
-                                  decoration: InputDecoration.collapsed(
-                                    hintText: "رسالتك...",
-                                    hintStyle: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            8.width,
-                            // add the emoji button here
-                            InkWell(
-                              child: Container(
-                                padding: const EdgeInsets.all(5.0),
-                                // add left margin
-                                margin: const EdgeInsets.only(left: 8.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.orange,
-                                ),
-                                child: Icon(
-                                  Icons.emoji_emotions_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              onTap: () {
-                                FocusScope.of(context)
-                                    .unfocus(); // Dismiss keyboard (optional)
-                                showEmojiPicker(context); // Show picker
-                              },
-                            ),
-
-                            Container(
-                              padding: const EdgeInsets.all(5.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.orange,
-                              ),
-                              child: Icon(
-                                Icons.send,
-                                color: Colors.white,
-                              ),
-                            ).onTap(() {
-                              if (ismuted == true) {
-                                CommonFunctions.showToast(
-                                    'لا تملك الصلاحية', Colors.red);
-                              } else {
-                                onSendMessage(
-                                  _messageController.text, 0,
-                                  UserEXP_Model.data.userCurrentLevel,
-                                  // model.data.userId
-                                );
-                              }
-                            }),
-                            8.width,
-                            Theme(
-                                data: Theme.of(context).copyWith(
-                                  dividerTheme: DividerThemeData(
-                                    color: Colors.white,
-                                  ),
-                                  cardColor: Colors.black.withOpacity(0.7),
-                                ),
-                                child: PopupMenuButton<int>(
-                                  icon: Container(
-                                    padding: const EdgeInsets.all(4.0),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: kPrimaryLightColor,
-                                    ),
-                                    child: Icon(
-                                      Icons.image_rounded,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  onSelected: (item) => onSelected(
-                                      context, item, textedit_controller),
-                                  itemBuilder: (context) => [
-                                    PopupMenuItem<int>(
-                                        value: 3,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          width: 180,
-                                          height: 70,
-                                          child: Row(
-                                            children: [
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.music_note,
-                                                    color: Colors.white,
-                                                  ),
-                                                  Text(
-                                                    "أغاني الغرفه",
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                ],
-                                              ),
-                                              Spacer(),
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(
-                                                    Icons.album,
-                                                    color: Colors.white,
-                                                  ),
-                                                  InkWell(
-                                                    child: Container(
-                                                      child: Text(
-                                                        "البوم الصور",
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ),
-                                                    onTap: () {
-                                                      imagePicker(
-                                                          context, theme);
-                                                    },
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        )),
-                                  ],
-                                )),
-                            Container(
-                              height: 35,
-                              // padding: const EdgeInsets.all(3.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: kPrimaryColor,
-                              ),
-                              child: IconButton(
-                                  iconSize: 22,
-                                  color: Colors.white,
-                                  icon: Icon(Icons.card_giftcard_rounded),
-                                  onPressed: () => showModalBottomSheet(
-                                      backgroundColor: Colors.transparent,
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return GiftScreen(
-                                            roomID: widget.roomId);
-                                      })),
-                            ),
-                            8.width,
-                            InkWell(
-                              child: Container(
-                                padding: const EdgeInsets.all(6.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.black45,
-                                ),
-                                child: Icon(
-                                  Icons.favorite_outline_outlined,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
-                              onTap: () {
-                                showModalBottomSheet(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Container(
-                                        height: 350,
-                                        child: Scaffold(
-                                            backgroundColor:
-                                                Colors.black.withOpacity(0.7),
-                                            body: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Container(
-                                                          height: 50,
-                                                          child: Center(
-                                                            child: Text(
-                                                              "مركز  الترفيه",
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontSize: 16),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.grey,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                      height: 120,
-                                                      width: 80,
-                                                      child: Center(
-                                                          child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons.games,
-                                                            size: 40,
-                                                            color: Colors
-                                                                .redAccent,
-                                                          ),
-                                                          // SizedBox(
-                                                          //   height: 20,
-                                                          // ),
-                                                          Column(
-                                                            children: [
-                                                              Text(
-                                                                "حجرة ورقة",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        16),
-                                                              ),
-                                                              Text(
-                                                                "مقص",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        16),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        ],
-                                                      )),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.grey,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                      height: 120,
-                                                      width: 80,
-                                                      child: Center(
-                                                          child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .monetization_on_rounded,
-                                                            size: 40,
-                                                            color:
-                                                                Colors.orange,
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
-                                                          ),
-                                                          Text(
-                                                            "حقيبة الحظ",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 16),
-                                                          ),
-                                                        ],
-                                                      )),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Container(
-                                                      height: 120,
-                                                      width: 80,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.grey,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                      child: Center(
-                                                          child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons.circle,
-                                                            size: 40,
-                                                            color: Colors.blue,
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
-                                                          ),
-                                                          Text(
-                                                            "عجلة الحظ",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 16),
-                                                          ),
-                                                        ],
-                                                      )),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Container(
-                                                      height: 120,
-                                                      width: 80,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.grey,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                      child: Center(
-                                                          child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .people_alt_sharp,
-                                                            size: 40,
-                                                            color:
-                                                                kPrimaryColor,
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
-                                                          ),
-                                                          Text(
-                                                            "استطلاع الرأي",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 16),
-                                                          ),
-                                                        ],
-                                                      )),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(
-                                                  height: 20,
-                                                ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Container(
-                                                      height: 120,
-                                                      width: 80,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.grey,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                      child: Center(
-                                                          child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .confirmation_number_rounded,
-                                                            size: 40,
-                                                            color:
-                                                                kPrimaryColor,
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
-                                                          ),
-                                                          Text(
-                                                            "رقم الحظ",
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 16),
-                                                          ),
-                                                        ],
-                                                      )),
-                                                    ),
-                                                  ],
-                                                )
-                                              ],
-                                            )),
-                                      );
-                                    });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
+                      RoomMessageWriteingRow(
+                          context, UserEXPModel, texteditController, theme),
                     ],
                   ),
                 ),
@@ -2536,151 +1108,778 @@ class _DetailsScreenState extends State<DetailsScreen> {
     });
   }
 
-  void onSelected1(BuildContext context, int item, int userID, String roomid) {
-    switch (item) {
-      case 0:
-        HomeCubit.get(context).postSupervsorroom(id: userID);
-
-        break;
-
-      case 1:
-        HomeCubit.get(context).deleteSupervsorroom(id: userID);
-
-        break;
-
-      case 2:
-        HomeCubit.get(context).postUnfollowser(idUser: userID, idRoom: roomid);
-
-        break;
-    }
-  }
-
-  void onSelected2(
-      //   BuildContext context,
-      int item,
-      String userID,
-      String roomid) {
-    switch (item) {
-      case 0:
-        HomeCubit.get(context).postSupervsorroom(id: userID);
-        // Navigator.of(context).push(
-        //     MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
-        break;
-
-      case 1:
-        HomeCubit.get(context).deleteSupervsorroom(id: userID);
-        // Navigator.of(context).push(
-        //     MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
-        break;
-
-      case 2:
-        HomeCubit.get(context).postUnfollowser(idUser: userID, idRoom: roomid);
-        // Navigator.of(context).push(
-        //     MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
-        break;
-    }
-  }
-
-  void onSelected(
-      BuildContext context, int item, TextEditingController _controller) {
-    switch (item) {
-      case 0:
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
-        break;
-
-      case 2:
-        if (userstateInroom == 'owner') {
-          showDialog<String>(
-            context: context,
-            builder: (BuildContext context) => Directionality(
-              textDirection: TextDirection.rtl,
-              child: AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15))),
-                title: Center(
-                  child: const Text('برجاء تعين كلمة المرور للغرفة'),
+  Positioned RoomMessageWriteingRow(
+      BuildContext context,
+      GetUserExpModel UserEXPModel,
+      TextEditingController texteditController,
+      ThemeData theme) {
+    return Positioned(
+      bottom: 10,
+      left: 10,
+      right: 10,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.0),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.all(Radius.circular(16.0)),
+              ),
+              child: TextField(
+                keyboardType: TextInputType.text,
+                controller: _messageController,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration.collapsed(
+                  hintText: "رسالتك...",
+                  hintStyle: TextStyle(color: Colors.white),
                 ),
-                // content: const Text('AlertDialog description'),
-                actions: <Widget>[
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 250,
-                            child: Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: CommonFunctions().nbAppTextFieldWidget(
-                                _controller,
-                                'Password',
-                                "ادخل كلمة المرور",
-                                'برجاء ادخال كلمه المرور',
-                                TextFieldType.PASSWORD,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 100,
-                            decoration: BoxDecoration(
-                              color: kPrimaryLightColor,
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(10),
-                                bottomRight: Radius.circular(10),
-                                bottomLeft: Radius.circular(10),
-                                topLeft: Radius.circular(10),
-                              ),
-                            ),
-                            child: TextButton(
-                              onPressed: () {
-                                HomeCubit.get(context).setRoomPassword(
-                                    roompassword: _controller.text);
-
-                                // ShopCubit.get(context)
-                                //     .lockPurchase(id: model.id);
-                                Navigator.pop(context, 'yes');
-
-                                CommonFunctions.showToast(
-                                    'تم تعين كلمة مرور للغرفة ', Colors.green);
-                              },
-                              child: const Text(
-                                'تعين',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          // TextButton(
-                          //   onPressed: () => Navigator.pop(context, 'no'),
-                          //   child: const Text('لا'),
-                          // ),
-                        ],
-                      )
-                    ],
-                  )
-                ],
               ),
             ),
-          );
-        } else {
-          CommonFunctions.showToast('خاص بمالك الغرفة', Colors.red);
-        }
+          ),
+          8.width,
+          // add the emoji button here
+          InkWell(
+            child: Container(
+              padding: const EdgeInsets.all(5.0),
+              // add left margin
+              margin: const EdgeInsets.only(left: 8.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.orange,
+              ),
+              child: Icon(
+                Icons.emoji_emotions_outlined,
+                color: Colors.white,
+              ),
+            ),
+            onTap: () {
+              FocusScope.of(context).unfocus(); // Dismiss keyboard (optional)
+              showEmojiPicker(context); // Show picker
+            },
+          ),
 
-        break;
-    }
+          Container(
+            padding: const EdgeInsets.all(5.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.orange,
+            ),
+            child: Icon(
+              Icons.send,
+              color: Colors.white,
+            ),
+          ).onTap(() {
+            if (ismuted == true) {
+              CommonFunctions.showToast('لا تملك الصلاحية', Colors.red);
+            } else {
+              onSendMessage(
+                _messageController.text, 0,
+                UserEXPModel.data.userCurrentLevel,
+                // model.data.userId
+              );
+            }
+          }),
+          8.width,
+          Theme(
+              data: Theme.of(context).copyWith(
+                dividerTheme: DividerThemeData(
+                  color: Colors.white,
+                ),
+                cardColor: Colors.black.withOpacity(0.7),
+              ),
+              child: PopupMenuButton<int>(
+                icon: Container(
+                  padding: const EdgeInsets.all(4.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kPrimaryLightColor,
+                  ),
+                  child: Icon(
+                    Icons.image_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                onSelected: (item) => backgroundandpasswordselect(
+                    context, item, texteditController),
+                itemBuilder: (context) => [
+                  PopupMenuItem<int>(
+                      value: 3,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                            topLeft: Radius.circular(10),
+                          ),
+
+                          // shape: BoxShape.circle,
+                        ),
+                        width: 180,
+                        height: 70,
+                        child: Row(
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.music_note,
+                                  color: Colors.white,
+                                ),
+                                Text(
+                                  "أغاني الغرفه",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.album,
+                                  color: Colors.white,
+                                ),
+                                InkWell(
+                                  child: Container(
+                                    child: Text(
+                                      "البوم الصور",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    imagePicker(context, theme);
+                                  },
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      )),
+                ],
+              )),
+          Container(
+            height: 35,
+            // padding: const EdgeInsets.all(3.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: kPrimaryColor,
+            ),
+            child: IconButton(
+                iconSize: 22,
+                color: Colors.white,
+                icon: Icon(Icons.card_giftcard_rounded),
+                onPressed: () => showModalBottomSheet(
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return GiftScreen(roomID: widget.roomId);
+                    })),
+          ),
+          8.width,
+          InkWell(
+            child: Container(
+              padding: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black45,
+              ),
+              child: Icon(
+                Icons.favorite_outline_outlined,
+                color: Colors.blueAccent,
+              ),
+            ),
+            onTap: () {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Container(
+                      height: 350,
+                      child: Scaffold(
+                          backgroundColor: Colors.black.withOpacity(0.7),
+                          body: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        height: 50,
+                                        child: Center(
+                                          child: Text(
+                                            "مركز  الترفيه",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    height: 120,
+                                    width: 80,
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.games,
+                                          size: 40,
+                                          color: Colors.redAccent,
+                                        ),
+                                        // SizedBox(
+                                        //   height: 20,
+                                        // ),
+                                        Column(
+                                          children: [
+                                            Text(
+                                              "حجرة ورقة",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16),
+                                            ),
+                                            Text(
+                                              "مقص",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    )),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    height: 120,
+                                    width: 80,
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on_rounded,
+                                          size: 40,
+                                          color: Colors.orange,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          "حقيبة الحظ",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16),
+                                        ),
+                                      ],
+                                    )),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Container(
+                                    height: 120,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          size: 40,
+                                          color: Colors.blue,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          "عجلة الحظ",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16),
+                                        ),
+                                      ],
+                                    )),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Container(
+                                    height: 120,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.people_alt_sharp,
+                                          size: 40,
+                                          color: kPrimaryColor,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          "استطلاع الرأي",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16),
+                                        ),
+                                      ],
+                                    )),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Container(
+                                    height: 120,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Center(
+                                        child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.confirmation_number_rounded,
+                                          size: 40,
+                                          color: kPrimaryColor,
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          "رقم الحظ",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16),
+                                        ),
+                                      ],
+                                    )),
+                                  ),
+                                ],
+                              )
+                            ],
+                          )),
+                    );
+                  });
+            },
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget buildItem(
+  Container RoomUserDetailsRow(ThemeData theme, BuildContext context) {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Container(
+              width: 150,
+              padding:
+                  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 6.0),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    bottomLeft: Radius.circular(16.0)),
+              ),
+              child: InkWell(
+                child: Container(
+                  child: Row(
+                    children: [
+                      Icon(Icons.monetization_on_rounded, color: Colors.orange),
+                      SizedBox(
+                        width: 6.0,
+                      ),
+                      Expanded(
+                        child: Text(
+                          widget.roomDesc,
+                          maxLines: 1,
+                          style: theme.textTheme.bodyText1
+                              .copyWith(color: Colors.red, fontSize: 17),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_back_ios_rounded,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                ),
+                onTap: () {
+                  showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (builder) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height * 0.80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(30.0),
+                              topRight: Radius.circular(30.0),
+                            ),
+                          ),
+                          child: BestRoomUsers(),
+                        );
+                      });
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    width: 170,
+                    height: 70,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  var roomUserModel =
+                                      HomeCubit.get(context).roomUserModel;
+                                  if (roomUserModel != null &&
+                                      roomUserModel.data != null) {
+                                    return UserProfileBottomSheetWidget(
+                                        roomUserModel.data[index], context);
+                                  } else {
+                                    return Container(); // return an empty container when roomUserModel or data is null
+                                  }
+                                },
+                                itemCount: HomeCubit.get(context)
+                                        .roomUserModel
+                                        ?.data
+                                        ?.length ??
+                                    0,
+                                separatorBuilder:
+                                    (BuildContext context, int index) =>
+                                        SizedBox(
+                                  width: 10,
+                                ),
+                              ),
+                            )
+                          ]),
+                    ),
+                  ),
+                ),
+                5.width,
+                InkWell(
+                  child: Container(
+                    child: Row(
+                      children: [
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('roomUsers')
+                              .doc(widget.roomId)
+                              .collection('UsersInRoom')
+                              .snapshots(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('E');
+                            }
+
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Text("...");
+                            }
+
+                            // Count the number of documents in the snapshot (each document represents a user)
+                            int userCount = snapshot.data.docs.length;
+
+                            // Update the 'totalnum' variable
+                            totalnum = userCount.toString();
+
+                            return Text(
+                              totalnum.toString(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1
+                                  .copyWith(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  ),
+                            );
+                          },
+                        ),
+                        Icon(Icons.person_outline, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                  onTap: () {
+                    showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        constraints: BoxConstraints(),
+                        builder: (builder) {
+                          print("Proday of UsersInroom Wedgit IS " +
+                              widget.roomId.toString());
+                          return UsersInroom(roomID: widget.roomId.toString());
+                        });
+                  },
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Row RoomTopHeaderRow(
+      Size size,
+      BuildContext context,
+      GetUserExpModel UserEXPModel,
+      ThemeData theme,
+      TextEditingController texteditController) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Container(
+            width: size.width / 2 - 18,
+            padding: const EdgeInsets.symmetric(vertical: 1.0, horizontal: 3.0),
+            decoration: BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16.0),
+                  bottomLeft: Radius.circular(16.0)),
+            ),
+            child: Row(
+              children: [
+                InkWell(
+                  child: Container(
+                    height: 50,
+                    width: 50,
+                    child: Image.network(
+                      'https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  onTap: () {
+                    showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        constraints: BoxConstraints(),
+                        builder: (builder) {
+                          return Container(
+                            color: Colors.transparent,
+                            child: RoomImageTap(
+                                roomDesc: widget.roomDesc,
+                                totalNum: totalnum,
+                                roomimage: widget.roomImage,
+                                roomname: widget.roomName,
+                                roomID: widget.roomId.toString(),
+                                currentlevel:
+                                    UserEXPModel.data.userCurrentLevel),
+                          );
+                        });
+                  },
+                ),
+                SizedBox(
+                  width: 10.0,
+                ),
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.roomName,
+                        maxLines: 1,
+                        style: theme.textTheme.bodyText1
+                            .copyWith(color: Colors.white, fontSize: 17),
+                      ),
+                      Spacer(),
+                      Text(
+                        "ID :${widget.roomId}",
+                        maxLines: 1,
+                        style: theme.textTheme.bodyText2
+                            .copyWith(color: Colors.white, fontSize: 15),
+                      ),
+                    ],
+                  ),
+                ),
+                check == 0
+                    // model.data.user.follow == 0
+                    // model.data.user.follow == 0
+                    ? IconButton(
+                        onPressed: () {
+                          HomeCubit.get(context).followroom(id: roomID);
+                          setState(() {
+                            check = 1;
+                          });
+                        },
+                        icon: Icon(
+                          Icons.favorite_border,
+                          color: Colors.white,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: () {
+                          HomeCubit.get(context).followroom(id: roomID);
+                          // check = true;
+                        },
+                        icon: Icon(Icons.favorite, color: Color(0xFFe10deb)))
+              ],
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            IconButton(
+                icon: Icon(Icons.ios_share, color: Colors.white),
+                onPressed: () {
+                  // getreal();
+                  print("share btn clicked");
+                }),
+            Theme(
+                data: Theme.of(context).copyWith(
+                  dividerTheme: DividerThemeData(
+                    color: Colors.white,
+                  ),
+                  cardColor: Colors.black.withOpacity(0.7),
+                ),
+                child: PopupMenuButton<int>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                  ),
+                  onSelected: (item) => backgroundandpasswordselect(
+                      context, item, texteditController),
+                  itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                        value: 0,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.subject,
+                              color: Colors.white,
+                            ),
+                            Spacer(),
+                            Text(
+                              "الموضوعات",
+                              style: TextStyle(color: Colors.white),
+                            )
+                          ],
+                        )),
+                    PopupMenuDivider(),
+                    PopupMenuItem<int>(
+                        value: 1,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.developer_board,
+                              color: Colors.white,
+                            ),
+                            Spacer(),
+                            Text("تطوير", style: TextStyle(color: Colors.white))
+                          ],
+                        )),
+                    PopupMenuDivider(),
+                    PopupMenuItem<int>(
+                        value: 2,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                            ),
+                            Spacer(),
+                            Text(
+                              "قفل",
+                              style: TextStyle(color: Colors.white),
+                            )
+                          ],
+                        )),
+                    PopupMenuDivider(),
+                    PopupMenuItem<int>(
+                        value: 3,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.share,
+                              color: Colors.white,
+                            ),
+                            Spacer(),
+                            Text(
+                              "مشاركة",
+                              style: TextStyle(color: Colors.white),
+                            )
+                          ],
+                        )),
+                  ],
+                )),
+            GestureDetector(
+                child: Icon(Icons.close, color: Colors.white),
+                //Create api for room logout
+                onTap: () {
+                  HomeCubit.get(context).logoutUserRoom(id: widget.roomId);
+                  _closeRoom();
+                })
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget userprofileboshetmessageswidget(
     int index,
     DocumentSnapshot document,
     Size size,
@@ -2725,7 +1924,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     document.get('userType') == 'owner'
                                         ? Icon(
                                             Icons.person,
-                                            color: Colors.red,
+                                            color: Colors.black,
                                           )
                                         : Container(),
                                     document.get('userType') == 'user'
@@ -2960,6 +2159,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
+                                              // Get the usertype to write his type in room for his bottomsheet profile
                                               if (document.get('userType') ==
                                                   'user')
                                                 Padding(
@@ -3083,14 +2283,18 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                               SizedBox(
                                                 width: 10,
                                               ),
+
+                                              // write user id under his name in the bottomsheet profile
                                               Text(
-                                                'ID:${document.get('idFrom').toString()}',
+                                                'ID:${document.get('specialId').toString()}',
                                                 style: TextStyle(
                                                     color: Colors.grey),
                                               ),
                                               SizedBox(
                                                 width: 10,
                                               ),
+
+                                              // write user Level under his name in the bottomsheet profile
                                               Text(
                                                 'LV ${document.get('userLevel').toString()}',
                                                 style: TextStyle(
@@ -3508,8 +2712,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                                 size: 25,
                                                               ),
                                                               onSelected: (item) =>
-                                                                  onSelected2(
-                                                                      // context,
+                                                                  supervrormanagmentselect(
+                                                                      context,
                                                                       item,
                                                                       document.get(
                                                                           'ApiUserID'),
@@ -3632,7 +2836,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             document.get('userType') == 'owner'
                                 ? Icon(
                                     Icons.person,
-                                    color: Colors.red,
+                                    color: Colors.blue,
                                   )
                                 : Container(),
                             document.get('userType') == 'user'
@@ -3813,78 +3017,93 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
+  /// This widget is responsible for building a list of messages in the room.
+  ///
+  /// It fetches the messages from Firestore and displays them in a ListView.
+  /// If there are no messages available, it displays a loading indicator.
+  ///
+  /// The widget is expanded to take up 3 flex space of its parent Flex widget.
+  ///
+  /// Returns:
+  /// A widget that either shows the messages in the room or a loading indicator.
   Widget buildListMessage(Size size) {
+    // The widget is expanded to take up 3 flex space of its parent Flex widget
     return Expanded(
-      child: widget.roomId.isNotEmpty
-          ? StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('messages')
-                  .doc(widget.roomId.toString())
-                  .collection(widget.roomId.toString())
-                  .orderBy('timestamp', descending: true)
-                  .limit(limit)
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                print("messaegs: ${snapshot.toString()}");
-                if (snapshot.hasData) {
-                  listMessage.addAll(snapshot.data.docs);
-                  return ListView.builder(
-                    padding: EdgeInsets.all(10.0),
-                    itemBuilder: (context, index) => buildItem(
-                      index,
-                      snapshot.data?.docs[index],
-                      size,
-                    ),
-                    itemCount: snapshot.data?.docs.length,
-                    reverse: true,
-                    controller: listScrollController,
-                  );
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
-                    ),
-                  );
-                }
-              },
-            )
-          : Center(
+      flex: 3,
+      // StreamBuilder is used to build the UI based on the stream data
+      child: StreamBuilder<QuerySnapshot>(
+        // The stream is the collection of messages in the room, ordered by timestamp in descending order
+        stream: FirebaseFirestore.instance
+            .collection('messages')
+            .doc(widget.roomId.toString())
+            .collection(widget.roomId.toString())
+            .orderBy('timestamp', descending: true)
+            .limit(limit)
+            .snapshots(),
+        // The builder takes the current context and snapshot of the stream
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          // If the snapshot has data, add the documents in the snapshot to the list of messages
+          if (snapshot.hasData) {
+            listMessage.addAll(snapshot.data.docs);
+            // Return a ListView.builder to build the list of messages
+            return ListView.builder(
+              padding: EdgeInsets.all(10.0),
+              itemBuilder: (context, index) => userprofileboshetmessageswidget(
+                index,
+                snapshot.data?.docs[index],
+                size,
+              ),
+              itemCount: snapshot.data?.docs.length,
+              reverse: true,
+              controller: listScrollController,
+            );
+          } else {
+            // If the snapshot does not have data, display a loading indicator
+            return Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(kPrimaryColor),
               ),
-            ),
+            );
+          }
+        },
+      ),
     );
   }
 
-  Future<bool> _closeRoom() async {
-    await CommonFunctions.showAlertWithTwoActions(
-        widget.roomId, context, "خروج", "هل تريد الخروج من الغرفة؟", () async {
-      {
-        finish(context);
-      }
-
-      finish(
-        context,
-      );
-    });
-    return true;
-  }
-
+  /// A generic StreamTransformer that transforms a Stream of QuerySnapshots into a Stream of Lists.
+  ///
+  /// This StreamTransformer takes a function that converts a Map<String, dynamic> into an object of type T.
+  /// It applies this function to each document in the QuerySnapshot to convert it into an object of type T.
+  /// It then emits a List of these objects.
+  ///
+  /// The StreamTransformer is generic over the type T.
+  ///
+  /// Parameters:
+  /// - [fromJson]: A function that converts a Map<String, dynamic> into an object of type T.
+  ///
+  /// Returns:
+  /// - A StreamTransformer that transforms a Stream of QuerySnapshots into a Stream of Lists of objects of type T.
   static StreamTransformer transformer<T>(
           T Function(Map<String, dynamic> json) fromJson) =>
       StreamTransformer<QuerySnapshot<Map<String, dynamic>>,
           List<T>>.fromHandlers(
         handleData: (QuerySnapshot<Map<String, dynamic>> data,
             EventSink<List<T>> sink) {
+          // Convert each document in the QuerySnapshot into a Map<String, dynamic>
           final snaps = data.docs.map((doc) => doc.data()).toList();
+          // Convert each Map<String, dynamic> into an object of type T using the provided function
           final users = snaps.map((json) => fromJson(json)).toList();
 
+          // Emit the List of objects of type T
           sink.add(users);
         },
       );
 
+  /// This widget is responsible for displaying the layout of microphones in a room.
+  /// It fetches the data of the microphones from Firestore and displays them in a grid layout.
+  /// If there is no data available, it displays a default layout with empty microphones.
   Widget _roomMicsLayout() {
+    // Create a stream of UserMicModel objects by transforming the Firestore snapshot
     Stream<List<UserMicModel>> _stream = _firestoreInstance
         .collection('roomUsers')
         .doc(widget.roomId)
@@ -3892,19 +3111,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
         .snapshots()
         .transform(
             transformer<UserMicModel>((json) => UserMicModel.fromJson(json)));
+
+    // Use a StreamBuilder to build the UI based on the stream data
     return StreamBuilder<List<UserMicModel>>(
         stream: _stream,
         builder:
             (BuildContext context, AsyncSnapshot<List<UserMicModel>> snapshot) {
+          // If the snapshot has data and it's not empty
           if (snapshot.hasData && snapshot.data.length > 0) {
-            print(":has data");
+            // Update the list of microphone users
             _micUsersList = snapshot.data;
+
+            // Return a column of two rows, each containing 5 microphone users
             return Column(children: <Widget>[
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(5, (index) {
-                    return _personInRoom(
+                    return RoomMicsWidget(
                       index,
                       snapshot.data[index],
                     );
@@ -3918,161 +3142,872 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(5, (index) {
-                    return _personInRoom(
+                    return RoomMicsWidget(
                       index + 5,
                       snapshot.data[index + 5],
                     );
                   }).toList(),
-                  // children: snapshot.data.map((item) => _personInRoom(snapshot.data.indexOf(item), item)).toList(),
                 ),
               ),
             ]);
           } else {
-            print("not has data");
+            // If the snapshot doesn't have data, display a default layout with empty microphones
             List<UserMicModel> _micsList = [];
 
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 0,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 1,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 2,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 3,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 4,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 5,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 6,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 7,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 8,
-                micStatus: false,
-                isLocked: false));
-            _micsList.add(UserMicModel(
-                id: null,
-                userId: null,
-                userName: null,
-                micNumber: 9,
-                micStatus: false,
-                isLocked: false));
+            // Generate 10 empty microphones
+            for (int i = 0; i < 10; i++) {
+              _micsList.add(UserMicModel(
+                  id: null,
+                  userId: null,
+                  userName: null,
+                  micNumber: i,
+                  micStatus: false,
+                  isLocked: false));
+            }
 
+            // Return a row of 10 empty microphones
             return Expanded(
-              child: Expanded(
-                child: Row(
-                  children: [
-                    _personInRoom(
-                      0,
-                      _micsList[0],
-                    ),
-                    _personInRoom(
-                      1,
-                      _micsList[1],
-                    ),
-                    _personInRoom(
-                      2,
-                      _micsList[2],
-                    ),
-                    _personInRoom(
-                      3,
-                      _micsList[3],
-                    ),
-                    _personInRoom(
-                      4,
-                      _micsList[4],
-                    ),
-                    _personInRoom(
-                      5,
-                      _micsList[5],
-                    ),
-                    _personInRoom(
-                      6,
-                      _micsList[6],
-                    ),
-                    _personInRoom(
-                      7,
-                      _micsList[7],
-                    ),
-                    _personInRoom(
-                      8,
-                      _micsList[8],
-                    ),
-                    _personInRoom(
-                      9,
-                      _micsList[9],
-                    ),
-                  ],
-                ),
+              child: Row(
+                children: List.generate(10, (index) {
+                  return RoomMicsWidget(
+                    index,
+                    _micsList[index],
+                  );
+                }).toList(),
               ),
             );
           }
         });
   }
 
+  /// This widget represents an individual item in the room.
+  ///
+  /// It displays the user's avatar, name, and other details. When tapped, it opens a bottom sheet with more options.
+  ///
+  /// Parameters:
+  /// - [model]: An instance of [InRoomUserModelModelData] containing the user's information.
+  /// - [context]: The build context in which this widget is being constructed.
+  ///
+  /// Returns:
+  /// - An [InkWell] widget that responds to touch events.
+  Widget UserProfileBottomSheetWidget(
+          InRoomUserModelModelData model, BuildContext context) =>
+      InkWell(
+        // This widget represents a user in the room.
+//
+// It is a Padding widget that contains a Column widget. The Column widget
+// aligns its children along the vertical axis in the center.
+//
+// The children of the Column widget are:
+// 1. A Padding widget that contains a CircleAvatar widget. The CircleAvatar
+//    widget displays the user's profile image. The image is loaded from the
+//    assets directory.
+// 2. A SizedBox widget that serves as a vertical spacer.
+// 3. A Text widget that displays the user's name. The text color is white and
+//    the font size is 10.
+// 4. A Spacer widget that takes up any remaining space along the main axis.
+//
+// When this widget is tapped, it opens a bottom sheet with more options.
+        child: Padding(
+          // Add padding to the top of the widget
+          padding: const EdgeInsets.only(top: 10),
+          child: Column(
+            // Align the children along the vertical axis in the center
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                // Add padding to all sides of the widget
+                padding: const EdgeInsets.all(2.0),
+                child: CircleAvatar(
+                  // Set the radius of the CircleAvatar
+                  radius: 18,
+                  // Load the user's profile image from the assets directory
+                  backgroundImage: AssetImage(
+                    "assets/images/Profile Image.png",
+                  ),
+                ),
+              ),
+              // Add a vertical spacer
+              SizedBox(
+                height: 2,
+              ),
+              // Display the user's name
+              Text(
+                model.name.toString(),
+                // Set the text color to white and the font size to 10
+                style: TextStyle(color: Colors.white, fontSize: 10),
+              ),
+              // Take up any remaining space along the main axis
+              Spacer(),
+            ],
+          ),
+        ),
+        onTap: () {
+          showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              isScrollControlled: true,
+              builder: (context) {
+                return FractionallySizedBox(
+                  heightFactor: 0.42,
+                  child: Stack(children: [
+                    Column(
+                      children: [
+                        new Container(
+                          height: 30,
+                          color: Colors.transparent.withOpacity(0.0),
+                        ),
+                        Expanded(
+                          child: Container(
+                            height: 300,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(30),
+                                  topRight: Radius.circular(30)),
+                            ),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 20, top: 12),
+                                        child: Container(
+                                          height: 22,
+                                          width: 25,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.orange,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "@",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            right: 20, top: 12),
+                                        child: Container(
+                                          height: 22,
+                                          width: 25,
+                                          child: Icon(
+                                            Icons.report_problem_outlined,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Text(model.name.toString()),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      // Text(text),
+                                      if (model.typeUser == 'user')
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                              width: 50,
+                                              decoration: BoxDecoration(
+                                                color: kPrimaryColor,
+                                                borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(10),
+                                                  bottomRight:
+                                                      Radius.circular(10),
+                                                  bottomLeft:
+                                                      Radius.circular(10),
+                                                  topLeft: Radius.circular(10),
+                                                ),
+                                                border: Border.all(
+                                                  width: 1,
+                                                  color: kPrimaryColor,
+                                                  style: BorderStyle.solid,
+                                                ),
+                                                // shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                  child: Text(
+                                                'عضو',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12),
+                                              ))),
+                                        ),
+                                      if (model.typeUser == 'supervisor')
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                              width: 50,
+                                              decoration: BoxDecoration(
+                                                color: kPrimaryColor,
+                                                borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(10),
+                                                  bottomRight:
+                                                      Radius.circular(10),
+                                                  bottomLeft:
+                                                      Radius.circular(10),
+                                                  topLeft: Radius.circular(10),
+                                                ),
+                                                border: Border.all(
+                                                  width: 1,
+                                                  color: kPrimaryColor,
+                                                  style: BorderStyle.solid,
+                                                ),
+                                                // shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                  child: Text(
+                                                'مشرف',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12),
+                                              ))),
+                                        ),
+                                      if (model.typeUser == 'owner')
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                              width: 50,
+                                              decoration: BoxDecoration(
+                                                color: kPrimaryColor,
+                                                borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(10),
+                                                  bottomRight:
+                                                      Radius.circular(10),
+                                                  bottomLeft:
+                                                      Radius.circular(10),
+                                                  topLeft: Radius.circular(10),
+                                                ),
+                                                border: Border.all(
+                                                  width: 1,
+                                                  color: kPrimaryColor,
+                                                  style: BorderStyle.solid,
+                                                ),
+                                                // shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                  child: Text(
+                                                'مالك',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12),
+                                              ))),
+                                        ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        'ID:${model.spacialId}',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        "LV ${model.level[0].userCurrentLevel.toString()}",
+                                        style: TextStyle(
+                                            color: kPrimaryColor,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                        width: 30,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        height: 18,
+                                        width: 20,
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.red,
+                                            border: Border.all(
+                                              width: 2,
+                                              color: Colors.amber,
+                                            )),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.person,
+                                            color: Colors.amber,
+                                            size: 12,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Container(
+                                        height: 18,
+                                        width: 20,
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.red,
+                                            border: Border.all(
+                                              width: 2,
+                                              color: Colors.amber,
+                                            )),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.markunread_mailbox,
+                                            color: Colors.amber,
+                                            size: 10,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Container(
+                                        height: 18,
+                                        width: 20,
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.red,
+                                            border: Border.all(
+                                              width: 2,
+                                              color: Colors.amber,
+                                            )),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.home,
+                                            color: Colors.amber,
+                                            size: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Spacer(),
+                                Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (model.isFriend == true)
+                                        Column(
+                                          children: [
+                                            MaterialButton(
+                                              onPressed: () {
+                                                Get.to(Onechat(
+                                                  user: model,
+                                                  fromRoomUser: true,
+                                                ));
+                                              },
+                                              color: Colors.yellow,
+                                              textColor: Colors.white,
+                                              child: Icon(
+                                                Icons.message_rounded,
+                                                size: 14,
+                                              ),
+                                              padding: EdgeInsets.all(16),
+                                              shape: CircleBorder(),
+                                            ),
+                                            Text(
+                                              "الرسائل",
+                                              style:
+                                                  TextStyle(color: Colors.grey),
+                                            )
+                                          ],
+                                        ),
+                                      if (model.isFriend == false)
+                                        Column(
+                                          children: [
+                                            MaterialButton(
+                                              onPressed: () {
+                                                HomeCubit.get(context)
+                                                    .addfriend(
+                                                  id: model.userId,
+                                                );
+
+                                                // print(HomeCubit.get(context)
+                                                //     .addfriendsModel
+                                                //     .message);
+                                              },
+                                              color: Colors.yellow,
+                                              textColor: Colors.white,
+                                              child: Icon(
+                                                Icons.person_add,
+                                                size: 14,
+                                              ),
+                                              padding: EdgeInsets.all(16),
+                                              shape: CircleBorder(),
+                                            ),
+                                            Text(
+                                              'إضافه صديق',
+                                              style:
+                                                  TextStyle(color: Colors.grey),
+                                            )
+                                          ],
+                                        ),
+                                      Column(
+                                        children: [
+                                          MaterialButton(
+                                            onPressed: () {},
+                                            color: kPrimaryLightColor,
+                                            textColor: Colors.white,
+                                            child: Icon(
+                                              Icons.mic_external_off_rounded,
+                                              size: 14,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          Text(
+                                            'كتم الصوت',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          MaterialButton(
+                                            onPressed: () {
+                                              // Get.to(StackDemo());
+                                            },
+                                            color: Colors.pink,
+                                            textColor: Colors.white,
+                                            child: Icon(
+                                              Icons.star,
+                                              size: 14,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          Text(
+                                            'البطاقات السحرية',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          MaterialButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+
+                                              showModalBottomSheet(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return GiftScreen(
+                                                      roomID: roomID,
+                                                      userID: model.userId
+                                                          .toString(),
+                                                      check: true,
+                                                      username: model.name,
+                                                      // userID: model.userId
+                                                      // .toString(),
+                                                    );
+                                                  });
+                                            },
+                                            color: Colors.blueAccent,
+                                            textColor: Colors.white,
+                                            child: Icon(
+                                              Icons.card_giftcard,
+                                              size: 14,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          Text(
+                                            'إرسال هديه',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                            height: 45,
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                top: BorderSide(
+                                                    width: 1.0,
+                                                    color:
+                                                        Colors.grey.shade300),
+                                                bottom: BorderSide(
+                                                    width: 1.0,
+                                                    color: Colors
+                                                        .lightBlue.shade900),
+                                              ),
+                                              color: Colors.white,
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                IconButton(
+                                                    onPressed: () {
+                                                      showDialog<String>(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            Directionality(
+                                                          textDirection:
+                                                              TextDirection.rtl,
+                                                          child: AlertDialog(
+                                                            shape: RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            15))),
+                                                            title: Center(
+                                                              child: const Text(
+                                                                  'هل تريد حظر العضو'),
+                                                            ),
+                                                            // content: const Text('AlertDialog description'),
+                                                            actions: <Widget>[
+                                                              Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceAround,
+                                                                children: [
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      HomeCubit.get(
+                                                                              context)
+                                                                          .addBlockList(
+                                                                              id: model.userId);
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'yes');
+
+                                                                      CommonFunctions.showToast(
+                                                                          'تم حظر العضو',
+                                                                          Colors
+                                                                              .green);
+                                                                    },
+                                                                    child: const Text(
+                                                                        'نعم'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            context,
+                                                                            'no'),
+                                                                    child:
+                                                                        const Text(
+                                                                            'لا'),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.logout,
+                                                      color:
+                                                          Colors.grey.shade400,
+                                                      size: 25,
+                                                    )),
+                                                VerticalDivider(),
+                                                IconButton(
+                                                    onPressed: () {
+                                                      showDialog<String>(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            Directionality(
+                                                          textDirection:
+                                                              TextDirection.rtl,
+                                                          child: AlertDialog(
+                                                            shape: RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            15))),
+                                                            title: Center(
+                                                              child: const Text(
+                                                                  'هل تريد اصمات العضو'),
+                                                            ),
+                                                            // content: const Text('AlertDialog description'),
+                                                            actions: <Widget>[
+                                                              Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceAround,
+                                                                children: [
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      ismuted =
+                                                                          true;
+                                                                      _updateuserDataFirebase(
+                                                                          roomID,
+                                                                          model
+                                                                              .name,
+                                                                          model
+                                                                              .spacialId);
+
+                                                                      _updateMutedFirebase(
+                                                                        roomID,
+                                                                      );
+
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'yes');
+                                                                    },
+                                                                    child: const Text(
+                                                                        'نعم'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            context,
+                                                                            'no'),
+                                                                    child:
+                                                                        const Text(
+                                                                            'لا'),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.block_rounded,
+                                                      color:
+                                                          Colors.grey.shade400,
+                                                      size: 25,
+                                                    )),
+                                                VerticalDivider(),
+                                                IconButton(
+                                                    onPressed: () {},
+                                                    icon: Icon(
+                                                      Icons.mic,
+                                                      color:
+                                                          Colors.grey.shade400,
+                                                      size: 25,
+                                                    )),
+                                                VerticalDivider(),
+                                                Theme(
+                                                    data: Theme.of(context)
+                                                        .copyWith(
+                                                      dividerTheme:
+                                                          DividerThemeData(
+                                                        color: Colors.white,
+                                                      ),
+                                                      cardColor: Colors.black
+                                                          .withOpacity(0.7),
+                                                    ),
+                                                    child: PopupMenuButton<int>(
+                                                      icon: Icon(
+                                                        Icons.person,
+                                                        color: Colors.green,
+                                                        size: 25,
+                                                      ),
+                                                      onSelected: (item) =>
+                                                          supervrormanagmentselect(
+                                                              context,
+                                                              item,
+                                                              model.userId,
+                                                              roomID),
+                                                      itemBuilder: (context) =>
+                                                          [
+                                                        PopupMenuItem<int>(
+                                                            value: 0,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Center(
+                                                                  child: Text(
+                                                                    "تعين مشرف",
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            )),
+                                                        PopupMenuDivider(),
+                                                        PopupMenuItem<int>(
+                                                            value: 1,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Center(
+                                                                  child: Text(
+                                                                      "تعين عضو",
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.white)),
+                                                                )
+                                                              ],
+                                                            )),
+                                                        PopupMenuDivider(),
+                                                        PopupMenuItem<int>(
+                                                            value: 2,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Text(
+                                                                  "ازالة العضو",
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                )
+                                                              ],
+                                                            )),
+                                                      ],
+                                                    )),
+                                              ],
+                                            )),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      // height: 70,
+
+                      alignment: Alignment.topCenter,
+
+                      child: FloatingActionButton(
+                        onPressed: () {},
+                        child: CircleAvatar(
+                          child: Image.asset("assets/images/Profile Image.png"),
+                          backgroundColor: kPrimaryColor,
+                          radius: 50,
+                        ),
+                      ),
+                    ),
+                  ]),
+                );
+              });
+        },
+      );
+
+  /// Updates or creates a user document in Firebase.
+  ///
+  /// This function is used to update a user's document in a Firebase collection.
+  /// If the document does not exist, it creates a new one.
+  ///
+  /// The collection is structured as follows: 'roomUsers' -> roomID -> 'UsersInRoom'.
+  /// Each document in the 'UsersInRoom' sub-collection represents a user in the room.
+  ///
+  /// Parameters:
+  /// - [id]: The user's ID. This is used as the document ID in the collection.
+  /// - [name]: The user's name.
+  /// - [roomID]: The ID of the room the user is in.
+  ///
+  /// This function performs the following steps:
+  /// 1. Retrieves a reference to the appropriate Firebase collection.
+  /// 2. Checks if the user's document exists in the collection.
+  /// 3. If the document exists, it updates the document with the new user information.
+  /// 4. If the document does not exist, it creates a new document with the user information.
+  ///
+  /// This function is asynchronous and returns a [Future] that completes when the update or creation operation is finished.
   void _updateuserDataFirebase(String id, String name, String roomID) async {
+    // Get a reference to the Firebase collection
     CollectionReference _collectionRef = FirebaseFirestore.instance
         .collection('roomUsers')
         .doc(roomID)
         .collection('UsersInRoom');
 
+    // Get a reference to the user's document in the collection
     DocumentReference documentReference = _collectionRef.doc(id);
 
-    // Check if the user document exists
+    // Check if the user's document exists in the collection
     DocumentSnapshot documentSnapshot = await documentReference.get();
 
     if (documentSnapshot.exists) {
-      // If the user document exists, update it
+      // If the user's document exists, update it with the new user information
       await documentReference.update(
           {'username': name, 'userID': id, 'roomId': roomID, 'state': ismuted});
     } else {
-      // If the user document doesn't exist, create it
+      // If the user's document does not exist, create a new document with the user information
       await documentReference.set(
           {'username': name, 'userID': id, 'roomId': roomID, 'state': ismuted});
+    }
+  }
+
+  void _addMicsToFirebase(String roomId) async {
+    try {
+      // Factory method to create mic models
+      UserMicModel createMicModel(
+          {int micNumber, bool isLocked = false, bool micStatus = false}) {
+        return UserMicModel(
+            id: null,
+            userId: null,
+            micNumber: micNumber,
+            isLocked: isLocked,
+            micStatus: micStatus);
+      }
+
+      final mics = <UserMicModel>[];
+
+      // Generate mic models in a loop
+      for (int i = 0; i < 10; i++) {
+        mics.add(createMicModel(micNumber: i));
+      }
+
+      // Get a reference to the Firestore collection where the mics will be stored
+      CollectionReference _collectionRef = FirebaseFirestore.instance
+          .collection('roomUsers')
+          .doc(roomId)
+          .collection('roommics');
+
+      // Check if the mics already exist
+      QuerySnapshot querySnapshot = await _collectionRef.get();
+      if (querySnapshot.docs.isEmpty) {
+        // If the mics do not exist, write all models in a batch
+        final batch = FirebaseFirestore.instance.batch();
+
+        mics.forEach((mic) {
+          batch.set(_collectionRef.doc('mic${mic.micNumber}'), mic.toJson());
+        });
+
+        // Commit the batch to write all the mics to Firestore
+        await batch.commit();
+      }
+    } catch (e) {
+      // If any error occurs during the execution of the code, it is caught here
+      print('Error occurred in _addMicsToFirebase: $e');
     }
   }
 
@@ -4097,14 +4032,36 @@ class _DetailsScreenState extends State<DetailsScreen> {
     });
   }
 
+  /// Updates the microphone status of a user in a Firebase collection.
+  ///
+  /// This function is used to update the microphone status of a user in a Firebase collection.
+  /// The collection is structured as follows: 'roomUsers' -> roomID -> roomID.
+  /// Each document in the innermost collection represents a user's microphone status in the room.
+  ///
+  /// Parameters:
+  /// - [index]: The index of the user in the room. This is used as the document ID in the collection.
+  /// - [micModel]: A [UserMicModel] instance containing the user's microphone status information.
+  ///
+  /// This function performs the following steps:
+  /// 1. Prints the index and user information for debugging purposes.
+  /// 2. Retrieves a reference to the appropriate Firebase collection.
+  /// 3. Attempts to update the document corresponding to the user in the collection with the new microphone status.
+  /// 4. If an error occurs during the update, it is caught and printed to the console.
+  ///
+  /// This function is asynchronous and returns a [Future] that completes when the update operation is finished.
   void _updateMicsToFirebase(int index, UserMicModel micModel) async {
+    // Debugging prints
     print("inUpdate doc: $index");
     print("name: ${micModel.userName}");
     print("id: ${micModel.userId}");
+
+    // Get a reference to the Firebase collection
     CollectionReference _collectionRef = FirebaseFirestore.instance
         .collection('roomUsers')
         .doc(roomID)
-        .collection(roomID);
+        .collection('roommics');
+
+    // Attempt to update the document in the collection
     await _collectionRef.doc("$index").update({
       "id": micModel.id,
       "userId": micModel.userId,
@@ -4113,696 +4070,742 @@ class _DetailsScreenState extends State<DetailsScreen> {
       "micStatus": micModel.micStatus,
       "isLocked": micModel.isLocked
     }).catchError((e) {
+      // Print any errors that occur during the update
       print(e);
       return;
     });
   }
 
-  Widget builditem(InRoomUserModelModelData model, BuildContext context) =>
-      InkWell(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundImage: AssetImage(
-                    "assets/images/Profile Image.png",
-                  ),
+  Future<void> countUsersInRoomAndUpdate() async {
+    try {
+      // Get a reference to the 'UsersInRoom' collection in Firestore
+      CollectionReference usersInRoomRef = FirebaseFirestore.instance
+          .collection('roomUsers')
+          .doc(widget.roomId)
+          .collection('UsersInRoom');
+
+      // Get a snapshot of the 'UsersInRoom' collection
+      QuerySnapshot snapshot = await usersInRoomRef.get();
+
+      // Count the number of documents in the snapshot (each document represents a user)
+      int userCount = snapshot.docs.length;
+
+      // Update the 'totalnum' variable
+      totalnum = userCount.toString();
+
+      print(
+          "countUsersInRoomAndUpdate() has been completed. Total number of users in room is " +
+              totalnum);
+    } catch (e) {
+      print("Error in countUsersInRoomAndUpdate(): " + e.toString());
+    }
+  }
+
+  //// Get rooms Collection , Usernow filed in roomid doc to return string value for totalnum variable
+  //// By Hedra Adel
+  // void GetRoomsCollection() async {
+  //   try {
+  //     await for (var snapshot in _firestoreInstance
+  //         .collection('rooms')
+  //         .doc(widget.roomId)
+  //         .snapshots()) {
+  //       var messeage = snapshot.get('userNow');
+  //
+  //       print("GetRoomsCollection() Has been Complete and message content is " +
+  //           messeage.toString() +
+  //           "--- Hedra Adel ---");
+  //
+  //       totalnum = messeage.toString();
+  //     }
+  //   } catch (e) {
+  //     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  //     print(" - Error - There is Error in ${hedra.fileName} -- " +
+  //         "In Line : ${hedra.lineNumber} -- " +
+  //         "The caller function : ${hedra.callerFunctionName} -- " +
+  //         "The Details is : :::: " +
+  //         e.toString() +
+  //         " :::: " +
+  //         "-- Hedra Adel - Error -");
+  //     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  //   }
+  // }
+
+  void onUserLogout(String userId, String roomId) {
+    // Remove the user from the backend API
+    // OnlineRoomListBackend().removeOnlineUser(userId, roomId);
+
+    // Remove the user from Firebase
+    FirebaseFirestore.instance
+        .collection('UsersInRoom')
+        .doc(roomId)
+        .collection(roomId)
+        .doc(userId)
+        .delete();
+
+    // ... other logic for when the user logs out
+  }
+
+  //// Get the Muted users in the Users in room(UsersInRoom) From firestore
+  //// By Hedra Adel
+  void isUserMuted() async {
+    final firestoreInstance = FirebaseFirestore.instance;
+
+    // Check if the user document exists in the 'MutedList' sub-collection
+    DocumentSnapshot mutedListDoc = await firestoreInstance
+        .collection('roomUsers')
+        .doc(widget.roomId)
+        .collection(
+            'MutedList') // Assuming 'MutedList' is the sub-collection you want to access
+        .doc(widget.userID) // Provide the user's ID to the .doc() method
+        .get();
+
+    // Check if the 'ismuted' field exists in the 'FollowersUsers' sub-collection
+    DocumentSnapshot followersUsersDoc = await firestoreInstance
+        .collection('roomUsers')
+        .doc(widget.roomId)
+        .collection('FollowersUsers')
+        .doc(widget.userID)
+        .get();
+
+    if (followersUsersDoc.exists &&
+            followersUsersDoc.data() != null &&
+            (followersUsersDoc.data() as Map<String, dynamic>)['ismuted'] ==
+                true ||
+        mutedListDoc.exists) {
+      ismuted = true;
+    } else {
+      ismuted = false;
+    }
+  }
+
+  Future<bool> _closeRoom() async {
+    await CommonFunctions.showAlertWithTwoActions(
+        widget.roomId, context, "خروج", "هل تريد الخروج من الغرفة؟", () async {
+      {
+        finish(context);
+      }
+
+      finish(
+        context,
+      );
+    });
+    return true;
+  }
+
+  /// Executes an action based on the selected item in a menu.
+  ///
+  /// This function is used to perform an action based on the user's selection in a menu.
+  /// The menu items are represented by an integer index, and each index corresponds to a different action.
+  ///
+  /// Parameters:
+  /// - [context]: The build context in which the function is being called.
+  /// - [item]: The index of the selected item in the menu.
+  /// - [userID]: The ID of the user performing the action.
+  /// - [roomid]: The ID of the room in which the action is being performed.
+  ///
+  /// This function performs the following actions based on the selected item:
+  /// - 0: Calls the `postSupervsorroom` method of the `HomeCubit` class, passing the user's ID as an argument.
+  /// - 1: Calls the `deleteSupervsorroom` method of the `HomeCubit` class, passing the user's ID as an argument.
+  /// - 2: Calls the `postUnfollowser` method of the `HomeCubit` class, passing the user's ID and the room ID as arguments.
+  void supervrormanagmentselect(
+      BuildContext context, int item, int userID, String roomid) {
+    switch (item) {
+      case 0:
+        HomeCubit.get(context).postSupervsorroom(id: userID);
+        break;
+
+      case 1:
+        HomeCubit.get(context).deleteSupervsorroom(id: userID);
+        break;
+
+      case 2:
+        HomeCubit.get(context).postUnfollowser(idUser: userID, idRoom: roomid);
+        break;
+    }
+  }
+
+  // void onSelected2(
+  //     //   BuildContext context,
+  //     int item,
+  //     String userID,
+  //     String roomid) {
+  //   switch (item) {
+  //     case 0:
+  //       HomeCubit.get(context).postSupervsorroom(id: userID);
+  //       // Navigator.of(context).push(
+  //       //     MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
+  //       break;
+  //
+  //     case 1:
+  //       HomeCubit.get(context).deleteSupervsorroom(id: userID);
+  //       // Navigator.of(context).push(
+  //       //     MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
+  //       break;
+  //
+  //     case 2:
+  //       HomeCubit.get(context).postUnfollowser(idUser: userID, idRoom: roomid);
+  //       // Navigator.of(context).push(
+  //       //     MaterialPageRoute(builder: (context) => ShopbackgroundGift()));
+  //       break;
+  //   }
+  // }
+
+  /// Executes an action based on the selected item in a menu.
+  ///
+  /// This function is used to perform an action based on the user's selection in a menu.
+  /// The menu items are represented by an integer index, and each index corresponds to a different action.
+  ///
+  /// Parameters:
+  /// - [context]: The build context in which the function is being called.
+  /// - [item]: The index of the selected item in the menu.
+  /// - [_controller]: The TextEditingController for the password input field.
+  ///
+  /// This function performs the following actions based on the selected item:
+  /// - 0: Navigates to the ShopbackgroundGift screen, passing the room ID as an argument.
+  /// - 2: If the user is the owner of the room, it shows a dialog for the user to set a password for the room.
+  void backgroundandpasswordselect(
+      BuildContext context, int item, TextEditingController _controller) {
+    switch (item) {
+      case 0:
+        // Print the room ID for debugging purposes
+        print('Room ID: $roomID');
+        // Navigate to the ShopbackgroundGift screen, passing the room ID as an argument
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ShopbackgroundGift(roomId_get: roomID)));
+        break;
+
+      case 2:
+        // If the user is the owner of the room, show a dialog for setting a password
+        if (userstateInroom == 'owner') {
+          showDialog<String>(
+            context: context,
+            builder: (BuildContext context) => Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
+                title: Center(
+                  child: const Text('برجاء تعين كلمة المرور للغرفة'),
                 ),
-              ),
-              SizedBox(
-                height: 2,
-                // width: 10.0,
-              ),
-              Text(
-                model.name.toString(),
-                // style: TextStyle(fontSize: 10),
-                style: TextStyle(color: Colors.white, fontSize: 10),
-              ),
-              Spacer(),
-            ],
-          ),
-        ),
-        onTap: () {
-          showModalBottomSheet(
-              context: context,
-              backgroundColor: Colors.transparent, // <-- SEE HERE
+                // content: const Text('AlertDialog description'),
+                actions: <Widget>[
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 250,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: CommonFunctions().nbAppTextFieldWidget(
+                                _controller,
+                                'Password',
+                                "ادخل كلمة المرور",
+                                'برجاء ادخال كلمه المرور',
+                                TextFieldType.PASSWORD,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: kPrimaryLightColor,
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                                bottomRight: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                                topLeft: Radius.circular(10),
+                              ),
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                // Set the room password using the HomeCubit
+                                HomeCubit.get(context).setRoomPassword(
+                                    roompassword: _controller.text);
 
-              isScrollControlled: true,
-              builder: (context) {
-                return FractionallySizedBox(
-                  heightFactor: 0.42,
-                  child: Stack(children: [
-                    Column(
-                      children: [
-                        new Container(
-                          height: 25,
-                          color: Colors.transparent.withOpacity(0.0),
+                                // Close the dialog
+                                Navigator.pop(context, 'yes');
+
+                                // Show a toast message indicating that the password has been set
+                                CommonFunctions.showToast(
+                                    'تم تعين كلمة مرور للغرفة ', Colors.green);
+                              },
+                              child: const Text(
+                                'تعين',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
+        } else {
+          // If the user is not the owner of the room, show a toast message
+          CommonFunctions.showToast('خاص بمالك الغرفة', Colors.red);
+        }
+
+        break;
+    }
+  }
+
+  //// Chose Image
+  Future<File> pickImage(ImageSource source) async {
+    var image = await ImagePicker().pickImage(source: source);
+    if (image != null) {
+      imageFile = File(image.path);
+      uploadImage();
+      imagename = imageFile.path.split("/").last;
+      print(imageFile.path);
+      return imageFile;
+    }
+  }
+
+  //// Pick Image with Camera
+  Future<File> imagePicker(BuildContext context, ThemeData themeData) {
+    showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: CupertinoActionSheet(
+              title: Text(
+                'التقاط الصورة عبر',
+                // style: themeData.textTheme.subtitle,
+              ),
+              cancelButton: CupertinoButton(
+                child: Text("اغلاق",
+                    style: themeData.textTheme.bodyText1.copyWith(
+                      color: kPrimaryColor,
+                    )),
+                onPressed: () => Navigator.pop(context),
+              ),
+              actions: <Widget>[
+                CupertinoButton(
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          CupertinoIcons.photo_camera_solid,
+                          color: themeData.primaryColor,
                         ),
-                        Container(
-                          height: 300,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(30),
-                                topRight: Radius.circular(30)),
-                          ),
-                          // color: Colors.amber,
-
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 20, top: 12),
-                                    child: Container(
-                                      height: 22,
-                                      width: 25,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.orange,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "@",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 20, top: 12),
-                                    child: Container(
-                                      height: 22,
-                                      width: 25,
-                                      child: Icon(
-                                        Icons.report_problem_outlined,
-                                        color: Colors.grey.shade400,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Text(model.name.toString()),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Text(text),
-                                  if (model.typeUser == 'user')
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: kPrimaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-                                            border: Border.all(
-                                              width: 1,
-                                              color: kPrimaryColor,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            'عضو',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ))),
-                                    ),
-                                  if (model.typeUser == 'supervisor')
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: kPrimaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-                                            border: Border.all(
-                                              width: 1,
-                                              color: kPrimaryColor,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            'مشرف',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ))),
-                                    ),
-                                  if (model.typeUser == 'owner')
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: kPrimaryColor,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10),
-                                              topLeft: Radius.circular(10),
-                                            ),
-                                            border: Border.all(
-                                              width: 1,
-                                              color: kPrimaryColor,
-                                              style: BorderStyle.solid,
-                                            ),
-                                            // shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            'مالك',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ))),
-                                    ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    'ID:${model.spacialId}',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    "LV ${model.level[0].userCurrentLevel.toString()}",
-                                    style: TextStyle(
-                                        color: kPrimaryColor,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(
-                                    width: 30,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 18,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Colors.amber,
-                                        )),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.person,
-                                        color: Colors.amber,
-                                        size: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Container(
-                                    height: 18,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Colors.amber,
-                                        )),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.markunread_mailbox,
-                                        color: Colors.amber,
-                                        size: 10,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Container(
-                                    height: 18,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red,
-                                        border: Border.all(
-                                          width: 2,
-                                          color: Colors.amber,
-                                        )),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.home,
-                                        color: Colors.amber,
-                                        size: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Spacer(),
-                              Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (model.isFriend == true)
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {
-                                              Get.to(Onechat(
-                                                user: model,
-                                                fromRoomUser: true,
-                                              ));
-                                            },
-                                            color: Colors.yellow,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.message_rounded,
-                                              size: 14,
-                                            ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            "الرسائل",
-                                            style:
-                                                TextStyle(color: Colors.grey),
-                                          )
-                                        ],
-                                      ),
-                                    if (model.isFriend == false)
-                                      Column(
-                                        children: [
-                                          MaterialButton(
-                                            onPressed: () {
-                                              HomeCubit.get(context).addfriend(
-                                                id: model.userId,
-                                              );
-
-                                              // print(HomeCubit.get(context)
-                                              //     .addfriendsModel
-                                              //     .message);
-                                            },
-                                            color: Colors.yellow,
-                                            textColor: Colors.white,
-                                            child: Icon(
-                                              Icons.person_add,
-                                              size: 14,
-                                            ),
-                                            padding: EdgeInsets.all(16),
-                                            shape: CircleBorder(),
-                                          ),
-                                          Text(
-                                            'إضافه صديق',
-                                            style:
-                                                TextStyle(color: Colors.grey),
-                                          )
-                                        ],
-                                      ),
-                                    Column(
-                                      children: [
-                                        MaterialButton(
-                                          onPressed: () {},
-                                          color: kPrimaryLightColor,
-                                          textColor: Colors.white,
-                                          child: Icon(
-                                            Icons.mic_external_off_rounded,
-                                            size: 14,
-                                          ),
-                                          padding: EdgeInsets.all(16),
-                                          shape: CircleBorder(),
-                                        ),
-                                        Text(
-                                          'كتم الصوت',
-                                          style: TextStyle(color: Colors.grey),
-                                        )
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        MaterialButton(
-                                          onPressed: () {
-                                            // Get.to(StackDemo());
-                                          },
-                                          color: Colors.pink,
-                                          textColor: Colors.white,
-                                          child: Icon(
-                                            Icons.star,
-                                            size: 14,
-                                          ),
-                                          padding: EdgeInsets.all(16),
-                                          shape: CircleBorder(),
-                                        ),
-                                        Text(
-                                          'البطاقات السحرية',
-                                          style: TextStyle(color: Colors.grey),
-                                        )
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        MaterialButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-
-                                            showModalBottomSheet(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return GiftScreen(
-                                                    roomID: roomID,
-                                                    userID:
-                                                        model.userId.toString(),
-                                                    check: true,
-                                                    username: model.name,
-                                                    // userID: model.userId
-                                                    // .toString(),
-                                                  );
-                                                });
-                                          },
-                                          color: Colors.blueAccent,
-                                          textColor: Colors.white,
-                                          child: Icon(
-                                            Icons.card_giftcard,
-                                            size: 14,
-                                          ),
-                                          padding: EdgeInsets.all(16),
-                                          shape: CircleBorder(),
-                                        ),
-                                        Text(
-                                          'إرسال هديه',
-                                          style: TextStyle(color: Colors.grey),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                        height: 45,
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                                width: 1.0,
-                                                color: Colors.grey.shade300),
-                                            bottom: BorderSide(
-                                                width: 1.0,
-                                                color:
-                                                    Colors.lightBlue.shade900),
-                                          ),
-                                          color: Colors.white,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            IconButton(
-                                                onPressed: () {
-                                                  showDialog<String>(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        Directionality(
-                                                      textDirection:
-                                                          TextDirection.rtl,
-                                                      child: AlertDialog(
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            15))),
-                                                        title: Center(
-                                                          child: const Text(
-                                                              'هل تريد حظر العضو'),
-                                                        ),
-                                                        // content: const Text('AlertDialog description'),
-                                                        actions: <Widget>[
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  HomeCubit.get(
-                                                                          context)
-                                                                      .addBlockList(
-                                                                          id: model
-                                                                              .userId);
-                                                                  Navigator.pop(
-                                                                      context,
-                                                                      'yes');
-
-                                                                  CommonFunctions
-                                                                      .showToast(
-                                                                          'تم حظر العضو',
-                                                                          Colors
-                                                                              .green);
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'نعم'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        context,
-                                                                        'no'),
-                                                                child:
-                                                                    const Text(
-                                                                        'لا'),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                icon: Icon(
-                                                  Icons.logout,
-                                                  color: Colors.grey.shade400,
-                                                  size: 25,
-                                                )),
-                                            VerticalDivider(),
-                                            IconButton(
-                                                onPressed: () {
-                                                  showDialog<String>(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        Directionality(
-                                                      textDirection:
-                                                          TextDirection.rtl,
-                                                      child: AlertDialog(
-                                                        shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .all(Radius
-                                                                        .circular(
-                                                                            15))),
-                                                        title: Center(
-                                                          child: const Text(
-                                                              'هل تريد اصمات العضو'),
-                                                        ),
-                                                        // content: const Text('AlertDialog description'),
-                                                        actions: <Widget>[
-                                                          Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceAround,
-                                                            children: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  ismuted =
-                                                                      true;
-                                                                  _updateuserDataFirebase(
-                                                                      roomID,
-                                                                      model
-                                                                          .name,
-                                                                      model
-                                                                          .spacialId);
-
-                                                                  _updateMutedFirebase(
-                                                                    roomID,
-                                                                  );
-
-                                                                  Navigator.pop(
-                                                                      context,
-                                                                      'yes');
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'نعم'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        context,
-                                                                        'no'),
-                                                                child:
-                                                                    const Text(
-                                                                        'لا'),
-                                                              ),
-                                                            ],
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                icon: Icon(
-                                                  Icons.block_rounded,
-                                                  color: Colors.grey.shade400,
-                                                  size: 25,
-                                                )),
-                                            VerticalDivider(),
-                                            IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
-                                                  Icons.mic,
-                                                  color: Colors.grey.shade400,
-                                                  size: 25,
-                                                )),
-                                            VerticalDivider(),
-                                            Theme(
-                                                data:
-                                                    Theme.of(context).copyWith(
-                                                  dividerTheme:
-                                                      DividerThemeData(
-                                                    color: Colors.white,
-                                                  ),
-                                                  cardColor: Colors.black
-                                                      .withOpacity(0.7),
-                                                ),
-                                                child: PopupMenuButton<int>(
-                                                  icon: Icon(
-                                                    Icons.person,
-                                                    color: Colors.green,
-                                                    size: 25,
-                                                  ),
-                                                  onSelected: (item) =>
-                                                      onSelected1(context, item,
-                                                          model.userId, roomID),
-                                                  itemBuilder: (context) => [
-                                                    PopupMenuItem<int>(
-                                                        value: 0,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Center(
-                                                              child: Text(
-                                                                "تعين مشرف",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        )),
-                                                    PopupMenuDivider(),
-                                                    PopupMenuItem<int>(
-                                                        value: 1,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Center(
-                                                              child: Text(
-                                                                  "تعين عضو",
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .white)),
-                                                            )
-                                                          ],
-                                                        )),
-                                                    PopupMenuDivider(),
-                                                    PopupMenuItem<int>(
-                                                        value: 2,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text(
-                                                              "ازالة العضو",
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .white),
-                                                            )
-                                                          ],
-                                                        )),
-                                                  ],
-                                                )),
-                                          ],
-                                        )),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text(
+                          "الكاميرا",
+                          //  style: themeData.textTheme.body1,
                         ),
                       ],
                     ),
-                    Container(
-                      // height: 70,
-
-                      alignment: Alignment.topCenter,
-
-                      child: FloatingActionButton(
-                        onPressed: () {},
-                        child: CircleAvatar(
-                          child: Image.asset("assets/images/Profile Image.png"),
-                          backgroundColor: kPrimaryColor,
-                          radius: 50,
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      File imageFile = await pickImage(ImageSource.camera);
+                      return imageFile;
+                    }),
+                CupertinoButton(
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.insert_photo,
+                          color: themeData.primaryColor,
                         ),
-                      ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text(
+                          "الاستوديو",
+                          // style: themeData.textTheme.body1,
+                        ),
+                      ],
                     ),
-                  ]),
-                );
-              });
-        },
-      );
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      File imageFile = await pickImage(ImageSource.gallery);
+                      return imageFile;
+                    }),
+              ],
+            ),
+          );
+        });
+  }
+
+  //// Upload Image to firestore into chats collection inside chatroom collection
+  Future uploadImage() async {
+    String fileName = Uuid().v1();
+    int status = 1;
+
+    await _firestoreInstance
+        .collection('chatroom')
+        .doc(widget.roomId)
+        .collection('chats')
+        .doc(fileName)
+        .set({
+      "sendby": specialId,
+      "message": "",
+      "type": "img",
+      "time": FieldValue.serverTimestamp(),
+    });
+
+    var ref =
+        FirebaseStorage.instance.ref().child('images').child("$fileName.jpg");
+
+    //// Delete the image if Error has been catched
+    var uploadTask = await ref.putFile(imageFile).catchError((error) async {
+      await _firestoreInstance
+          .collection('chatroom')
+          .doc(widget.roomId)
+          .collection('chats')
+          .doc(fileName)
+          .delete();
+
+      status = 0;
+    });
+
+    if (status == 1) {
+      String imageUrl = await uploadTask.ref.getDownloadURL();
+
+      await _firestoreInstance
+          .collection('chatroom')
+          .doc(widget.roomId)
+          .collection('chats')
+          .doc(fileName)
+          .update({"message": imageUrl});
+      onSendMessage(imageUrl, 1, 1);
+      print(imageUrl);
+    }
+  }
+
+  void showEmojiPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return EmojiPicker(
+          onEmojiSelected: (category, emoji) {
+            _messageController.text += emoji.emoji; // Add to message
+            Navigator.pop(context); // Close the picker
+          },
+        );
+      },
+    );
+  }
+
+// Optional - for clearing a selected emoji easily
+  void _clearSelectedEmoji() {
+    if (_messageController.text.isNotEmpty) {
+      final text = _messageController.text;
+      _messageController.text = text.substring(0, text.length - 2);
+    }
+  }
+
+  //// Send New massage (content) from the user To the room chat , select the massage Type if text or image, etc ..
+  //// By Hedra Adel
+  void onSendMessage(
+    String content,
+    int type,
+    int currentlevel,
+  ) {
+    // type: 0 = text, 1 = image, 2 = sticker
+    if (content.trim() != '') {
+      _messageController.clear();
+
+      var documentReference = FirebaseFirestore.instance
+          .collection('messages')
+          .doc(widget.roomId)
+          .collection(widget.roomId)
+          .doc(DateTime.now().millisecondsSinceEpoch.toString());
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.set(
+          documentReference,
+          {
+            'username': username,
+            'idFrom': specialId,
+            'idTo': widget.roomId,
+            'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+            'content': content,
+            'type': type,
+            'userLevel': currentlevel,
+            'ApiUserID': apiid,
+            'userType': userstateInroom,
+            'specialId': specialId,
+            'packageName': nameOFPackage,
+            'packageColor': packageColor,
+            'packageBadge': packagebadge,
+            'hasSpecialID': hasSpecialID
+          },
+        );
+      });
+      listScrollController.animateTo(0.0,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+      print("The Message has Been Sent" + "--- Hedra Adel ---");
+    } else {
+      CommonFunctions.showToast('Nothing to send', Colors.red);
+      print("The Message hasn't Been Sent" + "--- Hedra Adel ---");
+    }
+  }
+
+  /// Reads local data and updates the state.
+  ///
+  /// This function reads the room ID from the widget and updates the state variables `groupChatId` and `roomID`.
+
+  Future<void> setRoomID() async {
+    try {
+      // Update the state variables with the room ID from the widget
+      setState(() {
+        groupChatId = '${widget.roomId}';
+        roomID = widget.roomId;
+      });
+    } catch (e) {
+      // If an exception is caught, print an error message to the console
+      print("Error in readLocal(): " + e.toString());
+    }
+  }
+
+// improve checkRoomFoundOrNot() code and handle the errors
+//// Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable and create room doc if it not exists
+//// By Hedra Adel
+  checkRoomFoundOrNot() async {
+    try {
+      DocumentSnapshot ds =
+          await _firestoreInstance.collection("roomUsers").doc(roomID).get();
+      this.setState(() {
+        _isRoomOnFirebase = ds.exists;
+        print("checkRoomFoundOrNot Has been Completed and " +
+            "_isRoomOnFirebase is : $_isRoomOnFirebase" +
+            "--- Hedra Adel ---");
+      });
+      // if room not exist add it to firebase
+      _isRoomOnFirebase ? null : _addMicsToFirebase(roomID);
+    } catch (e) {
+      print("Error in checkRoomFoundOrNot: $e");
+    }
+  }
+}
+
+class BestRoomUsers extends StatelessWidget {
+  const BestRoomUsers({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Text(
+                "قائمة الكرماء",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            //height: 568,
+            child: DefaultTabController(
+              length: 2,
+              child: Scaffold(
+                appBar: PreferredSize(
+                    preferredSize: Size.fromHeight(30.0),
+                    child: AppBar(
+                      backgroundColor: Colors.white,
+                      bottom: TabBar(
+                        indicator: BoxDecoration(
+                          color: KstorebuttonColor,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(5),
+                          ),
+                        ),
+                        tabs: [
+                          Text(
+                            "اخر 24 ساعة",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Text(
+                            "اخر 7 أيام",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )),
+                body: TabBarView(
+                  children: [
+                    ListView(children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 80,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              color: Colors.white,
+                              child: Icon(
+                                Icons.hourglass_empty_rounded,
+                                size: 80,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "لم يرسل أحد الهدايا في ال 24 ساعة الماضية",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 240,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)),
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 30.0,
+                                          backgroundImage: NetworkImage(
+                                              "https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
+                                          backgroundColor: Colors.transparent,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text("username"),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                      Icons
+                                                          .monetization_on_rounded,
+                                                      color: Colors.orange),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text("0"),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ]),
+                    ListView(
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 80,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                color: Colors.white,
+                                child: Icon(
+                                  Icons.hourglass_empty_rounded,
+                                  size: 80,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "لم يرسل أحد الهدايا في السبعة أيام الماضية",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 240,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                          border:
+                                              Border.all(color: Colors.grey)),
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 30.0,
+                                            backgroundImage: NetworkImage(
+                                                "https://images.unsplash.com/photo-1547665979-bb809517610d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=675&q=80"),
+                                            backgroundColor: Colors.transparent,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text("username"),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                        Icons
+                                                            .monetization_on_rounded,
+                                                        color: Colors.orange),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text("0"),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      )),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

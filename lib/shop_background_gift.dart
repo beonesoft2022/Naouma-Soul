@@ -15,7 +15,9 @@ import 'models/shop_background_mode.dart';
 import 'myBackground_screen.dart';
 
 class ShopbackgroundGift extends StatefulWidget {
-  const ShopbackgroundGift({Key key}) : super(key: key);
+  final String roomId_get;
+
+  const ShopbackgroundGift({Key key, this.roomId_get}) : super(key: key);
 
   @override
   State<ShopbackgroundGift> createState() => _ShopbackgroundGiftState();
@@ -26,28 +28,16 @@ class _ShopbackgroundGiftState extends State<ShopbackgroundGift> {
   String price;
   double difference;
 
+  String roomId;
+
   @override
-  // Widget build(BuildContext context) {
-  //   return BlocConsumer<ShopCubit, ShopIntresStates>(
-  //     listener: (context, state) {
+  void initState() {
+    super.initState();
+    roomId = widget.roomId_get;
+    print("room id is" + roomId);
+  }
 
-  //     },
-  //     builder: (context, state) {
-  //       return ConditionalBuilder(
-  //         condition: ShopCubit.get(context).backgroundModel != null,
-  //         builder: (context) =>
-  //             getIntresItem(ShopCubit.get(context).backgroundModel),
-  //         fallback: (context) => Container(
-  //           color: Colors.white,
-  //           child: Center(
-  //             child: CircularProgressIndicator(),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
+  @override
   Widget build(BuildContext context) {
     return Builder(
       builder: (BuildContext context) {
@@ -56,7 +46,8 @@ class _ShopbackgroundGiftState extends State<ShopbackgroundGift> {
         return BlocConsumer<ShopCubit, ShopIntresStates>(
           listener: (context, state) {
             if (state is ShopPurchaseSuccessStates) {
-              if (ShopCubit.get(context).shopPurchaseModel.status == 201) {
+              if (ShopCubit.get(context).shopPurchaseModel.status == 200 &&
+                  ShopCubit.get(context).shopPurchaseModel.status != null) {
                 if (ShopCubit.get(context).shopPurchaseModel.message != null) {
                   showDialog<String>(
                     context: context,
@@ -143,7 +134,7 @@ class _ShopbackgroundGiftState extends State<ShopbackgroundGift> {
                 style: TextStyle(color: Colors.white, fontSize: 15),
               ),
               onPressed: () {
-                Get.to(MyBackgroundScreen());
+                Get.to(MyBackgroundScreen(roomId: roomId));
               },
             )
           ],
@@ -276,12 +267,12 @@ class _ShopbackgroundGiftState extends State<ShopbackgroundGift> {
                                     TextButton(
                                       onPressed: () {
                                         ShopCubit.get(context)
-                                            .shopPurchase(id: model.id);
+                                            .shopPurchase2(id: model.id);
                                         ShopCubit.get(context)
                                             .getWalletAmount();
                                         Navigator.pop(context, 'yes');
                                       },
-                                      child: const Text('نعم'),
+                                      child: const Text('نعم اشتري الخلفية'),
                                     ),
                                     TextButton(
                                       onPressed: () =>

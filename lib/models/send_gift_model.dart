@@ -1,6 +1,6 @@
 class SendgiftModel {
   SendgiftModelData data;
-  Null message;
+  int message;
   int status;
 
   SendgiftModel({this.data, this.message, this.status});

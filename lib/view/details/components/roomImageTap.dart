@@ -40,6 +40,7 @@ class RoomImageTap extends StatefulWidget {
       this.totalNum,
       this.roomDesc,
       this.currentlevel});
+
   @override
   State<RoomImageTap> createState() => _RoomImageTapState();
 }
@@ -162,14 +163,15 @@ class _RoomImageTapState extends State<RoomImageTap> {
                                             Align(
                                               alignment: Alignment.topCenter,
                                               child: Container(
-                                                // color: Colors.black,
-                                                height: 100,
-                                                width: 100,
-                                                child: Image.network(
-                                                  widget.roomimage,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
+                                                  // color: Colors.black,
+                                                  height: 100,
+                                                  width: 100,
+                                                  // child: Image.network(
+                                                  //   widget.roomimage,
+                                                  //   fit: BoxFit.cover,
+                                                  // ),
+                                                  child: Image.asset(
+                                                      "assets/images/Profile Image.png")),
                                             ),
                                             Spacer(),
 

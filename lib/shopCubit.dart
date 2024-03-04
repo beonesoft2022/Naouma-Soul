@@ -6,6 +6,8 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +31,7 @@ import 'models/shop_purchase_model.dart';
 import 'models/showLocks_model.dart';
 import 'models/specialRoomID_model.dart';
 import 'models/myInters_model.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:project/network/cache_helper.dart';
 
 class ShopCubit extends Cubit<ShopIntresStates> {
@@ -199,6 +201,57 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     }
   }
 
+  void ChangeDefaultBackground({@required shopid, @required roomid}) async {
+    emit(ShopPurchaseLoadingStates());
+    print("shopid is " + shopid.toString());
+    print("roomid is " + roomid.toString());
+    try {
+      final response = await DioHelper.postdata(
+        url: 'changebackground',
+        token: token,
+        data: {'room_id': roomid, 'background_id': shopid},
+      );
+      // Get data list
+      final product = response.data['data'];
+
+      // Check that list is not empty
+      if (product != null) {
+        print("wooooooooooow is" + response.toString());
+        try {
+          // Use the 'product' variable here
+          emit(ShopPurchaseSuccessStates(
+              ShopPurchaseModel.fromJson(response.data)));
+        } catch (e) {
+          print("Product is not a valid JSON string" + e.toString());
+        }
+      } else {
+        // Show toast message
+        Fluttertoast.showToast(
+            msg: 'No data in API response',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+
+      CommonFunctions.showToast("Shop created in API ", Colors.greenAccent);
+      //getx.Get.offAll(() => HomeScreen());
+    } catch (e) {
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+      print(" - Error - There is Error in ${hedra.fileName} -- " +
+          "In Line : ${hedra.lineNumber} -- " +
+          "The caller function : ${hedra.callerFunctionName} -- " +
+          "The Details is in create not fire: :::: " +
+          e.toString() +
+          " :::: " +
+          "-- Hedra Adel - Error -");
+      print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+  }
+
   void purchasePersonalID({@required id}) async {
     emit(PersonalPurchaseIDLoadingStates());
 
@@ -342,6 +395,7 @@ class ShopCubit extends Cubit<ShopIntresStates> {
 
   void buyPermiemData({@required id}) {
     emit(BuyPermemLoadingState());
+    print("id is " + id.toString());
     DioHelper.postdata(url: buypermiem, token: token, data: {'id': id})
         .then((value) {
       print(value.data);
