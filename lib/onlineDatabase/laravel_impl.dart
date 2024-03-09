@@ -17,7 +17,7 @@ import 'online_database_repository.dart';
 
 class LaravelImpl extends OnlineDatabaseRepository {
   String badStatusCode = "Wrong status code";
-  final String baseUrl = "https://nauma.smartlys.online/public/api";
+  final String baseUrl = "https://nauma.onoo.online/public/api";
   final String loginWithPhonePath = "/login";
   final String loginWithFBPath = "/fc_login";
   final String signUpPath = "/register";

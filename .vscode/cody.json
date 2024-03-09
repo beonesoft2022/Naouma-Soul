@@ -5,6 +5,17 @@
       "context": {
         "codebase": true,
         "selection": true
+      },
+      "mode": "ask"
+    },
+    "NormalNull": {
+      "prompt": "rewrite the selected code with normal null check and remove the '?' operator ",
+      "context": {
+        "codebase": false,
+        "selection": true,
+        "currentDir": true,
+        "openTabs": true,
+        "command": "nn"
       }
     }
   }

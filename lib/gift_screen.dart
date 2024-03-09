@@ -52,6 +52,7 @@ class _GiftScreenState extends State<GiftScreen> {
   int selectedCard = -1;
   String dropDownValue = 'One';
   String senduserId;
+  String receiveuserId;
   @override
   var fromkey = GlobalKey<FormState>();
   int index = 0;
@@ -218,12 +219,12 @@ class _GiftScreenState extends State<GiftScreen> {
                                       print(value);
                                       setState(() {
                                         newValue = value;
-                                        senduserId = model3.data[index].userId
+                                        receiveuserId = model3
+                                            .data[index].userId
                                             .toString();
-
                                         print(
                                             '________________________$newValue');
-                                        print(senduserId);
+                                        print("receiveuserId" + receiveuserId);
                                         widget.check = false;
                                         // print(model2.userId.toString());
                                       });
@@ -258,23 +259,18 @@ class _GiftScreenState extends State<GiftScreen> {
                       if (senduserId == null) {
                         senduserId = widget.userID.toString();
                       }
-                      // print('userID is${widget.userID}');
-                      // print('userID is${widget.check}');
-                      print('userID is $senduserId');
-                      print('giftID is $giftID');
-                      print('roomId is ${widget.roomID}');
-                      print(_controller.text);
-                      HomeCubit.get(context).sendgift(
-                          id: widget.roomID,
-                          type: 'user',
-                          giftid: giftID,
-                          received: senduserId.toInt(),
-                          count: _controller.text);
+                      // HomeCubit.get(context).sendgift(
+                      //     id: widget.roomID,
+                      //     type: 'user',
+                      //     giftid: giftID,
+                      //     received: senduserId.toInt(),
+                      //     count: _controller.text);
                       // Call sendGiftToFirebase function
                       HomeCubit.get(context).sendGiftToFirebase(
                         roomId: widget.roomID,
                         giftId: giftID,
-                        receiverId: senduserId,
+                        receiverId: receiveuserId,
+                        senderId: senduserId,
                         count: _controller.text,
                       );
                       giftID = '0';
@@ -291,7 +287,7 @@ class _GiftScreenState extends State<GiftScreen> {
                       //       children: [
                       //         Center(
                       //           child: Image.network(
-                      //             'https://nauma.smartlys.online/public/uploads/images/shop/VDMrqshf4qyScQJWEAXJ0D9huZto0exXdwmJSJJG.png',
+                      //             'https://nauma.onoo.online/public/uploads/images/shop/VDMrqshf4qyScQJWEAXJ0D9huZto0exXdwmJSJJG.png',
                       //             fit: BoxFit.cover,
                       //           ),
                       //         ),

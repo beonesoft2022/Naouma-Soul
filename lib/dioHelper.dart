@@ -20,11 +20,11 @@ class DioHelper {
 
   static init() {
     dio = Dio(BaseOptions(
-        baseUrl: 'https://nauma.smartlys.online/public/api/',
+        baseUrl: 'https://nauma.onoo.online/public/api/',
         receiveDataWhenStatusError: true));
   }
 
-  final String basse = "https://nauma.smartlys.online/public/api/";
+  final String basse = "https://nauma.onoo.online/public/api/";
 
   static Future<Response> getdata({
     @required String url,

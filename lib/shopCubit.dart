@@ -88,6 +88,8 @@ class ShopCubit extends Cubit<ShopIntresStates> {
     });
   }
 
+  // write a function to send current location to firestore database every 10 seconds
+
   //backend api checked
   BackgroundModel backgroundModel;
 

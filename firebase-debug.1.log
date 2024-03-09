@@ -1,0 +1,244 @@
+[debug] [2024-03-04T11:37:32.035Z] ----------------------------------------------------------------------
+[debug] [2024-03-04T11:37:32.105Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Onoo\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-03-04T11:37:32.106Z] CLI Version:   13.1.0
+[debug] [2024-03-04T11:37:32.106Z] Platform:      win32
+[debug] [2024-03-04T11:37:32.107Z] Node Version:  v20.11.0
+[debug] [2024-03-04T11:37:32.109Z] Time:          Mon Mar 04 2024 13:37:32 GMT+0200 (توقيت شرق أوروبا الرسمي)
+[debug] [2024-03-04T11:37:32.109Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-03-04T11:37:32.321Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-04T11:37:32.322Z] > authorizing via signed-in user (onoo.mobile@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  D:\SourceCode\Naouma Last
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-03-04T11:37:55.686Z] Using project from CLI flag: onoo-3dfa7
+[debug] [2024-03-04T11:37:55.690Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/onoo-3dfa7 [none]
+[debug] [2024-03-04T11:37:58.215Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/onoo-3dfa7 200
+[debug] [2024-03-04T11:37:58.216Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/onoo-3dfa7 {"projectId":"onoo-3dfa7","projectNumber":"721289678140","displayName":"Onoo","name":"projects/onoo-3dfa7","resources":{"hostingSite":"onoo-3dfa7","realtimeDatabaseInstance":"onoo-3dfa7-default-rtdb"},"state":"ACTIVE","etag":"1_be0cf4f3-950d-4a5a-9a90-69d4e849a8b7"}
+[info] i  Using project onoo-3dfa7 (Onoo) 
+[info] 
+=== Database Setup
+[info] i  database: ensuring required API firebasedatabase.googleapis.com is enabled... 
+[debug] [2024-03-04T11:37:58.245Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firebasedatabase.googleapis.com [none]
+[debug] [2024-03-04T11:37:58.245Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firebasedatabase.googleapis.com x-goog-quota-user=projects/onoo-3dfa7
+[debug] [2024-03-04T11:37:59.439Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firebasedatabase.googleapis.com 200
+[debug] [2024-03-04T11:37:59.439Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firebasedatabase.googleapis.com [omitted]
+[info] +  database: required API firebasedatabase.googleapis.com is enabled 
+[info] 
+[debug] [2024-03-04T11:37:59.441Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/onoo-3dfa7/locations/-/instances/onoo-3dfa7-default-rtdb [none]
+[debug] [2024-03-04T11:38:00.580Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/onoo-3dfa7/locations/-/instances/onoo-3dfa7-default-rtdb 200
+[debug] [2024-03-04T11:38:00.580Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/onoo-3dfa7/locations/-/instances/onoo-3dfa7-default-rtdb {"name":"projects/721289678140/locations/us-central1/instances/onoo-3dfa7-default-rtdb","project":"projects/721289678140","databaseUrl":"https://onoo-3dfa7-default-rtdb.firebaseio.com","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[info] 
+[info] Firebase Realtime Database Security Rules allow you to define how your data should be
+[info] structured and when your data can be read from and written to.
+[info] 
+[debug] [2024-03-04T11:38:28.067Z] >>> [apiv2][query] GET https://onoo-3dfa7-default-rtdb.firebaseio.com/.settings/rules.json [none]
+[debug] [2024-03-04T11:38:28.784Z] <<< [apiv2][status] GET https://onoo-3dfa7-default-rtdb.firebaseio.com/.settings/rules.json 200
+[debug] [2024-03-04T11:38:28.784Z] <<< [apiv2][body] GET https://onoo-3dfa7-default-rtdb.firebaseio.com/.settings/rules.json [stream]
+[info] +  Database Rules for onoo-3dfa7-default-rtdb have been written to database.rules.json. 
+[info] Future modifications to database.rules.json will update Realtime Database Security Rules when you run
+[info] firebase deploy.
+[info] 
+=== Firestore Setup
+[debug] [2024-03-04T11:38:28.830Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firestore.googleapis.com [none]
+[debug] [2024-03-04T11:38:28.830Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firestore.googleapis.com x-goog-quota-user=projects/onoo-3dfa7
+[debug] [2024-03-04T11:38:29.876Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firestore.googleapis.com 200
+[debug] [2024-03-04T11:38:29.876Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/firestore.googleapis.com [omitted]
+[debug] [2024-03-04T11:38:29.876Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default) [none]
+[debug] [2024-03-04T11:38:30.893Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default) 200
+[debug] [2024-03-04T11:38:30.894Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default) {"name":"projects/onoo-3dfa7/databases/(default)","uid":"fd8422a6-41a5-43f6-8fbe-b8f3fcff078a","createTime":"2024-03-04T11:10:46.809868Z","updateTime":"2024-03-04T11:10:46.809868Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-03-04T11:10:46.809868Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"II3R1tHC2oQDMJOCv/vB2oQD"}
+[debug] [2024-03-04T11:38:30.894Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-03-04T11:38:30.894Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-04T11:38:30.895Z] > authorizing via signed-in user (onoo.mobile@gmail.com)
+[debug] [2024-03-04T11:38:30.895Z] [iam] checking project onoo-3dfa7 for permissions ["firebase.projects.get"]
+[debug] [2024-03-04T11:38:30.896Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions [none]
+[debug] [2024-03-04T11:38:30.896Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions x-goog-quota-user=projects/onoo-3dfa7
+[debug] [2024-03-04T11:38:30.896Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-04T11:38:31.880Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions 200
+[debug] [2024-03-04T11:38:31.880Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-03-04T11:38:42.798Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/onoo-3dfa7/releases pageSize=10&pageToken=
+[debug] [2024-03-04T11:38:43.796Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/onoo-3dfa7/releases 200
+[debug] [2024-03-04T11:38:43.797Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/onoo-3dfa7/releases {"releases":[{"name":"projects/onoo-3dfa7/releases/cloud.firestore","rulesetName":"projects/onoo-3dfa7/rulesets/faa117df-ee80-41f1-aede-eaba35847f3d","createTime":"2024-03-04T11:11:23.477150Z","updateTime":"2024-03-04T11:13:27.984061Z"}]}
+[debug] [2024-03-04T11:38:43.797Z] Found ruleset: projects/onoo-3dfa7/rulesets/faa117df-ee80-41f1-aede-eaba35847f3d
+[debug] [2024-03-04T11:38:43.798Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/onoo-3dfa7/rulesets/faa117df-ee80-41f1-aede-eaba35847f3d [none]
+[debug] [2024-03-04T11:38:44.519Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/onoo-3dfa7/rulesets/faa117df-ee80-41f1-aede-eaba35847f3d 200
+[debug] [2024-03-04T11:38:44.519Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/onoo-3dfa7/rulesets/faa117df-ee80-41f1-aede-eaba35847f3d [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-03-04T11:38:47.631Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-03-04T11:38:47.635Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-03-04T11:38:48.643Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-03-04T11:38:48.643Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/onoo-3dfa7/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[debug] [2024-03-04T11:38:48.644Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-03-04T11:38:48.644Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/onoo-3dfa7/databases/(default)/collectionGroups/-/indexes {}
+[info] 
+=== Functions Setup
+[debug] [2024-03-04T11:38:48.647Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-03-04T11:38:48.647Z] > authorizing via signed-in user (onoo.mobile@gmail.com)
+[debug] [2024-03-04T11:38:48.647Z] [iam] checking project onoo-3dfa7 for permissions ["firebase.projects.get"]
+[debug] [2024-03-04T11:38:48.648Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions [none]
+[debug] [2024-03-04T11:38:48.648Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions x-goog-quota-user=projects/onoo-3dfa7
+[debug] [2024-03-04T11:38:48.648Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-04T11:38:49.538Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions 200
+[debug] [2024-03-04T11:38:49.538Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/onoo-3dfa7:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-03-04T11:38:49.538Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-03-04T11:38:49.538Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/onoo-3dfa7
+[debug] [2024-03-04T11:38:49.541Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-03-04T11:38:49.541Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/onoo-3dfa7
+[debug] [2024-03-04T11:38:50.608Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/runtimeconfig.googleapis.com 200
+[debug] [2024-03-04T11:38:50.609Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-03-04T11:38:50.611Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/cloudfunctions.googleapis.com 200
+[debug] [2024-03-04T11:38:50.611Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/onoo-3dfa7/services/cloudfunctions.googleapis.com [omitted]
+[info] Let's create a new codebase for your functions.
+[info] A directory corresponding to the codebase will be created in your project
+[info] with sample code pre-configured.
+
+[info] See https://firebase.google.com/docs/functions/organize-functions for
+[info] more information on organizing your functions using codebases.
+
+[info] Functions can be deployed with firebase deploy.
+
+[info] +  Wrote functions/package.json 
+[info] +  Wrote functions/index.js 
+[info] +  Wrote functions/.gitignore 
+[info] 
+=== Hosting Setup
+[debug] [2024-03-04T11:39:05.966Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/onoo-3dfa7 [none]
+[debug] [2024-03-04T11:39:06.422Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/onoo-3dfa7 200
+[debug] [2024-03-04T11:39:06.422Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/onoo-3dfa7 {"projectId":"onoo-3dfa7","projectNumber":"721289678140","displayName":"Onoo","name":"projects/onoo-3dfa7","resources":{"hostingSite":"onoo-3dfa7","realtimeDatabaseInstance":"onoo-3dfa7-default-rtdb"},"state":"ACTIVE","etag":"1_be0cf4f3-950d-4a5a-9a90-69d4e849a8b7"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 
+[info] +  Wrote n/404.html 
+[debug] [2024-03-04T11:39:23.045Z] >>> [apiv2][query] GET https://www.gstatic.com/firebasejs/releases.json [none]
+[debug] [2024-03-04T11:39:23.376Z] <<< [apiv2][status] GET https://www.gstatic.com/firebasejs/releases.json 200
+[debug] [2024-03-04T11:39:23.377Z] <<< [apiv2][body] GET https://www.gstatic.com/firebasejs/releases.json {"current":{"version":"10.8.1","browserURL":"https://www.gstatic.com/firebasejs/10.8.1/firebase.js","packageURL":"https://www.gstatic.com/firebasejs/10.8.1/firebase.tgz"},"live":{"version":"10.8","browserURL":"https://www.gstatic.com/firebasejs/live/10.8/firebase.js","packageURL":"https://www.gstatic.com/firebasejs/live/10.8/firebase.tgz"},"components":{"analytics":"https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js","app":"https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js","app-check":"https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check.js","auth":"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js","auth/cordova":"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth/cordova.js","auth/web-extension":"https://www.gstatic.com/firebasejs/10.8.1/firebase-auth/web-extension.js","functions":"https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js","firestore":"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js","firestore/lite":"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore/lite.js","installations":"https://www.gstatic.com/firebasejs/10.8.1/firebase-installations.js","storage":"https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js","performance":"https://www.gstatic.com/firebasejs/10.8.1/firebase-performance.js","remote-config":"https://www.gstatic.com/firebasejs/10.8.1/firebase-remote-config.js","messaging":"https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js","messaging/sw":"https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging/sw.js","database":"https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js","firestore.memory":"https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.memory.js"}}
+[info] +  Wrote n/index.html 
+[info] 
+[info] i  Detected a .git folder at D:\SourceCode\Naouma Last 
+[info] i  Authorizing with GitHub to upload your service account to a GitHub repository's secrets store. 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://github.com/login/oauth/authorize?client_id=89cf50f02ac6aaed3484&state=916048042&redirect_uri=http%3A%2F%2Flocalhost%3A9005&scope=read%3Auser%20repo%20public_repo
+[info] 
+[info] Waiting for authentication...
+[debug] [2024-03-04T11:39:33.041Z] >>> [apiv2][query] POST https://github.com/login/oauth/access_token [none]
+[debug] [2024-03-04T11:39:33.042Z] >>> [apiv2][body] POST https://github.com/login/oauth/access_token [stream]
+[debug] [2024-03-04T11:39:33.745Z] <<< [apiv2][status] POST https://github.com/login/oauth/access_token 200
+[debug] [2024-03-04T11:39:33.745Z] <<< [apiv2][body] POST https://github.com/login/oauth/access_token {"access_token":"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","token_type":"bearer","scope":"read:user,repo"}
+[debug] [2024-03-04T11:39:33.774Z] >>> [apiv2][query] GET https://api.github.com/user [none]
+[debug] [2024-03-04T11:39:34.725Z] <<< [apiv2][status] GET https://api.github.com/user 200
+[debug] [2024-03-04T11:39:34.725Z] <<< [apiv2][body] GET https://api.github.com/user {"login":"beonesoft2022","id":125046697,"node_id":"U_kgDOB3QPqQ","avatar_url":"https://avatars.githubusercontent.com/u/125046697?v=4","gravatar_id":"","url":"https://api.github.com/users/beonesoft2022","html_url":"https://github.com/beonesoft2022","followers_url":"https://api.github.com/users/beonesoft2022/followers","following_url":"https://api.github.com/users/beonesoft2022/following{/other_user}","gists_url":"https://api.github.com/users/beonesoft2022/gists{/gist_id}","starred_url":"https://api.github.com/users/beonesoft2022/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/beonesoft2022/subscriptions","organizations_url":"https://api.github.com/users/beonesoft2022/orgs","repos_url":"https://api.github.com/users/beonesoft2022/repos","events_url":"https://api.github.com/users/beonesoft2022/events{/privacy}","received_events_url":"https://api.github.com/users/beonesoft2022/received_events","type":"User","site_admin":false,"name":null,"company":null,"blog":"","location":null,"email":null,"hireable":null,"bio":null,"twitter_username":null,"public_repos":5,"public_gists":0,"followers":0,"following":0,"created_at":"2023-02-10T14:54:28Z","updated_at":"2024-02-09T09:48:54Z","private_gists":3,"total_private_repos":4,"owned_private_repos":4,"disk_usage":44104,"collaborators":0,"two_factor_authentication":false,"plan":{"name":"free","space":976562499,"collaborators":0,"private_repos":10000}}
+[info] 
+[info] +  Success! Logged into GitHub as beonesoft2022 
+[info] 
+[debug] [2024-03-04T11:39:55.035Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:39:56.003Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:39:56.004Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:40:11.234Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:40:11.855Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:40:11.855Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:40:14.341Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:40:14.651Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:40:14.651Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:41:17.272Z] >>> [apiv2][query] GET https://api.github.com/repos/c/actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:41:17.772Z] <<< [apiv2][status] GET https://api.github.com/repos/c/actions/secrets/public-key 404
+[debug] [2024-03-04T11:41:17.772Z] <<< [apiv2][body] GET https://api.github.com/repos/c/actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:41:22.551Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:41:22.767Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:41:22.767Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:41:28.007Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:41:28.518Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:41:28.519Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:42:58.910Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:42:59.400Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:42:59.400Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 
+[debug] [2024-03-04T11:43:48.045Z] >>> [apiv2][query] GET https://api.github.com/repos//actions/secrets/public-key type=owner
+[debug] [2024-03-04T11:43:48.508Z] <<< [apiv2][status] GET https://api.github.com/repos//actions/secrets/public-key 404
+[debug] [2024-03-04T11:43:48.508Z] <<< [apiv2][body] GET https://api.github.com/repos//actions/secrets/public-key {"message":"Not Found","documentation_url":"https://docs.github.com/rest"}
+[info] 
+[info] 
+[error] !  The provided authorization cannot be used with this repository. If this repository is in an organization, did you remember to grant access? 
+[info] 
+[info] i  Action required: Visit this URL to ensure access has been granted to the appropriate organization(s) for the Firebase CLI GitHub OAuth App: 
+[info] https://github.com/settings/connections/applications/89cf50f02ac6aaed3484
+[info] 

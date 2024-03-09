@@ -65,6 +65,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 class HomeCubit extends Cubit<HomeStates> {
   HomeCubit() : super(HomeIntialStates());
   HedraTrace hedra = HedraTrace(StackTrace.current);
+  bool _isClosed = false;
+
+  @override
+  Future<void> close() {
+    _isClosed = true;
+    return super.close();
+  }
 
   static HomeCubit get(context) => BlocProvider.of(context);
   static Dio dio;
@@ -712,8 +719,6 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-  SendgiftModel sendGiftModel;
-
   Future<void> sendgift(
       {@required id,
       @required type,
@@ -723,7 +728,7 @@ class HomeCubit extends Cubit<HomeStates> {
     print(id);
     try {
       // Step 1: Trigger a Firebase Realtime Database event after sendgift() is executed
-      FirebaseDatabase.instance.ref().child('newGift').push().set({
+      await FirebaseDatabase.instance.ref().child('newGift').push().set({
         'giftId': giftid,
         'senderUserId': id,
         'receiverUserId': received,
@@ -731,20 +736,12 @@ class HomeCubit extends Cubit<HomeStates> {
         'isShown': false,
       });
 
-      final value = await DioHelper.postdata(
-          url: 'send-new-gift',
-          token: token,
-          data: {
-            'gift_id': giftid,
-            'user_gift_to_id': received,
-            'room_id': id,
-            'qty': count
-          });
+      // Check if the Bloc is closed before emitting a new state
+      if (!_isClosed) {
+        emit(SendGiftSuccessStates());
+        print("Data successfully inserted into 'newGift' child");
+      }
 
-      print(value.data);
-      sendGiftModel = SendgiftModel.fromJson(value.data);
-      print(value.data);
-      emit(SendGiftSuccessStates());
       print("--------------------");
       print(" sendgift  success");
       print("--------------------");
@@ -789,23 +786,73 @@ class HomeCubit extends Cubit<HomeStates> {
 
   // Existing code...
 
+//   Future<void> sendGiftToFirebase({
+//     @required String giftId,
+//     @required String senderId,
+//     @required String receiverId,
+//     @required String roomId,
+//     @required dynamic count,
+//   }) async {
+//     try {
+//       // Gift data goes to Firestore for persistence
+//       await FirebaseFirestore.instance.collection('gifts').add({
+//         'giftId': giftId,
+//         'senderUserId': senderId,
+//         'receiverUserId': receiverId,
+//       });
+//
+// // Push a notification into the Realtime Database for room broadcast
+//       await FirebaseDatabase.instance
+//           .ref()
+//           .child('roomNotifications')
+//           .child(roomId)
+//           .push()
+//           .set({'giftId': giftId});
+//       //
+//       // // Generate a new document ID
+//       // String newDocId = FirebaseFirestore.instance.collection('gifts').doc().id;
+//       //
+//       // // Send the gift to Firebase
+//       // await FirebaseFirestore.instance.collection('gifts').doc(newDocId).set({
+//       //   'giftId': giftId,
+//       //   'receiverId': receiverId,
+//       //   'roomId': roomId,
+//       //   'count': count,
+//       // }, SetOptions(merge: true));
+//
+//       // Emit the SendGiftSuccessStates state
+//       emit(SendGiftSuccessStates());
+//     } catch (e) {
+//       // Handle any errors here
+//       print(e);
+//     }
+//   }
   Future<void> sendGiftToFirebase({
     @required String giftId,
+    @required String senderId,
     @required String receiverId,
     @required String roomId,
     @required dynamic count,
   }) async {
     try {
-      // Generate a new document ID
-      String newDocId = FirebaseFirestore.instance.collection('gifts').doc().id;
-
-      // Send the gift to Firebase
-      await FirebaseFirestore.instance.collection('gifts').doc(newDocId).set({
+      // Gift data goes to Firestore for persistence
+      await FirebaseFirestore.instance.collection('gifts').add({
         'giftId': giftId,
-        'receiverId': receiverId,
-        'roomId': roomId,
-        'count': count,
-      }, SetOptions(merge: true));
+        'senderUserId': senderId,
+        'receiverUserId': receiverId,
+      });
+
+      // Push a notification into the Realtime Database for room broadcast
+      await FirebaseDatabase.instance
+          .ref()
+          .child('roomNotifications')
+          .child(roomId)
+          .push()
+          .set({
+        'giftId': giftId,
+        'senderId': senderId,
+        'receiverId': receiverId
+      });
 
       // Emit the SendGiftSuccessStates state
       emit(SendGiftSuccessStates());

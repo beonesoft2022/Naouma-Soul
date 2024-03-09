@@ -26,7 +26,7 @@ class LocationService {
 
   Future<void> sendLocationToAPI(LocationLog location) async {
     var response = await http.post(
-      Uri.parse('www.smartlys.online/public/api/storelocation'),
+      Uri.parse('www.onoo.online/public/api/storelocation'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer token', // replace with actual token

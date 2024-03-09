@@ -1,41 +1,64 @@
 {
   "project_info": {
-    "project_number": "325533563947",
-    "project_id": "naouma-30072023",
-    "storage_bucket": "naouma-30072023.appspot.com"
+    "project_number": "721289678140",
+    "firebase_url": "https://onoo-3dfa7-default-rtdb.firebaseio.com",
+    "project_id": "onoo-3dfa7",
+    "storage_bucket": "onoo-3dfa7.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:325533563947:android:f68bac47181b4a5f06fe6e",
+        "mobilesdk_app_id": "1:721289678140:android:d3925e05d26b3f42a3e239",
         "android_client_info": {
           "package_name": "com.onoo.naouma"
         }
       },
       "oauth_client": [
         {
-          "client_id": "325533563947-3mjndre7oud6n3u702c2iabtj1k9da5t.apps.googleusercontent.com",
+          "client_id": "721289678140-kjotilg6p8hq211hptjtcupobenhb0fc.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCQbgVi9nPbJe3tjdf3ydmmjbHcs8WfDIs"
+          "current_key": "AIzaSyDCHuvNbY6A7EIduFlGy6CtolJGM0znvz0"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "325533563947-3mjndre7oud6n3u702c2iabtj1k9da5t.apps.googleusercontent.com",
+              "client_id": "721289678140-kjotilg6p8hq211hptjtcupobenhb0fc.apps.googleusercontent.com",
               "client_type": 3
-            },
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721289678140:android:f07e2c7d3a9ecba6a3e239",
+        "android_client_info": {
+          "package_name": "onoo.onoo.link"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721289678140-kjotilg6p8hq211hptjtcupobenhb0fc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCHuvNbY6A7EIduFlGy6CtolJGM0znvz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
             {
-              "client_id": "325533563947-hpm3f9rjjpp04bagieicef270tmbq1nq.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.onoo.naouma"
-              }
+              "client_id": "721289678140-kjotilg6p8hq211hptjtcupobenhb0fc.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         }

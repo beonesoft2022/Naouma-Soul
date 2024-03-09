@@ -14,6 +14,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mime/mime.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:project/utils/constants.dart';
@@ -263,5 +264,15 @@ class CommonFunctions {
           borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       prefixIcon: prefixIcon,
     );
+  }
+
+  static getCurrentLocation() {
+    // return the current location of the user
+    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      return position;
+    }).catchError((e) {
+      print(e);
+    });
   }
 }

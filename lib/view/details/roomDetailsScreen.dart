@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'dart:io';
 import 'dart:ui';
 import 'package:firebase_database/firebase_database.dart';
@@ -146,53 +147,43 @@ class _DetailsScreenState extends State<DetailsScreen> {
   var expmodel;
   DocumentSnapshot snapshot; //Define snapshot
   HedraTrace hedra = HedraTrace(StackTrace.current);
+  final _firestore = FirebaseFirestore.instance;
+
+  void showGiftDialog(Map<String, dynamic> giftData) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.network(giftData['imageUrl']),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Close'),
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((_) {
+      // Dialog closed, add any actions if needed
+    });
+    // Auto-close after 10 minutes
+    Future.delayed(Duration(minutes: 10), () {
+      Navigator.of(context).pop();
+    });
+  }
 
   @override
   void initState() {
     print("room image is : ${widget.roomImage}");
     super.initState();
-    FirebaseDatabase.instance
-        .ref()
-        .child('newGift')
-        .onChildAdded
-        .listen((event) {
-      Map<String, dynamic> giftData =
-          Map<String, dynamic>.from(event.snapshot.value);
-      if (!giftData['isShown'] && giftData['roomId'] == roomID) {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              Future.delayed(Duration(seconds: 5), () {
-                Navigator.of(context).pop(true);
-              });
-              return Dialog(
-                backgroundColor: Colors.transparent,
-                child: new Container(
-                  alignment: FractionalOffset.center,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Image.network(
-                          giftData['giftId'],
-                          fit: BoxFit.cover,
-                        ),
-                        Text('Your first text here'),
-                        Text('Your second text here'),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            });
-        FirebaseDatabase.instance
-            .ref()
-            .child('newGift')
-            .child(event.snapshot.key)
-            .update({'isShown': true});
-      }
-    });
+
     try {
+      //  showBackgroundDialog();
       isUserMuted();
       print("room image is : ${widget.roomImage}");
       countUsersInRoomAndUpdate();
@@ -207,11 +198,52 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
+// write a method to display for five seconds an transparent background image as fullscreen with text "يارب" wrote under it ,
+
+// write a method to display for five seconds an transparent background image as fullscreen with text "يارب" wrote under it ,
+  Future<void> showBackgroundDialog() async {
+    String background222 = "https://onoo.online/bosh.gif";
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.network(background222),
+            ],
+          ),
+        );
+      },
+    ).then((_) {
+      // Navigator.of(context).pop();
+    });
+    // Auto-close after 10 minutes
+    Future.delayed(Duration(seconds: 10), () {
+      Navigator.of(context).pop();
+    });
+  }
+
   Future<void> initialize() async {
     //// Check the room is found or no in the firestore and update _isRoomOnFirebase bool variable
     //// By Hedra Adel
     try {
       await checkRoomFoundOrNot();
+      //call showBackgroundDialog
+
+      // write code listen to firebase realtime (roomNotifications/roomid) and fire showBackgroundDialog when new data is inserted
+      // Get a reference to your desired node
+      final roomNotificationsRef =
+          FirebaseDatabase.instance.ref('roomNotifications/$roomID');
+
+      // Listen for new data (assuming 'data' contains the notification payload)
+      roomNotificationsRef.onChildAdded.listen((DatabaseEvent event) {
+        if (event.snapshot.exists) {
+          showBackgroundDialog();
+        }
+      });
     } catch (e) {
       print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
       print(
@@ -266,497 +298,96 @@ class _DetailsScreenState extends State<DetailsScreen> {
         "_personInRoom index" + "${micModel.userName}" + "--- Hedra Adel ---");
 
     if (micModel != null) {
-      return Expanded(
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              micModel.micStatus == true
-                  ? Expanded(
-                      child: Row(
-                        children: [
-                          hasFrame == null
-                              ? Container(
-                                  //empty frame
-                                  )
-                              : Expanded(
-                                  child: Container(
-                                      width: 70,
-                                      child: Image.network(
-                                        hasFrame,
-                                      )),
-                                ), // Back image
-                          Padding(
-                            padding: const EdgeInsets.all(9.0),
-                            child: Container(
-                              width: 50,
-                              child: Image.asset(
-                                "assets/images/Profile Image.png",
-                                // fit: BoxFit.cover,
-                              ),
+      return Container(
+        child: Column(
+          children: <Widget>[
+            micModel.micStatus == true
+                ? Expanded(
+                    child: Row(
+                      children: [
+                        hasFrame == null
+                            ? Container(
+                                //empty frame
+                                )
+                            : Expanded(
+                                child: Container(
+                                    width: 7,
+                                    child: Image.network(
+                                      hasFrame,
+                                    )),
+                              ), // Back image
+                        Padding(
+                          padding: const EdgeInsets.all(9.0),
+                          child: Container(
+                            width: 50,
+                            child: Image.asset(
+                              "assets/images/Profile Image.png",
+                              // fit: BoxFit.cover,
                             ),
-                          )
-                        ],
-                      ),
-                    )
-                  : Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.all(6.0),
-                        decoration: BoxDecoration(
-                            color: Colors.grey,
-                            shape: BoxShape.circle,
-                            border: Border.all(width: 2, color: kPrimaryColor)),
-                        child: Icon(
-                          micModel.isLocked != null
-                              ? micModel.isLocked
-                                  ? Icons.lock
-                                  : Icons.mic
-                              : Icons.mic,
-                          color: Colors.white,
-                          size: 32,
-                        ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                : Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.all(6.0),
+                      decoration: BoxDecoration(
+                          color: Colors.grey,
+                          shape: BoxShape.circle,
+                          border: Border.all(width: 2, color: kPrimaryColor)),
+                      child: Icon(
+                        micModel.isLocked != null
+                            ? micModel.isLocked
+                                ? Icons.lock
+                                : Icons.mic
+                            : Icons.mic,
+                        color: Colors.white,
+                        size: 32,
                       ),
                     ),
-              2.height,
-              Text(
-                micModel.isLocked != null && micModel.isLocked
-                    ? "مقفل"
-                    : micModel.micStatus
-                        ? micModel.userName.length > 7
-                            ? ".${micModel.userName}"
-                            : micModel.userName
-                        : "${index + 1}",
-                overflow: TextOverflow.ellipsis,
-                style: secondaryTextStyle(size: 12, color: black),
-              ),
-            ],
-          ),
-        ).onTap(() {
-          if (ismuted == true) {
-            CommonFunctions.showToast('لا تملك الصلاحية', Colors.red);
-          } else if (!micModel.micStatus &&
-              !micModel.isLocked &&
-              micModel.userId == null &&
-              micModel.roomOwnerId == userid) {
-            // Iam room owner and mic is empty
-            print("Iam owner and mic is empty.");
+                  ),
+            2.height,
+            Text(
+              micModel.isLocked != null && micModel.isLocked
+                  ? "مقفل"
+                  : micModel.micStatus
+                      ? micModel.userName.length > 7
+                          ? ".${micModel.userName}"
+                          : micModel.userName
+                      : "${index + 1}",
+              overflow: TextOverflow.ellipsis,
+              style: secondaryTextStyle(size: 12, color: black),
+            ),
+          ],
+        ),
+      ).onTap(() {
+        if (ismuted == false) {
+          CommonFunctions.showToast('لا تملك الصلاحية', Colors.red);
+        } else if (!micModel.micStatus &&
+            !micModel.isLocked &&
+            micModel.userId == null &&
+            micModel.roomOwnerId == userid) {
+          // Iam room owner and mic is empty
+          print("Iam owner and mic is empty.");
 
-            // Check if user already holds mic before
-            var existingItem = _micUsersList.firstWhere(
-                (itemToCheck) => itemToCheck.userId == userid,
-                orElse: () => null);
+          // Check if user already holds mic before
+          var existingItem = _micUsersList.firstWhere(
+              (itemToCheck) => itemToCheck.userId == userid,
+              orElse: () => null);
 
-            // user already holds mic before
-            // will leave the old mic , and use new one
+          // user already holds mic before
+          // will leave the old mic , and use new one
 
-            if (existingItem != null) {
-              print(existingItem.micNumber);
-              print(existingItem.userName);
-              print("take other mic");
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MicClickDialog(
-                      takeMicFunction: () {
-                        print("clicked take");
-                        print("clicked index: $index");
-                        // leave old mic
-                        existingItem.id = null;
-                        existingItem.userName = null;
-                        existingItem.userId = null;
-                        existingItem.micNumber = existingItem.micNumber;
-                        existingItem.micStatus = false;
-                        _updateMicsToFirebase(
-                            existingItem.micNumber, existingItem);
-                        print("existname: ${existingItem.userName}");
-                        print("existuserId: ${existingItem.userId}");
-                        print("existmicNumber: ${existingItem.micNumber}");
-                        print("existid: ${existingItem.micNumber}");
-                        print("existmicStatus: ${existingItem.micStatus}");
-
-                        // go to new mic
-                        micModel.id = index.toString();
-                        micModel.userName = username;
-                        micModel.userId = userid;
-                        micModel.micNumber = index;
-                        micModel.micStatus = true;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-
-                        /// Removes all previous screens from the back stack and redirect to new screen with provided screen tag
-                        finish(context);
-
-                        _updateMicsToFirebase(index, micModel);
-                      },
-                      leaveMicFunction: () {
-                        // Leave mic
-                        micModel.id = null;
-                        micModel.userName = null;
-                        micModel.userId = null;
-                        micModel.micNumber = index;
-                        micModel.micStatus = false;
-                        micModel.isLocked = false;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      lockMicFunction: () {
-                        // lock mic
-                        micModel.id = null;
-                        micModel.userName = null;
-                        micModel.userId = null;
-                        micModel.micNumber = index;
-                        micModel.micStatus = false;
-                        micModel.isLocked = true;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      unLockMicFunction: () {},
-                      showTakeMic: true,
-                      showLeaveMic: false,
-                      showLockMic: true,
-                      micIsLocked: false,
-                    );
-                  });
-            } else {
-              print("not take other mic");
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MicClickDialog(
-                      takeMicFunction: () {
-                        // go to new mic
-                        micModel.id = index.toString();
-                        micModel.userName = username;
-                        micModel.userId = userid;
-                        micModel.micNumber = index;
-                        micModel.micStatus = true;
-                        micModel.isLocked = false;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      leaveMicFunction: () {
-                        // Leave mic
-                        micModel.id = null;
-                        micModel.userName = null;
-                        micModel.userId = null;
-                        micModel.micNumber = index;
-                        micModel.micStatus = false;
-                        micModel.isLocked = false;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      lockMicFunction: () {
-                        // lock mic
-                        micModel.id = null;
-                        micModel.userName = null;
-                        micModel.userId = null;
-                        micModel.micNumber = index;
-                        micModel.micStatus = false;
-                        micModel.isLocked = true;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      unLockMicFunction: () {},
-                      showTakeMic: true,
-                      showLeaveMic: false,
-                      showLockMic: true,
-                      micIsLocked: false,
-                    );
-                  });
-            }
-          } else if (!micModel.micStatus &&
-              micModel.isLocked &&
-              micModel.userId == null &&
-              micModel.roomOwnerId == userid) {
-            // Iam room owner and mic is locked
-            print("Iam room owner and mic is locked...");
+          if (existingItem != null) {
+            print(existingItem.micNumber);
+            print(existingItem.userName);
+            print("take other mic");
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return MicClickDialog(
-                    takeMicFunction: () {},
-                    leaveMicFunction: () {
-                      // Leave mic
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    unLockMicFunction: () {
-                      print("unLock Mic index: $index");
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    showTakeMic: false,
-                    showLeaveMic: false,
-                    showLockMic: false,
-                    micIsLocked: true,
-                  );
-                });
-          } else if (micModel.micStatus &&
-              !micModel.isLocked &&
-              micModel.userId == userid &&
-              micModel.roomOwnerId == userid) {
-            // Iam room owner and mic is locked
-            print("Iam room owner and mic is taken by me...");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(
-                    takeMicFunction: () {},
-                    leaveMicFunction: () {
-                      print("unLock Mic index: $index");
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      micModel.isLocked = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      _updateMicsToFirebase(index, micModel);
-                      finish(context);
-                    },
-                    unLockMicFunction: () {},
-                    showTakeMic: false,
-                    showLeaveMic: true,
-                    showLockMic: false,
-                    micIsLocked: false,
-                  );
-                });
-          } else if (!micModel.micStatus &&
-              !micModel.isLocked &&
-              micModel.userId == null &&
-              micModel.roomOwnerId != specialId) {
-            // Iam not room owner and mic is locked
-            print("Iam not room owner and mic is taken by me...");
-            var existingItem = _micUsersList.firstWhere(
-                (itemToCheck) => itemToCheck.userId == userid,
-                orElse: () => null);
-            if (existingItem != null) {
-              // user already holds mic before
-              print(existingItem.micNumber);
-              print(existingItem.userName);
-              print("take other mic");
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MicClickDialog(
-                      takeMicFunction: () {
-                        print("clicked take");
-                        print("clicked index: $index");
-                        // leave old mic
-                        existingItem.id = null;
-                        existingItem.userName = null;
-                        existingItem.userId = null;
-                        existingItem.micNumber = existingItem.micNumber;
-                        existingItem.micStatus = false;
-                        _updateMicsToFirebase(
-                            existingItem.micNumber, existingItem);
-                        print("existname: ${existingItem.userName}");
-                        print("existuserId: ${existingItem.userId}");
-                        print("existmicNumber: ${existingItem.micNumber}");
-                        print("existid: ${existingItem.micNumber}");
-                        print("existmicStatus: ${existingItem.micStatus}");
-
-                        // go to new mic
-                        micModel.id = index.toString();
-                        micModel.userName = username;
-                        micModel.userId = userid;
-                        micModel.micNumber = index;
-                        micModel.micStatus = true;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        // update firebase
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      leaveMicFunction: () {
-                        print("leave index: $index");
-                        micModel.id = null;
-                        micModel.userName = null;
-                        micModel.userId = null;
-                        micModel.micNumber = index;
-                        micModel.micStatus = false;
-                        micModel.isLocked = false;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        // update firebase
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      lockMicFunction: () {},
-                      unLockMicFunction: () {},
-                      showTakeMic: true,
-                      showLeaveMic: true,
-                      showLockMic: false,
-                      micIsLocked: false,
-                    );
-                  });
-            } else {
-              print("not take other mic");
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MicClickDialog(
-                      takeMicFunction: () {
-                        // go to new mic
-                        micModel.id = index.toString();
-                        micModel.userName = username;
-                        micModel.userId = specialId.toString();
-                        micModel.micNumber = index;
-                        micModel.micStatus = true;
-                        micModel.isLocked = false;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      leaveMicFunction: () {
-                        // Leave mic
-                        micModel.id = null;
-                        micModel.userName = null;
-                        micModel.userId = null;
-                        micModel.micNumber = index;
-                        micModel.micStatus = false;
-                        micModel.isLocked = false;
-                        print("name: ${micModel.userName}");
-                        print("userId: ${micModel.userId}");
-                        print("micNumber: ${micModel.micNumber}");
-                        print("id: ${micModel.micNumber}");
-                        print("micStatus: ${micModel.micStatus}");
-                        _updateMicsToFirebase(index, micModel);
-                        finish(context);
-                      },
-                      lockMicFunction: () {},
-                      unLockMicFunction: () {},
-                      showTakeMic: true,
-                      showLeaveMic: true,
-                      showLockMic: false,
-                      micIsLocked: false,
-                    );
-                  });
-            }
-          } else if (micModel.micStatus == true &&
-              !micModel.isLocked &&
-              micModel.userId != null &&
-              micModel.userId == specialId) {
-            // mic taken by me...
-            print("mic taken by me...");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return MicClickDialog(
-                    takeMicFunction: () {},
-                    leaveMicFunction: () {
-                      print("leave index: $index");
-                      micModel.id = null;
-                      micModel.userName = null;
-                      micModel.userId = null;
-                      micModel.micNumber = index;
-                      micModel.micStatus = false;
-                      print("name: ${micModel.userName}");
-                      print("userId: ${micModel.userId}");
-                      print("micNumber: ${micModel.micNumber}");
-                      print("id: ${micModel.micNumber}");
-                      print("micStatus: ${micModel.micStatus}");
-                      finish(context);
-                      _updateMicsToFirebase(index, micModel);
-                    },
-                    lockMicFunction: () {},
-                    unLockMicFunction: () {},
-                    showLockMic: false,
-                    micIsLocked: false,
-                    showTakeMic: false,
-                    showLeaveMic: true,
-                  );
-                });
-          } else if (micModel.micStatus &&
-              !micModel.isLocked &&
-              micModel.userId != null &&
-              micModel.userId != specialId) {
-            // taken by other one
-            CommonFunctions.showToast("Mic already taken", Colors.red);
-          } else if (!micModel.micStatus &&
-              micModel.isLocked &&
-              micModel.userId != null &&
-              micModel.userId != userid) {
-            // Mic is locked
-            CommonFunctions.showToast("Mic is locked", Colors.red);
-          } else {
-            print("_micUsersList: ${_micUsersList.length}");
-            //find existing item per link criteria
-            var existingItem = _micUsersList.firstWhere(
-                (itemToCheck) => itemToCheck.userId == userid,
-                orElse: () => null);
-            if (existingItem != null) {
-              // user already holds mic before
-              print(existingItem.micNumber);
-              print(existingItem.userName);
-              print("take other mic");
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MicClickDialog(takeMicFunction: () {
+                    takeMicFunction: () {
                       print("clicked take");
                       print("clicked index: $index");
                       // leave old mic
@@ -784,9 +415,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       print("micNumber: ${micModel.micNumber}");
                       print("id: ${micModel.micNumber}");
                       print("micStatus: ${micModel.micStatus}");
+
+                      /// Removes all previous screens from the back stack and redirect to new screen with provided screen tag
                       finish(context);
+
                       _updateMicsToFirebase(index, micModel);
-                    }, leaveMicFunction: () {
+                    },
+                    leaveMicFunction: () {
                       // Leave mic
                       micModel.id = null;
                       micModel.userName = null;
@@ -801,17 +436,212 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       print("micStatus: ${micModel.micStatus}");
                       _updateMicsToFirebase(index, micModel);
                       finish(context);
-                    });
-                  });
-            } else {
-              print("not take other mic");
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MicClickDialog(takeMicFunction: () {
+                    },
+                    lockMicFunction: () {
+                      // lock mic
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = true;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    unLockMicFunction: () {},
+                    showTakeMic: true,
+                    showLeaveMic: false,
+                    showLockMic: true,
+                    micIsLocked: false,
+                  );
+                });
+          } else {
+            print("not take other mic");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(
+                    takeMicFunction: () {
+                      // go to new mic
+                      micModel.id = index.toString();
+                      micModel.userName = username;
+                      micModel.userId = userid;
+                      micModel.micNumber = index;
+                      micModel.micStatus = true;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    leaveMicFunction: () {
+                      // Leave mic
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    lockMicFunction: () {
+                      // lock mic
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = true;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    unLockMicFunction: () {},
+                    showTakeMic: true,
+                    showLeaveMic: false,
+                    showLockMic: true,
+                    micIsLocked: false,
+                  );
+                });
+          }
+        } else if (!micModel.micStatus &&
+            micModel.isLocked &&
+            micModel.userId == null &&
+            micModel.roomOwnerId == userid) {
+          // Iam room owner and mic is locked
+          print("Iam room owner and mic is locked...");
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return MicClickDialog(
+                  takeMicFunction: () {},
+                  leaveMicFunction: () {
+                    // Leave mic
+                    micModel.id = null;
+                    micModel.userName = null;
+                    micModel.userId = null;
+                    micModel.micNumber = index;
+                    micModel.micStatus = false;
+                    micModel.isLocked = false;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    _updateMicsToFirebase(index, micModel);
+                    finish(context);
+                  },
+                  unLockMicFunction: () {
+                    print("unLock Mic index: $index");
+                    micModel.id = null;
+                    micModel.userName = null;
+                    micModel.userId = null;
+                    micModel.micNumber = index;
+                    micModel.micStatus = false;
+                    micModel.isLocked = false;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    _updateMicsToFirebase(index, micModel);
+                    finish(context);
+                  },
+                  showTakeMic: false,
+                  showLeaveMic: false,
+                  showLockMic: false,
+                  micIsLocked: true,
+                );
+              });
+        } else if (micModel.micStatus &&
+            !micModel.isLocked &&
+            micModel.userId == userid &&
+            micModel.roomOwnerId == userid) {
+          // Iam room owner and mic is locked
+          print("Iam room owner and mic is taken by me...");
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return MicClickDialog(
+                  takeMicFunction: () {},
+                  leaveMicFunction: () {
+                    print("unLock Mic index: $index");
+                    micModel.id = null;
+                    micModel.userName = null;
+                    micModel.userId = null;
+                    micModel.micNumber = index;
+                    micModel.micStatus = false;
+                    micModel.isLocked = false;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    _updateMicsToFirebase(index, micModel);
+                    finish(context);
+                  },
+                  unLockMicFunction: () {},
+                  showTakeMic: false,
+                  showLeaveMic: true,
+                  showLockMic: false,
+                  micIsLocked: false,
+                );
+              });
+        } else if (!micModel.micStatus &&
+            !micModel.isLocked &&
+            micModel.userId == null &&
+            micModel.roomOwnerId != specialId) {
+          // Iam not room owner and mic is locked
+          print("Iam not room owner and mic is taken by me...");
+          var existingItem = _micUsersList.firstWhere(
+              (itemToCheck) => itemToCheck.userId == userid,
+              orElse: () => null);
+          if (existingItem != null) {
+            // user already holds mic before
+            print(existingItem.micNumber);
+            print(existingItem.userName);
+            print("take other mic");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(
+                    takeMicFunction: () {
                       print("clicked take");
                       print("clicked index: $index");
-                      micModel.id = "$index";
+                      // leave old mic
+                      existingItem.id = null;
+                      existingItem.userName = null;
+                      existingItem.userId = null;
+                      existingItem.micNumber = existingItem.micNumber;
+                      existingItem.micStatus = false;
+                      _updateMicsToFirebase(
+                          existingItem.micNumber, existingItem);
+                      print("existname: ${existingItem.userName}");
+                      print("existuserId: ${existingItem.userId}");
+                      print("existmicNumber: ${existingItem.micNumber}");
+                      print("existid: ${existingItem.micNumber}");
+                      print("existmicStatus: ${existingItem.micStatus}");
+
+                      // go to new mic
+                      micModel.id = index.toString();
                       micModel.userName = username;
                       micModel.userId = userid;
                       micModel.micNumber = index;
@@ -821,9 +651,58 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       print("micNumber: ${micModel.micNumber}");
                       print("id: ${micModel.micNumber}");
                       print("micStatus: ${micModel.micStatus}");
-                      finish(context);
+                      // update firebase
                       _updateMicsToFirebase(index, micModel);
-                    }, leaveMicFunction: () {
+                      finish(context);
+                    },
+                    leaveMicFunction: () {
+                      print("leave index: $index");
+                      micModel.id = null;
+                      micModel.userName = null;
+                      micModel.userId = null;
+                      micModel.micNumber = index;
+                      micModel.micStatus = false;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      // update firebase
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    lockMicFunction: () {},
+                    unLockMicFunction: () {},
+                    showTakeMic: true,
+                    showLeaveMic: true,
+                    showLockMic: false,
+                    micIsLocked: false,
+                  );
+                });
+          } else {
+            print("not take other mic");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(
+                    takeMicFunction: () {
+                      // go to new mic
+                      micModel.id = index.toString();
+                      micModel.userName = username;
+                      micModel.userId = specialId.toString();
+                      micModel.micNumber = index;
+                      micModel.micStatus = true;
+                      micModel.isLocked = false;
+                      print("name: ${micModel.userName}");
+                      print("userId: ${micModel.userId}");
+                      print("micNumber: ${micModel.micNumber}");
+                      print("id: ${micModel.micNumber}");
+                      print("micStatus: ${micModel.micStatus}");
+                      _updateMicsToFirebase(index, micModel);
+                      finish(context);
+                    },
+                    leaveMicFunction: () {
                       // Leave mic
                       micModel.id = null;
                       micModel.userName = null;
@@ -838,12 +717,162 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       print("micStatus: ${micModel.micStatus}");
                       _updateMicsToFirebase(index, micModel);
                       finish(context);
-                    });
-                  });
-            }
+                    },
+                    lockMicFunction: () {},
+                    unLockMicFunction: () {},
+                    showTakeMic: true,
+                    showLeaveMic: true,
+                    showLockMic: false,
+                    micIsLocked: false,
+                  );
+                });
           }
-        }),
-      );
+        } else if (micModel.micStatus == true &&
+            !micModel.isLocked &&
+            micModel.userId != null &&
+            micModel.userId == specialId) {
+          // mic taken by me...
+          print("mic taken by me...");
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return MicClickDialog(
+                  takeMicFunction: () {},
+                  leaveMicFunction: () {
+                    print("leave index: $index");
+                    micModel.id = null;
+                    micModel.userName = null;
+                    micModel.userId = null;
+                    micModel.micNumber = index;
+                    micModel.micStatus = false;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    finish(context);
+                    _updateMicsToFirebase(index, micModel);
+                  },
+                  lockMicFunction: () {},
+                  unLockMicFunction: () {},
+                  showLockMic: false,
+                  micIsLocked: false,
+                  showTakeMic: false,
+                  showLeaveMic: true,
+                );
+              });
+        } else if (micModel.micStatus &&
+            !micModel.isLocked &&
+            micModel.userId != null &&
+            micModel.userId != specialId) {
+          // taken by other one
+          CommonFunctions.showToast("Mic already taken", Colors.red);
+        } else if (!micModel.micStatus &&
+            micModel.isLocked &&
+            micModel.userId != null &&
+            micModel.userId != userid) {
+          // Mic is locked
+          CommonFunctions.showToast("Mic is locked", Colors.red);
+        } else {
+          print("_micUsersList: ${_micUsersList.length}");
+          //find existing item per link criteria
+          var existingItem = _micUsersList.firstWhere(
+              (itemToCheck) => itemToCheck.userId == userid,
+              orElse: () => null);
+          if (existingItem != null) {
+            // user already holds mic before
+            print(existingItem.micNumber);
+            print(existingItem.userName);
+            print("take other mic");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(takeMicFunction: () {
+                    print("clicked take");
+                    print("clicked index: $index");
+                    // leave old mic
+                    existingItem.id = null;
+                    existingItem.userName = null;
+                    existingItem.userId = null;
+                    existingItem.micNumber = existingItem.micNumber;
+                    existingItem.micStatus = false;
+                    _updateMicsToFirebase(existingItem.micNumber, existingItem);
+                    print("existname: ${existingItem.userName}");
+                    print("existuserId: ${existingItem.userId}");
+                    print("existmicNumber: ${existingItem.micNumber}");
+                    print("existid: ${existingItem.micNumber}");
+                    print("existmicStatus: ${existingItem.micStatus}");
+
+                    // go to new mic
+                    micModel.id = index.toString();
+                    micModel.userName = username;
+                    micModel.userId = userid;
+                    micModel.micNumber = index;
+                    micModel.micStatus = true;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    finish(context);
+                    _updateMicsToFirebase(index, micModel);
+                  }, leaveMicFunction: () {
+                    // Leave mic
+                    micModel.id = null;
+                    micModel.userName = null;
+                    micModel.userId = null;
+                    micModel.micNumber = index;
+                    micModel.micStatus = false;
+                    micModel.isLocked = false;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    _updateMicsToFirebase(index, micModel);
+                    finish(context);
+                  });
+                });
+          } else {
+            print("not take other mic");
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return MicClickDialog(takeMicFunction: () {
+                    print("clicked take");
+                    print("clicked index: $index");
+                    micModel.id = "$index";
+                    micModel.userName = username;
+                    micModel.userId = userid;
+                    micModel.micNumber = index;
+                    micModel.micStatus = true;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    finish(context);
+                    _updateMicsToFirebase(index, micModel);
+                  }, leaveMicFunction: () {
+                    // Leave mic
+                    micModel.id = null;
+                    micModel.userName = null;
+                    micModel.userId = null;
+                    micModel.micNumber = index;
+                    micModel.micStatus = false;
+                    micModel.isLocked = false;
+                    print("name: ${micModel.userName}");
+                    print("userId: ${micModel.userId}");
+                    print("micNumber: ${micModel.micNumber}");
+                    print("id: ${micModel.micNumber}");
+                    print("micStatus: ${micModel.micStatus}");
+                    _updateMicsToFirebase(index, micModel);
+                    finish(context);
+                  });
+                });
+          }
+        }
+      });
     } else {
       print("_personInRoom index" +
           "${micModel.userName}" +
@@ -873,6 +902,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
           if (state is InroomSuccessStates) {
             var model = HomeCubit.get(context).roomUserModel.message;
           }
+
+          StreamBuilder(
+            stream: FirebaseDatabase.instance
+                .ref()
+                .child('roomNotifications')
+                .child(roomID)
+                .onChildAdded,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                // Display text when new data is inserted
+                return Text('New data inserted');
+              } else {
+                return Container();
+              }
+            },
+          );
 
           if (state is NotificationSuccessStates) {
             var model = HomeCubit.get(context).notificationModel;
@@ -919,7 +964,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           // if (state is SendGiftSuccessStates) {
           //   var model = HomeCubit.get(context).notificationModel;
           //   String showgift =
-          //       'https://nauma.smartlys.online/public/uploads/images/shop/VDMrqshf4qyScQJWEAXJ0D9huZto0exXdwmJSJJG.png}'; // Ensure showgift is defined
+          //       'https://nauma.onoo.online/public/uploads/images/shop/VDMrqshf4qyScQJWEAXJ0D9huZto0exXdwmJSJJG.png}'; // Ensure showgift is defined
           //
           //   FirebaseMessaging.onMessage.listen((event) {
           //     print(
@@ -990,46 +1035,80 @@ class _DetailsScreenState extends State<DetailsScreen> {
             }
           }
         }, builder: (context, state) {
-          return ConditionalBuilder(
-            condition: HomeCubit.get(context).roomUserModel != null &&
-                HomeCubit.get(context).getUserExpModel != null,
-            builder: (context) {
-              try {
-                // Call getdata function with necessary parameters
-                print("Result of roomUserModel.message : " +
-                    HomeCubit.get(context).roomUserModel.message.toString());
-                print("Result of roomUserModel: " +
-                    HomeCubit.get(context).roomUserModel.toString());
+          return Stack(
+            children: [
+              ConditionalBuilder(
+                condition: HomeCubit.get(context).roomUserModel != null &&
+                    HomeCubit.get(context).getUserExpModel != null,
+                builder: (context) {
+                  try {
+                    // Call getdata function with necessary parameters
+                    print("Result of roomUserModel.message : " +
+                        HomeCubit.get(context)
+                            .roomUserModel
+                            .message
+                            .toString());
+                    print("Result of roomUserModel: " +
+                        HomeCubit.get(context).roomUserModel.toString());
 
-                return getdata(
-                    constraints,
-                    HomeCubit.get(context).getUserExpModel,
-                    HomeCubit.get(context).roomUserModel.message.toString(),
-                    HomeCubit.get(context).roomUserModel,
-                    _controller);
-              } catch (e) {
-                // If any error occurs during the execution of the code, it is caught here
-                // The error message is then printed to the console
-                print('Error occurred in builder: $e');
-                return Container(); // Return an empty container in case of error
-              }
-            },
-            fallback: (context) {
-              try {
-                // Return a Container with a CircularProgressIndicator in the center
-                return Container(
-                  color: Colors.white,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } catch (e) {
-                // If any error occurs during the execution of the code, it is caught here
-                // The error message is then printed to the console
-                print('Error occurred in fallback: $e');
-                return Container(); // Return an empty container in case of error
-              }
-            },
+                    return getdata(
+                        constraints,
+                        HomeCubit.get(context).getUserExpModel,
+                        HomeCubit.get(context).roomUserModel.message.toString(),
+                        HomeCubit.get(context).roomUserModel,
+                        _controller);
+                  } catch (e) {
+                    // If any error occurs during the execution of the code, it is caught here
+                    // The error message is then printed to the console
+                    print('Error occurred in builder: $e');
+                    return Container(); // Return an empty container in case of error
+                  }
+                },
+                fallback: (context) {
+                  try {
+                    // Return a Container with a CircularProgressIndicator in the center
+                    return Container(
+                      color: Colors.white,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  } catch (e) {
+                    // If any error occurs during the execution of the code, it is caught here
+                    // The error message is then printed to the console
+                    print('Error occurred in fallback: $e');
+                    return Container(); // Return an empty container in case of error
+                  }
+                },
+              ),
+              // StreamBuilder<QuerySnapshot>(
+              //   stream: _firestore
+              //       .collection('newGifts')
+              //       .snapshots(), // Adjust the collection name if needed
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasError) {
+              //       return Text('Error: ${snapshot.error}');
+              //     }
+              //
+              //     if (!snapshot.hasData) {
+              //       return Center(child: CircularProgressIndicator());
+              //     }
+              //
+              //     final documents = snapshot.data?.docs;
+              //     if (documents != null) {
+              //       for (final doc in documents) {
+              //         if (doc.data() != null) {
+              //           if (doc.data() != null) {
+              //             _showGiftDialog(doc.data());
+              //           }
+              //         }
+              //       }
+              //     }
+              //
+              //     return Container(); //
+              //   },
+              // ),
+            ],
           );
         }),
       );
@@ -1083,22 +1162,126 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   UserEXPModel, theme, texteditController),
                             ),
                             5.height,
-                            Flexible(
-                              child: RoomUserDetailsRow(theme, context),
+                            RoomUserDetailsRow(theme, context),
+                            16.height,
+                            Container(
+                              height: 70,
+                              child: _roomMicsLayout(),
                             ),
                             16.height,
-                            Flexible(
-                              child: Container(
-                                child: _roomMicsLayout(),
-                              ),
-                            ),
-                            16.height,
-                            buildListMessage(size),
+                            Expanded(child: buildListMessage(size)),
                           ],
                         )),
                       ),
                       RoomMessageWriteingRow(
                           context, UserEXPModel, texteditController, theme),
+                      // StreamBuilder(
+                      //   stream: FirebaseDatabase.instance
+                      //       .ref()
+                      //       .child('roomNotifications')
+                      //       .child(roomID)
+                      //       .onValue,
+                      //   builder: (context, AsyncSnapshot snapshot) {
+                      //     // Removed '<DatabaseEvent>'
+                      //     if (snapshot.hasError) {
+                      //       return Text('Error: ${snapshot.error}');
+                      //     } else if (!snapshot.hasData) {
+                      //       return CircularProgressIndicator();
+                      //     } else {
+                      //       final notifications = snapshot.data.snapshot.value;
+                      //
+                      //       if (notifications is Map) {
+                      //         // Check type
+                      //         notifications.forEach((key, value) async {
+                      //           final giftId = value['giftId'];
+                      //           final giftData = await FirebaseFirestore
+                      //               .instance
+                      //               .collection('gifts')
+                      //               .doc(giftId)
+                      //               .get();
+                      //
+                      //           WidgetsBinding.instance
+                      //               .addPostFrameCallback((_) {
+                      //             // Construct the dialog with data from 'giftData'
+                      //             String senderName =
+                      //                 giftData.data()['senderUserName'] ??
+                      //                     'User';
+                      //             String receiverName =
+                      //                 giftData.data()['receiverUserName'] ??
+                      //                     'User';
+                      //
+                      //             showDialog(
+                      //               context: context,
+                      //               builder: (BuildContext context) {
+                      //                 Future.delayed(Duration(seconds: 10), () {
+                      //                   Navigator.of(context).pop();
+                      //                 });
+                      //
+                      //                 return AlertDialog(
+                      //                   backgroundColor: Colors.transparent,
+                      //                   content: Column(
+                      //                     children: [
+                      //                       Image.network(
+                      //                           'https://onoo.online/bosh.gif'),
+                      //                       Text(
+                      //                           '$senderName has sent a Gift For $receiverName'),
+                      //                       ElevatedButton(
+                      //                         onPressed: () {
+                      //                           Navigator.of(context).pop();
+                      //                         },
+                      //                         child: Text('Close'),
+                      //                       ),
+                      //                     ],
+                      //                   ),
+                      //                 );
+                      //               },
+                      //             );
+                      //           });
+                      //         });
+                      //       }
+                      //       return Container();
+                      //     }
+                      //   },
+                      // )
+
+                      // StreamBuilder(
+                      //  if (notifications is Map) {
+                      //  notifications.forEach((key, value) async {
+                      //  // ... (Retrieve giftData, senderData, receiverData as before) ...
+                      //
+                      //  WidgetsBinding.instance.addPostFrameCallback((_) {
+                      //  // Construct data for the dialog
+                      //  String senderName = senderData.data()['name'] ?? 'User';
+                      //  String receiverName = receiverData.data()['name'] ?? 'User';
+                      //  String imageUrl = value['imageUrl'] ?? 'https://onoo.online/bosh.gif'; // Assuming you add 'imageUrl' to the notification data
+                      //
+                      //  showDialog(
+                      //  context: context,
+                      //  builder: (BuildContext context) {
+                      //  Future.delayed(Duration(seconds: 5), () {
+                      //  Navigator.of(context).pop();
+                      //  });
+                      //
+                      //  return AlertDialog(
+                      //  backgroundColor: Colors.transparent,
+                      //  content: Column(
+                      //  children: [
+                      //  Image.network(imageUrl),
+                      //  Text('$senderName has sent a Gift For $receiverName'),
+                      //  ElevatedButton(
+                      //  onPressed: () {
+                      //  Navigator.of(context).pop();
+                      //  },
+                      //  child: Text('Close'),
+                      //  ),
+                      //  ],
+                      //  ),
+                      //  );
+                      //  },
+                      //  );
+                      //  });
+                      //  });
+                      //  })
                     ],
                   ),
                 ),
@@ -1588,33 +1771,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                shrinkWrap: true,
-                                itemBuilder: (BuildContext context, int index) {
-                                  var roomUserModel =
-                                      HomeCubit.get(context).roomUserModel;
-                                  if (roomUserModel != null &&
-                                      roomUserModel.data != null) {
-                                    return UserProfileBottomSheetWidget(
-                                        roomUserModel.data[index], context);
-                                  } else {
-                                    return Container(); // return an empty container when roomUserModel or data is null
-                                  }
-                                },
-                                itemCount: HomeCubit.get(context)
-                                        .roomUserModel
-                                        ?.data
-                                        ?.length ??
-                                    0,
-                                separatorBuilder:
-                                    (BuildContext context, int index) =>
-                                        SizedBox(
-                                  width: 10,
-                                ),
-                              ),
-                            )
+                            // Expanded(
+                            //   child: ListView.separated(
+                            //     scrollDirection: Axis.horizontal,
+                            //     shrinkWrap: true,
+                            //     itemBuilder: (BuildContext context, int index) {
+                            //       var roomUserModel =
+                            //           HomeCubit.get(context).roomUserModel;
+                            //       if (roomUserModel != null &&
+                            //           roomUserModel.data != null) {
+                            //         return UserProfileBottomSheetWidget(
+                            //             roomUserModel.data[index], context);
+                            //       } else {
+                            //         return Container(); // return an empty container when roomUserModel or data is null
+                            //       }
+                            //     },
+                            //     itemCount: HomeCubit.get(context)
+                            //             .roomUserModel
+                            //             ?.data
+                            //             ?.length ??
+                            //         0,
+                            //     separatorBuilder:
+                            //         (BuildContext context, int index) =>
+                            //             SizedBox(
+                            //       width: 10,
+                            //     ),
+                            //   ),
+                            // )
                           ]),
                     ),
                   ),
@@ -1681,6 +1864,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ],
       ),
     );
+  }
+
+  void checkAndSubscribeToTopic(String roomId) {
+    // Check if the roomid is subscribed to Cloud Messaging topics
+    // If not subscribed, subscribe to the topic with the roomid
+    FirebaseMessaging.instance.subscribeToTopic(roomId).then((value) {
+      print("Subscribed to topic $roomId");
+    });
   }
 
   Row RoomTopHeaderRow(
@@ -3128,9 +3319,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(5, (index) {
-                    return RoomMicsWidget(
-                      index,
-                      snapshot.data[index],
+                    return Flexible(
+                      child: RoomMicsWidget(
+                        index,
+                        snapshot.data[index],
+                      ),
                     );
                   }).toList(),
                 ),
